@@ -1,0 +1,49 @@
+# Maven
+backend/target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# IDE
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+*.swp
+*.swo
+*~
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+backend/logs/
+
+# Application
+backend/application-local.yml
+backend/application-dev.yml
+backend/application-prod.yml
+
+# Database
+*.db
+*.sqlite
+backend/postgres_data/
