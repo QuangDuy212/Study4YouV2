@@ -1,6 +1,7 @@
 package com.study4you.bootstrap;
 
-import com.study4you.common.enums.*;
+import com.study4you.common.enums.PartNumber;
+import com.study4you.common.enums.UserStatus;
 import com.study4you.permission.entity.Permission;
 import com.study4you.permission.repository.PermissionRepository;
 import com.study4you.role.entity.Role;
@@ -140,64 +141,53 @@ public class DataSeeder implements CommandLineRunner {
 
     private void seedToeicTests() {
         log.info("Seeding TOEIC tests...");
-
-        // 1. FULL LISTENING TEST
-        createTest("TOEIC Full Practice - Listening Vol 1", TestType.FULL_TEST, Skill.LISTENING, Level.MEDIUM, 45, true);
-
-        // 2. FULL READING TEST
-        createTest("TOEIC Full Practice - Reading Vol 1", TestType.FULL_TEST, Skill.READING, Level.MEDIUM, 75, true);
-
-        // 3. MINI TEST
-        createTest("Quick Mini Test - Mixed Skills", TestType.MINI_TEST, Skill.LISTENING, Level.EASY, 30, true);
+        createFullTest("ETS TOEIC 2024 - Test 1", true);
+        createFullTest("ETS TOEIC 2024 - Test 2", true);
     }
 
-    private void createTest(String title, TestType type, Skill skill, Level level, int duration, boolean active) {
+    private void createFullTest(String title, boolean active) {
         ToeicTest test = new ToeicTest();
         test.setTitle(title);
-        test.setTestType(type);
-        test.setSkill(skill);
-        test.setLevel(level);
-        test.setDurationMinutes(duration);
+        test.setDurationMinutes(120);
         test.setActive(active);
         test = toeicTestRepository.save(test);
 
-        if (skill == Skill.LISTENING) {
-            // Listening: Part 1 to 4
-            seedPart(test, PartNumber.PART_1, 6);
-            seedPart(test, PartNumber.PART_2, 10);
-            seedPart(test, PartNumber.PART_3, 9);
-            seedPart(test, PartNumber.PART_4, 9);
-        } else if (skill == Skill.READING) {
-            // Reading: Part 5 to 7
-            seedPart(test, PartNumber.PART_5, 10);
-            seedPart(test, PartNumber.PART_6, 4);
-            seedPart(test, PartNumber.PART_7, 10);
-        }
+        // Standard TOEIC L&R: 7 parts
+        seedPart(test, PartNumber.PART_1, 6,  true,  true);   // Photographs
+        seedPart(test, PartNumber.PART_2, 25, false, true);   // Question-Response
+        seedPart(test, PartNumber.PART_3, 39, false, true);   // Conversations
+        seedPart(test, PartNumber.PART_4, 30, false, true);   // Talks
+        seedPart(test, PartNumber.PART_5, 30, false, false);  // Incomplete Sentences
+        seedPart(test, PartNumber.PART_6, 16, false, false);  // Text Completion
+        seedPart(test, PartNumber.PART_7, 54, false, false);  // Reading Comprehension
     }
 
-    private void seedPart(ToeicTest test, PartNumber partNum, int questionCount) {
+    private void seedPart(ToeicTest test, PartNumber partNum, int questionCount,
+                          boolean hasImage, boolean hasAudio) {
         ToeicPart part = new ToeicPart();
         part.setTestId(test.getId());
         part.setPart(partNum);
-        part.setOrderIndex(partNum.ordinal());
+        part.setOrderIndex(partNum.ordinal() + 1);
         part = toeicPartRepository.save(part);
 
         for (int i = 1; i <= questionCount; i++) {
-            createQuestion(part, i);
+            createQuestion(part, i, hasImage, hasAudio);
         }
     }
 
-    private void createQuestion(ToeicPart part, int index) {
+    private void createQuestion(ToeicPart part, int index, boolean hasImage, boolean hasAudio) {
         ToeicQuestion question = new ToeicQuestion();
         question.setPartId(part.getId());
         question.setContent("Sample Question " + index + " for " + part.getPart());
-        
-        if (part.getPart().ordinal() < 4) { // Listening Part 1-4
-            question.setAudioUrl("https://example.com/audio/test-" + part.getPart() + "-" + index + ".mp3");
+
+        if (hasAudio) {
+            question.setAudioUrl("https://example.com/audio/" + part.getPart().name().toLowerCase() + "-" + index + ".mp3");
         }
-        
-        if (part.getPart() == PartNumber.PART_7) {
-            question.setPassage("This is a sample reading passage for Part 7. It contains information related to the question.");
+        if (hasImage) {
+            question.setImageUrl("https://example.com/images/" + part.getPart().name().toLowerCase() + "-" + index + ".jpg");
+        }
+        if (part.getPart() == PartNumber.PART_6 || part.getPart() == PartNumber.PART_7) {
+            question.setPassage("This is a sample passage for " + part.getPart() + " question " + index + ".");
         }
 
         question.setCorrectAnswer("A");

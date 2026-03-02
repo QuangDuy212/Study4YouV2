@@ -1,5 +1,6 @@
 package com.study4you.config;
 
+import com.study4you.security.JwtAuthenticationEntryPoint;
 import com.study4you.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -33,6 +34,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserDetailsService userDetailsService;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -40,8 +42,11 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/auth/**", "/error").permitAll()
                         .anyRequest().authenticated()
+                )
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

@@ -52,6 +52,7 @@ public class ToeicQuestionService {
         question.setPartId(request.getPartId());
         question.setContent(request.getContent());
         question.setAudioUrl(request.getAudioUrl());
+        question.setImageUrl(request.getImageUrl());
         question.setPassage(request.getPassage());
         question.setCorrectAnswer(request.getCorrectAnswer());
 
@@ -67,6 +68,7 @@ public class ToeicQuestionService {
         question.setPartId(request.getPartId());
         question.setContent(request.getContent());
         question.setAudioUrl(request.getAudioUrl());
+        question.setImageUrl(request.getImageUrl());
         question.setPassage(request.getPassage());
         question.setCorrectAnswer(request.getCorrectAnswer());
 
@@ -88,6 +90,7 @@ public class ToeicQuestionService {
         response.setPartId(question.getPartId());
         response.setContent(question.getContent());
         response.setAudioUrl(question.getAudioUrl());
+        response.setImageUrl(question.getImageUrl());
         response.setPassage(question.getPassage());
         response.setCorrectAnswer(question.getCorrectAnswer());
         response.setCreatedAt(question.getCreatedAt());

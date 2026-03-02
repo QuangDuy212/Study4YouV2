@@ -1,11 +1,13 @@
 package com.study4you.toeic.part.dto;
 
 import com.study4you.common.enums.PartNumber;
+import com.study4you.toeic.question.dto.ToeicQuestionResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -18,4 +20,5 @@ public class ToeicPartResponse {
     private Integer orderIndex;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<ToeicQuestionResponse> questions;
 }

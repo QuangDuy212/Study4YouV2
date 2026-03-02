@@ -30,6 +30,8 @@ public class ToeicQuestion extends BaseEntity {
 
     private String audioUrl;
 
+    private String imageUrl;
+
     @Column(columnDefinition = "TEXT")
     private String passage;
 

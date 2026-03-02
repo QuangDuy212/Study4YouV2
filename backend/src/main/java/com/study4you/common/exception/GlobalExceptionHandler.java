@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
         });
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ApiResponse<>(false, "Validation failed", errors));
+                .body(new ApiResponse<>(400, false, "Validation failed", errors));
     }
 
     @ExceptionHandler(BadCredentialsException.class)

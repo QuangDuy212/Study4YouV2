@@ -21,6 +21,8 @@ public class ToeicQuestionRequest {
 
     private String audioUrl;
 
+    private String imageUrl;
+
     private String passage;
 
     @NotBlank(message = "Correct answer is required")

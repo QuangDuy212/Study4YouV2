@@ -81,11 +81,8 @@ public class ToeicOptionService {
     private ToeicOptionResponse mapToResponse(ToeicOption option) {
         ToeicOptionResponse response = new ToeicOptionResponse();
         response.setId(option.getId());
-        response.setQuestionId(option.getQuestionId());
         response.setLabel(option.getLabel());
         response.setContent(option.getContent());
-        response.setCreatedAt(option.getCreatedAt());
-        response.setUpdatedAt(option.getUpdatedAt());
         return response;
     }
 }

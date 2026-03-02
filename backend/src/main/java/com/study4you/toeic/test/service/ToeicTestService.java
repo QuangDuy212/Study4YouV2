@@ -1,7 +1,17 @@
 package com.study4you.toeic.test.service;
 
 import com.study4you.common.dto.PageResponse;
+import com.study4you.common.enums.PartNumber;
 import com.study4you.common.exception.ResourceNotFoundException;
+import com.study4you.toeic.option.dto.ToeicOptionResponse;
+import com.study4you.toeic.option.entity.ToeicOption;
+import com.study4you.toeic.option.repository.ToeicOptionRepository;
+import com.study4you.toeic.part.dto.ToeicPartResponse;
+import com.study4you.toeic.part.entity.ToeicPart;
+import com.study4you.toeic.part.repository.ToeicPartRepository;
+import com.study4you.toeic.question.dto.ToeicQuestionResponse;
+import com.study4you.toeic.question.entity.ToeicQuestion;
+import com.study4you.toeic.question.repository.ToeicQuestionRepository;
 import com.study4you.toeic.test.dto.ToeicTestRequest;
 import com.study4you.toeic.test.dto.ToeicTestResponse;
 import com.study4you.toeic.test.entity.ToeicTest;
@@ -21,12 +31,21 @@ import java.util.stream.Collectors;
 public class ToeicTestService {
 
     private final ToeicTestRepository toeicTestRepository;
+    private final ToeicPartRepository toeicPartRepository;
+    private final ToeicQuestionRepository toeicQuestionRepository;
+    private final ToeicOptionRepository toeicOptionRepository;
+
+    // Standard TOEIC L&R: 7 parts with fixed question counts
+    private static final PartNumber[] PART_ORDER = {
+        PartNumber.PART_1, PartNumber.PART_2, PartNumber.PART_3, PartNumber.PART_4,
+        PartNumber.PART_5, PartNumber.PART_6, PartNumber.PART_7
+    };
 
     @Transactional(readOnly = true)
     public PageResponse<ToeicTestResponse> getAllTests(@org.springframework.lang.NonNull Pageable pageable) {
         Page<ToeicTest> testPage = toeicTestRepository.findAll(pageable);
         List<ToeicTestResponse> tests = testPage.getContent().stream()
-                .map(this::mapToResponse)
+                .map(this::mapToFlatResponse)
                 .collect(Collectors.toList());
         
         return new PageResponse<>(
@@ -43,21 +62,28 @@ public class ToeicTestService {
     public ToeicTestResponse getTestById(@org.springframework.lang.NonNull UUID id) {
         ToeicTest test = toeicTestRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ToeicTest", "id", id));
-        return mapToResponse(test);
+        return mapToNestedResponse(test);
     }
 
     @Transactional
     public ToeicTestResponse createTest(ToeicTestRequest request) {
         ToeicTest test = new ToeicTest();
         test.setTitle(request.getTitle());
-        test.setTestType(request.getTestType());
-        test.setSkill(request.getSkill());
-        test.setLevel(request.getLevel());
-        test.setDurationMinutes(request.getDurationMinutes());
+        test.setDurationMinutes(120);
         test.setActive(request.getActive() != null ? request.getActive() : true);
 
         ToeicTest savedTest = toeicTestRepository.save(test);
-        return mapToResponse(savedTest);
+
+        // Auto-create 7 standard parts
+        for (int i = 0; i < PART_ORDER.length; i++) {
+            ToeicPart part = new ToeicPart();
+            part.setTestId(savedTest.getId());
+            part.setPart(PART_ORDER[i]);
+            part.setOrderIndex(i + 1);
+            toeicPartRepository.save(part);
+        }
+
+        return mapToFlatResponse(savedTest);
     }
 
     @Transactional
@@ -66,16 +92,12 @@ public class ToeicTestService {
                 .orElseThrow(() -> new ResourceNotFoundException("ToeicTest", "id", id));
 
         test.setTitle(request.getTitle());
-        test.setTestType(request.getTestType());
-        test.setSkill(request.getSkill());
-        test.setLevel(request.getLevel());
-        test.setDurationMinutes(request.getDurationMinutes());
         if (request.getActive() != null) {
             test.setActive(request.getActive());
         }
 
         ToeicTest updatedTest = toeicTestRepository.save(test);
-        return mapToResponse(updatedTest);
+        return mapToFlatResponse(updatedTest);
     }
 
     @Transactional
@@ -86,17 +108,67 @@ public class ToeicTestService {
         toeicTestRepository.deleteById(id);
     }
 
-    private ToeicTestResponse mapToResponse(ToeicTest test) {
+    // Flat response (no nested data) – used in list/create/update
+    private ToeicTestResponse mapToFlatResponse(ToeicTest test) {
         ToeicTestResponse response = new ToeicTestResponse();
         response.setId(test.getId());
         response.setTitle(test.getTitle());
-        response.setTestType(test.getTestType());
-        response.setSkill(test.getSkill());
-        response.setLevel(test.getLevel());
         response.setDurationMinutes(test.getDurationMinutes());
         response.setActive(test.getActive());
         response.setCreatedAt(test.getCreatedAt());
         response.setUpdatedAt(test.getUpdatedAt());
+        return response;
+    }
+
+    // Nested response: Test → Parts → Questions → Options – used in getById
+    private ToeicTestResponse mapToNestedResponse(ToeicTest test) {
+        ToeicTestResponse response = mapToFlatResponse(test);
+
+        List<ToeicPart> parts = toeicPartRepository.findByTestIdOrderByOrderIndexAsc(test.getId());
+        List<ToeicPartResponse> partResponses = parts.stream()
+                .map(part -> {
+                    ToeicPartResponse partResponse = new ToeicPartResponse();
+                    partResponse.setId(part.getId());
+                    partResponse.setTestId(part.getTestId());
+                    partResponse.setPart(part.getPart());
+                    partResponse.setOrderIndex(part.getOrderIndex());
+                    partResponse.setCreatedAt(part.getCreatedAt());
+                    partResponse.setUpdatedAt(part.getUpdatedAt());
+
+                    List<ToeicQuestion> questions = toeicQuestionRepository.findByPartId(part.getId());
+                    List<ToeicQuestionResponse> questionResponses = questions.stream()
+                            .map(question -> {
+                                ToeicQuestionResponse questionResponse = new ToeicQuestionResponse();
+                                questionResponse.setId(question.getId());
+                                questionResponse.setPartId(question.getPartId());
+                                questionResponse.setContent(question.getContent());
+                                questionResponse.setAudioUrl(question.getAudioUrl());
+                                questionResponse.setImageUrl(question.getImageUrl());
+                                questionResponse.setPassage(question.getPassage());
+                                questionResponse.setCorrectAnswer(question.getCorrectAnswer());
+                                questionResponse.setCreatedAt(question.getCreatedAt());
+                                questionResponse.setUpdatedAt(question.getUpdatedAt());
+
+                                List<ToeicOption> options = toeicOptionRepository.findByQuestionId(question.getId());
+                                List<ToeicOptionResponse> optionResponses = options.stream()
+                                        .map(option -> {
+                                            ToeicOptionResponse optionResponse = new ToeicOptionResponse();
+                                            optionResponse.setId(option.getId());
+                                            optionResponse.setLabel(option.getLabel());
+                                            optionResponse.setContent(option.getContent());
+                                            return optionResponse;
+                                        })
+                                        .collect(Collectors.toList());
+                                questionResponse.setOptions(optionResponses);
+                                return questionResponse;
+                            })
+                            .collect(Collectors.toList());
+                    partResponse.setQuestions(questionResponses);
+                    return partResponse;
+                })
+                .collect(Collectors.toList());
+
+        response.setParts(partResponses);
         return response;
     }
 }

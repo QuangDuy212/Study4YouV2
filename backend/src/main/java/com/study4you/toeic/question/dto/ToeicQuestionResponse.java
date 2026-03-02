@@ -1,10 +1,12 @@
 package com.study4you.toeic.question.dto;
 
+import com.study4you.toeic.option.dto.ToeicOptionResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -15,8 +17,10 @@ public class ToeicQuestionResponse {
     private UUID partId;
     private String content;
     private String audioUrl;
+    private String imageUrl;
     private String passage;
     private String correctAnswer;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<ToeicOptionResponse> options;
 }
