@@ -140,6 +140,24 @@ public class AiService {
         return result;
     }
 
+    public com.study4you.ai.dto.ChatResponse chat(String message) {
+        if (geminiClient.isAvailable()) {
+            try {
+                String prompt = "You are a helpful study assistant for Study4You, an online TOEIC practice platform. " +
+                        "Answer the user's question concisely and helpfully.\n\nUser: " + message;
+                String reply = geminiClient.generate(prompt);
+                return com.study4you.ai.dto.ChatResponse.builder().reply(reply).build();
+            } catch (Exception e) {
+                log.error("Gemini chat failed: {}", e.getMessage());
+            }
+        }
+
+        // Fallback or simple logic
+        return com.study4you.ai.dto.ChatResponse.builder()
+                .reply("I'm currently in basic mode. How can I help you with your TOEIC studies?")
+                .build();
+    }
+
     private String buildQuestionPrompt(String part, String difficulty, int count) {
         return String.format(
             "You are a professional TOEIC test designer. Generate exactly %d TOEIC %s questions " +

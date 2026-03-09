@@ -25,6 +25,7 @@ public class ToeicAttemptController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<ToeicAttemptResponse>>> getAllAttempts(
+            @RequestParam(required = false) UUID userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
@@ -34,7 +35,7 @@ public class ToeicAttemptController {
                     Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
         
-        PageResponse<ToeicAttemptResponse> attempts = toeicAttemptService.getAllAttempts(pageable);
+        PageResponse<ToeicAttemptResponse> attempts = toeicAttemptService.getAllAttempts(userId, pageable);
         return ResponseEntity.ok(ApiResponse.success(attempts));
     }
 

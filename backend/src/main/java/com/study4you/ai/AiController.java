@@ -1,9 +1,6 @@
 package com.study4you.ai;
 
-import com.study4you.ai.dto.GenerateQuestionRequest;
-import com.study4you.ai.dto.GenerateUserRequest;
-import com.study4you.ai.dto.GeneratedQuestionResponse;
-import com.study4you.ai.dto.GeneratedUserResponse;
+import com.study4you.ai.dto.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +14,15 @@ import java.util.List;
 public class AiController {
 
     private final AiService aiService;
+
+    /**
+     * POST /api/v1/ai/chat
+     * Handles chatbot messages via AI.
+     */
+    @PostMapping("/chat")
+    public ResponseEntity<ChatResponse> chat(@Valid @RequestBody ChatRequest request) {
+        return ResponseEntity.ok(aiService.chat(request.getMessage()));
+    }
 
     /**
      * POST /api/v1/ai/generate-questions

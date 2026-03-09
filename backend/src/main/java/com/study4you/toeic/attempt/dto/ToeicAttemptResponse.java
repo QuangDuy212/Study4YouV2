@@ -14,6 +14,7 @@ public class ToeicAttemptResponse {
     private UUID id;
     private UUID userId;
     private UUID testId;
+    private String testTitle;
     private LocalDateTime startedAt;
     private LocalDateTime submittedAt;
     private Integer rawScore;

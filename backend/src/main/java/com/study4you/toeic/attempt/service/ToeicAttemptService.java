@@ -25,8 +25,16 @@ public class ToeicAttemptService {
     private final UserActivityService userActivityService;
 
     @Transactional(readOnly = true)
-    public PageResponse<ToeicAttemptResponse> getAllAttempts(@org.springframework.lang.NonNull Pageable pageable) {
-        Page<ToeicAttempt> attemptPage = toeicAttemptRepository.findAll(pageable);
+    public PageResponse<ToeicAttemptResponse> getAllAttempts(UUID userId, @org.springframework.lang.NonNull Pageable pageable) {
+        Page<ToeicAttempt> attemptPage;
+        if (userId != null) {
+            // Spring Data JPA doesn't generate Page<T> findByUserId(UUID userId, Pageable pageable) automatically if not in repository
+            // Let's check repository again or assume we need to add it there too for pagination
+            attemptPage = toeicAttemptRepository.findByUserId(userId, pageable);
+        } else {
+            attemptPage = toeicAttemptRepository.findAll(pageable);
+        }
+        
         List<ToeicAttemptResponse> attempts = attemptPage.getContent().stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -112,6 +120,9 @@ public class ToeicAttemptService {
         response.setId(attempt.getId());
         response.setUserId(attempt.getUserId());
         response.setTestId(attempt.getTestId());
+        if (attempt.getTest() != null) {
+            response.setTestTitle(attempt.getTest().getTitle());
+        }
         response.setStartedAt(attempt.getStartedAt());
         response.setSubmittedAt(attempt.getSubmittedAt());
         response.setRawScore(attempt.getRawScore());
