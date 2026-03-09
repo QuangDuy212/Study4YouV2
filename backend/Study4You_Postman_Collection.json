@@ -1657,6 +1657,317 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "AI Generation",
+			"description": "AI-powered generation endpoints for TOEIC questions and user previews. Requires MANAGE_QUESTIONS or MANAGE_USERS authority.",
+			"item": [
+				{
+					"name": "Generate Reading Questions - PART_5",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"part\": \"PART_5\",\n  \"difficulty\": \"MEDIUM\",\n  \"count\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/ai/generate-questions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ai",
+								"generate-questions"
+							]
+						},
+						"description": "Generate mock TOEIC PART_5 grammar questions. Requires MANAGE_QUESTIONS permission. passage will be null for PART_5."
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Reading Questions - PART_6",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"part\": \"PART_6\",\n  \"difficulty\": \"EASY\",\n  \"count\": 4\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/ai/generate-questions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ai",
+								"generate-questions"
+							]
+						},
+						"description": "Generate mock TOEIC PART_6 fill-in-the-blank questions with passage. Requires MANAGE_QUESTIONS permission."
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Reading Questions - PART_7",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"part\": \"PART_7\",\n  \"difficulty\": \"HARD\",\n  \"count\": 3\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/ai/generate-questions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ai",
+								"generate-questions"
+							]
+						},
+						"description": "Generate mock TOEIC PART_7 reading comprehension questions with passage. Requires MANAGE_QUESTIONS permission."
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Reading Questions - Invalid Part (400)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"part\": \"PART_1\",\n  \"difficulty\": \"EASY\",\n  \"count\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/ai/generate-questions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ai",
+								"generate-questions"
+							]
+						},
+						"description": "Negative test — should return 400 Bad Request because only PART_5, PART_6, PART_7 are allowed."
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Users Preview",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"count\": 5,\n  \"defaultRoleId\": \"{{roleId}}\",\n  \"status\": \"ACTIVE\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/ai/generate-users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ai",
+								"generate-users"
+							]
+						},
+						"description": "Generate a preview of random Vietnamese-style users. Requires MANAGE_USERS permission. Data is NOT saved to the database. Use roleId from the Roles → Create Role request."
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Users Preview - Max Count",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"count\": 20,\n  \"defaultRoleId\": \"{{roleId}}\",\n  \"status\": \"INACTIVE\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/ai/generate-users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ai",
+								"generate-users"
+							]
+						},
+						"description": "Generate maximum 20 user previews with INACTIVE status."
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Users - Invalid Role (404)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"count\": 3,\n  \"defaultRoleId\": \"00000000-0000-0000-0000-000000000000\",\n  \"status\": \"ACTIVE\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/ai/generate-users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ai",
+								"generate-users"
+							]
+						},
+						"description": "Negative test — should return 404 Not Found because the roleId does not exist."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin - Activities",
+			"description": "Admin-only endpoints for viewing user activity logs. Requires ADMIN role (Bearer token must belong to an Admin user).",
+			"item": [
+				{
+					"name": "Get Recent Activities",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/admin/activities/recent",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"activities",
+								"recent"
+							]
+						},
+						"description": "Returns the 20 most recent user activity logs sorted by newest first.\n\nTracked actions: LOGIN, CREATE_USER, UPDATE_USER, DELETE_USER, CREATE_TEST, UPDATE_TEST, DELETE_TEST, START_TEST, SUBMIT_TEST\n\n**Requires ADMIN role.**"
+					},
+					"response": [
+						{
+							"name": "200 OK – Recent Activities",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/admin/activities/recent",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"admin",
+										"activities",
+										"recent"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n  {\n    \"userName\": \"John Smith\",\n    \"actionType\": \"SUBMIT_TEST\",\n    \"description\": \"Submitted TOEIC test\",\n    \"targetType\": \"TEST\",\n    \"targetId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n    \"createdAt\": \"2026-03-06T10:12:00\"\n  },\n  {\n    \"userName\": \"Admin User\",\n    \"actionType\": \"CREATE_TEST\",\n    \"description\": \"Created TOEIC test: Full Listening Test #5\",\n    \"targetType\": \"TEST\",\n    \"targetId\": \"7c9e6679-7425-40de-944b-e07fc1f90ae7\",\n    \"createdAt\": \"2026-03-06T09:55:00\"\n  },\n  {\n    \"userName\": \"Emma Wilson\",\n    \"actionType\": \"LOGIN\",\n    \"description\": \"User logged in: emma@study4you.com\",\n    \"targetType\": \"USER\",\n    \"targetId\": \"550e8400-e29b-41d4-a716-446655440000\",\n    \"createdAt\": \"2026-03-06T09:50:00\"\n  }\n]"
+						}
+					]
+				}
+			]
 		}
 	],
 	"variable": [

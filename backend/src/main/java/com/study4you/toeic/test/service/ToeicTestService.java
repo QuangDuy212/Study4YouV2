@@ -1,5 +1,6 @@
 package com.study4you.toeic.test.service;
 
+import com.study4you.common.activity.UserActivityService;
 import com.study4you.common.dto.PageResponse;
 import com.study4you.common.enums.PartNumber;
 import com.study4you.common.exception.ResourceNotFoundException;
@@ -19,6 +20,8 @@ import com.study4you.toeic.test.repository.ToeicTestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +37,8 @@ public class ToeicTestService {
     private final ToeicPartRepository toeicPartRepository;
     private final ToeicQuestionRepository toeicQuestionRepository;
     private final ToeicOptionRepository toeicOptionRepository;
+    private final UserActivityService userActivityService;
+    private final com.study4you.user.repository.UserRepository userRepository;
 
     // Standard TOEIC L&R: 7 parts with fixed question counts
     private static final PartNumber[] PART_ORDER = {
@@ -83,6 +88,14 @@ public class ToeicTestService {
             toeicPartRepository.save(part);
         }
 
+        userActivityService.logActivity(
+                getCurrentUserId(),
+                "CREATE_TEST",
+                "Created TOEIC test: " + savedTest.getTitle(),
+                "TEST",
+                savedTest.getId()
+        );
+
         return mapToFlatResponse(savedTest);
     }
 
@@ -97,6 +110,15 @@ public class ToeicTestService {
         }
 
         ToeicTest updatedTest = toeicTestRepository.save(test);
+
+        userActivityService.logActivity(
+                getCurrentUserId(),
+                "UPDATE_TEST",
+                "Updated TOEIC test: " + updatedTest.getTitle(),
+                "TEST",
+                updatedTest.getId()
+        );
+
         return mapToFlatResponse(updatedTest);
     }
 
@@ -106,6 +128,29 @@ public class ToeicTestService {
             throw new ResourceNotFoundException("ToeicTest", "id", id);
         }
         toeicTestRepository.deleteById(id);
+
+        userActivityService.logActivity(
+                getCurrentUserId(),
+                "DELETE_TEST",
+                "Deleted TOEIC test with id: " + id,
+                "TEST",
+                id
+        );
+    }
+
+    // Helper: extract current authenticated user's ID from SecurityContext via email lookup
+    private UUID getCurrentUserId() {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.isAuthenticated() && auth.getName() != null) {
+                return userRepository.findByEmail(auth.getName())
+                        .map(user -> user.getId())
+                        .orElse(null);
+            }
+        } catch (Exception ignored) {
+            // If we cannot resolve the user ID, return null — logging is best-effort
+        }
+        return null;
     }
 
     // Flat response (no nested data) – used in list/create/update

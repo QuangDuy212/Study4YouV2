@@ -51,3 +51,11 @@ logging:
     org.springframework.security: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+# Gemini AI Configuration
+# Set env var GEMINI_API_KEY to enable real AI generation.
+# If empty, AiService falls back to built-in mock data.
+gemini:
+  api-key: AIzaSyDDf9ivIRl-vxSGQrnj_sn3zJvTWpEUT68
+  model: gemini-2.0-flash
+

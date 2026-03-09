@@ -3,6 +3,7 @@ package com.study4you.auth.service;
 import com.study4you.auth.dto.AuthResponse;
 import com.study4you.auth.dto.LoginRequest;
 import com.study4you.auth.dto.RegisterRequest;
+import com.study4you.common.activity.UserActivityService;
 import com.study4you.common.enums.UserStatus;
 import com.study4you.common.exception.BadRequestException;
 import com.study4you.permission.entity.Permission;
@@ -31,6 +32,7 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
     private final CustomUserDetailsService userDetailsService;
+    private final UserActivityService userActivityService;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -56,6 +58,15 @@ public class AuthService {
         );
 
         User user = userDetailsService.getUserByEmail(request.getEmail());
+
+        userActivityService.logActivity(
+                user.getId(),
+                "LOGIN",
+                "User logged in: " + user.getEmail(),
+                "USER",
+                user.getId()
+        );
+
         return generateAuthResponse(user);
     }
 

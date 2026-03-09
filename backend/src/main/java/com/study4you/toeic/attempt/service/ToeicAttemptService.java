@@ -1,5 +1,6 @@
 package com.study4you.toeic.attempt.service;
 
+import com.study4you.common.activity.UserActivityService;
 import com.study4you.common.dto.PageResponse;
 import com.study4you.common.exception.ResourceNotFoundException;
 import com.study4you.toeic.attempt.dto.ToeicAttemptRequest;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 public class ToeicAttemptService {
 
     private final ToeicAttemptRepository toeicAttemptRepository;
+    private final UserActivityService userActivityService;
 
     @Transactional(readOnly = true)
     public PageResponse<ToeicAttemptResponse> getAllAttempts(@org.springframework.lang.NonNull Pageable pageable) {
@@ -57,6 +59,15 @@ public class ToeicAttemptService {
         attempt.setToeicScore(request.getToeicScore());
 
         ToeicAttempt savedAttempt = toeicAttemptRepository.save(attempt);
+
+        userActivityService.logActivity(
+                savedAttempt.getUserId(),
+                "START_TEST",
+                "Started TOEIC test",
+                "TEST",
+                savedAttempt.getTestId()
+        );
+
         return mapToResponse(savedAttempt);
     }
 
@@ -73,6 +84,18 @@ public class ToeicAttemptService {
         attempt.setToeicScore(request.getToeicScore());
 
         ToeicAttempt updatedAttempt = toeicAttemptRepository.save(attempt);
+
+        // Log SUBMIT_TEST when the attempt has a submittedAt timestamp
+        if (updatedAttempt.getSubmittedAt() != null) {
+            userActivityService.logActivity(
+                    updatedAttempt.getUserId(),
+                    "SUBMIT_TEST",
+                    "Submitted TOEIC test",
+                    "TEST",
+                    updatedAttempt.getTestId()
+            );
+        }
+
         return mapToResponse(updatedAttempt);
     }
 

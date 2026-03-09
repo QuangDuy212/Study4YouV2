@@ -1,5 +1,6 @@
 package com.study4you.user.service;
 
+import com.study4you.common.activity.UserActivityService;
 import com.study4you.common.dto.PageResponse;
 import com.study4you.common.exception.BadRequestException;
 import com.study4you.common.exception.ResourceNotFoundException;
@@ -32,6 +33,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserActivityService userActivityService;
 
     @Transactional(readOnly = true)
     public PageResponse<UserResponse> getAllUsers(@org.springframework.lang.NonNull Pageable pageable) {
@@ -76,6 +78,15 @@ public class UserService {
         }
 
         User savedUser = userRepository.save(user);
+
+        userActivityService.logActivity(
+                savedUser.getId(),
+                "CREATE_USER",
+                "Created user: " + savedUser.getEmail(),
+                "USER",
+                savedUser.getId()
+        );
+
         return mapToResponse(savedUser);
     }
 
@@ -136,6 +147,15 @@ public class UserService {
         }
 
         User updatedUser = userRepository.save(user);
+
+        userActivityService.logActivity(
+                updatedUser.getId(),
+                "UPDATE_USER",
+                "Updated user: " + updatedUser.getEmail(),
+                "USER",
+                updatedUser.getId()
+        );
+
         return mapToResponse(updatedUser);
     }
 
@@ -145,6 +165,14 @@ public class UserService {
             throw new ResourceNotFoundException("User", "id", id);
         }
         userRepository.deleteById(id);
+
+        userActivityService.logActivity(
+                null,
+                "DELETE_USER",
+                "Deleted user with id: " + id,
+                "USER",
+                id
+        );
     }
 
     private UserResponse mapToResponse(User user) {
