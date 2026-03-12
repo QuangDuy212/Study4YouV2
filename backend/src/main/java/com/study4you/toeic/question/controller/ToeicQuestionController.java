@@ -13,6 +13,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import com.study4you.common.storage.FileStorageService;
 
 import java.util.UUID;
 
@@ -22,6 +24,7 @@ import java.util.UUID;
 public class ToeicQuestionController {
 
     private final ToeicQuestionService toeicQuestionService;
+    private final FileStorageService fileStorageService;
 
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<ToeicQuestionResponse>>> getAllQuestions(
@@ -64,5 +67,33 @@ public class ToeicQuestionController {
     public ResponseEntity<ApiResponse<Void>> deleteQuestion(@PathVariable @org.springframework.lang.NonNull UUID id) {
         toeicQuestionService.deleteQuestion(id);
         return ResponseEntity.ok(ApiResponse.success("Question deleted successfully", null));
+    }
+
+    @PostMapping(value = "/{id}/upload-audio", consumes = "multipart/form-data")
+    public ResponseEntity<ApiResponse<ToeicQuestionResponse>> uploadAudio(
+            @PathVariable @org.springframework.lang.NonNull UUID id,
+            @RequestParam("file") MultipartFile file
+    ) {
+        try {
+            String audioUrl = fileStorageService.saveAudio(file);
+            ToeicQuestionResponse updatedQuestion = toeicQuestionService.updateAudioUrl(id, audioUrl);
+            return ResponseEntity.ok(ApiResponse.success("Audio uploaded successfully", updatedQuestion));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @PostMapping(value = "/{id}/upload-image", consumes = "multipart/form-data")
+    public ResponseEntity<ApiResponse<ToeicQuestionResponse>> uploadImage(
+            @PathVariable @org.springframework.lang.NonNull UUID id,
+            @RequestParam("file") MultipartFile file
+    ) {
+        try {
+            String imageUrl = fileStorageService.saveImage(file);
+            ToeicQuestionResponse updatedQuestion = toeicQuestionService.updateImageUrl(id, imageUrl);
+            return ResponseEntity.ok(ApiResponse.success("Image uploaded successfully", updatedQuestion));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
     }
 }

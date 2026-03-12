@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Clock, Flag, AlertCircle, X, ChevronLeft, ChevronRight, Volume2, Bookmark, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, getMediaUrl } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -29,6 +29,7 @@ interface Part {
   title: string;
   section: "listening" | "reading";
   description: string;
+  audio?: string | null;
   questions: Question[];
 }
 
@@ -74,6 +75,7 @@ export default function TestTakingPage() {
             title: p.part.replace("_", " "),
             section: ["PART_1", "PART_2", "PART_3", "PART_4"].includes(p.part) ? "listening" : "reading",
             description: p.part,
+            audio: p.audioUrl || null,
             questions: (p.questions || [])
               .map((q, idx) => ({
                 id: q.id,
@@ -245,14 +247,15 @@ export default function TestTakingPage() {
         )
       );
 
-      toast.success("Test submitted successfully!");
+      toast.success(t('testSubmitted'));
       navigate(`/result/${id}`, { state: { score: toeicScore, total: totalQuestions, correct, maxScore: 990 } });
     } catch (err) {
       console.error("Submission failed:", err);
-      toast.error("Failed to submit test. Please try again.");
+      toast.error(t('errorSubmitting'));
       setIsSubmitting(false);
     }
   };
+
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -264,10 +267,11 @@ export default function TestTakingPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background">
         <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
-        <p className="text-muted-foreground animate-pulse">Preparing your test environment...</p>
+        <p className="text-muted-foreground animate-pulse">{t('preparingTestEnv')}</p>
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen bg-muted/30 flex flex-col">
@@ -286,9 +290,10 @@ export default function TestTakingPage() {
           {part?.section === "listening" && (
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary text-sm text-muted-foreground">
               <Volume2 className="w-4 h-4" />
-              <span className="hidden sm:inline">Audio Player (Listening Section)</span>
+              <span className="hidden sm:inline">{t('audioPlayerDesc')}</span>
             </div>
           )}
+
         </div>
       </header>
 
@@ -333,24 +338,37 @@ export default function TestTakingPage() {
             </div>
           </div>
 
+          {/* Part Level Audio */}
+          {part?.audio && (
+            <div className="bg-card px-6 py-4 border-b border-border flex justify-center shadow-sm">
+              <audio 
+                controls 
+                src={getMediaUrl(part.audio)} 
+                className="w-full max-w-lg" 
+                controlsList="nodownload" 
+              />
+            </div>
+          )}
+
           {/* Question Content */}
           <div ref={questionRef} className="max-w-3xl mx-auto p-6 space-y-6">
             {!question ? (
-              <div className="py-20 text-center text-muted-foreground">No questions found for this part.</div>
+              <div className="py-20 text-center text-muted-foreground">{t('noQuestionsFound')}</div>
             ) : (
               <>
-                {/* Passage if reading */}
+
                 {question.passage && (
                   <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
-                    <p className="text-sm text-muted-foreground font-medium mb-2 border-b pb-1">Reading Passage</p>
+                    <p className="text-sm text-muted-foreground font-medium mb-2 border-b pb-1">{t('readingPassage')}</p>
                     <p className="text-foreground whitespace-pre-line leading-relaxed italic">{question.passage}</p>
                   </div>
                 )}
 
+
                 {/* Image for Part 1 */}
                 {question.image && (
                   <div className="bg-card rounded-xl border border-border p-4 flex items-center justify-center shadow-sm">
-                    <img src={question.image} alt="Question Graphic" className="max-h-80 object-contain rounded" />
+                    <img src={getMediaUrl(question.image)} alt="Question Graphic" className="max-h-80 object-contain rounded" />
                   </div>
                 )}
 
@@ -370,11 +388,12 @@ export default function TestTakingPage() {
                       )}
                     >
                       <Bookmark className={cn("w-4 h-4", flaggedQuestions.has(globalQuestionIndex) && "fill-current")} />
-                      {flaggedQuestions.has(globalQuestionIndex) ? "Flagged" : "Flag"}
+                      {flaggedQuestions.has(globalQuestionIndex) ? t('flagged') : t('flag')}
                     </Button>
                   </div>
                   <p className="text-foreground text-lg leading-relaxed">{question.question}</p>
                 </div>
+
 
                 {/* Options */}
                 <div className="space-y-3">
@@ -432,11 +451,11 @@ export default function TestTakingPage() {
 
         {/* Right Sidebar */}
         <aside className="w-80 bg-card border-l border-border flex flex-col shrink-0 sticky top-14 h-[calc(100vh-3.5rem)] hidden lg:flex shadow-xl z-20">
-          {/* Timer & Submit */}
           <div className="p-6 space-y-4 bg-muted/20">
             <div>
-              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1">Time remaining</p>
+              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1">{t('timeRemaining')}</p>
               <div className={cn(
+
                 "flex items-center gap-3 text-3xl font-mono font-black",
                 timeLeft <= 300 ? "text-destructive animate-pulse" : "text-foreground"
               )}>
@@ -452,12 +471,13 @@ export default function TestTakingPage() {
               disabled={isSubmitting}
             >
               {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Flag className="w-5 h-5" />}
-              NỘP BÀI
+              {t('submitTest')}
             </Button>
             <div className="flex justify-between items-center text-xs">
-              <span className="text-muted-foreground font-medium">Progress</span>
-              <span className="text-foreground font-bold">{answeredCount}/{totalQuestions} Answered</span>
+              <span className="text-muted-foreground font-medium">{t('progress')}</span>
+              <span className="text-foreground font-bold">{answeredCount}/{totalQuestions} {t('answered')}</span>
             </div>
+
             <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
                <div className="h-full bg-primary transition-all duration-300" style={{ width: `${(answeredCount/totalQuestions)*100}%` }} />
             </div>
@@ -513,12 +533,13 @@ export default function TestTakingPage() {
           {/* Legend */}
           <div className="p-4 border-t border-border bg-muted/10">
             <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-[9px] font-bold text-muted-foreground uppercase tracking-wider">
-              <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-sm bg-muted border border-border" /> Unanswered</span>
-              <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-sm bg-primary/20 border border-primary/30" /> Answered</span>
-              <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-sm bg-amber-100 border border-amber-300" /> Flagged</span>
-              <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-sm bg-primary border border-primary" /> Current</span>
+              <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-sm bg-muted border border-border" /> {t('unanswered')}</span>
+              <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-sm bg-primary/20 border border-primary/30" /> {t('answered')}</span>
+              <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-sm bg-amber-100 border border-amber-300" /> {t('flagged')}</span>
+              <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-sm bg-primary border border-primary" /> {t('current')}</span>
             </div>
           </div>
+
         </aside>
       </div>
 
@@ -526,41 +547,42 @@ export default function TestTakingPage() {
       <Dialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold">Xác nhận nộp bài</DialogTitle>
+            <DialogTitle className="text-xl font-bold">{t('confirmSubmit')}</DialogTitle>
             <DialogDescription className="pt-2">
               <div className="space-y-4">
-                <p>Bạn đã hoàn thành <span className="text-foreground font-black">{answeredCount}</span> trên tổng số <span className="text-foreground font-black">{totalQuestions}</span> câu hỏi.</p>
+                <p>{t('completedQuestionsDesc')?.replace('{answered}', String(answeredCount))?.replace('{total}', String(totalQuestions))}</p>
                 
                 {(totalQuestions - answeredCount > 0 || flaggedQuestions.size > 0) && (
                   <div className="p-4 rounded-xl bg-amber-50 border border-amber-100 space-y-2">
                     {totalQuestions - answeredCount > 0 && (
                       <div className="flex items-center gap-2 text-amber-700 text-sm">
                         <AlertCircle className="w-4 h-4" />
-                        <span>Còn <strong>{totalQuestions - answeredCount}</strong> câu chưa trả lời.</span>
+                        <span>{t('unansweredQuestionsWarning')?.replace('{count}', String(totalQuestions - answeredCount))}</span>
                       </div>
                     )}
                     {flaggedQuestions.size > 0 && (
                       <div className="flex items-center gap-2 text-amber-700 text-sm">
                         <Bookmark className="w-4 h-4 fill-current" />
-                        <span>Có <strong>{flaggedQuestions.size}</strong> câu cần xem lại.</span>
+                        <span>{t('flaggedQuestionsWarning')?.replace('{count}', String(flaggedQuestions.size))}</span>
                       </div>
                     )}
                   </div>
                 )}
                 
-                <p className="text-sm text-muted-foreground">Sau khi nộp bài, bạn sẽ không thể thay đổi câu trả lời. Hệ thống sẽ tính điểm dựa trên các câu đã chọn.</p>
+                <p className="text-sm text-muted-foreground">{t('submitFinalWarning')}</p>
               </div>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex-col sm:flex-row gap-3 pt-4">
-            <Button variant="outline" onClick={() => setShowSubmitDialog(false)} className="sm:flex-1" disabled={isSubmitting}>Quay lại làm tiếp</Button>
+            <Button variant="outline" onClick={() => setShowSubmitDialog(false)} className="sm:flex-1" disabled={isSubmitting}>{t('cancel')}</Button>
             <Button onClick={handleSubmit} className="sm:flex-1 gap-2 bg-primary font-bold" disabled={isSubmitting}>
               {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Flag className="w-4 h-4" />}
-              Đồng ý nộp bài
+              {t('confirmSubmit')}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
 
       {/* 5 Minute Warning */}
       <Dialog open={showWarning} onOpenChange={setShowWarning}>
@@ -568,17 +590,18 @@ export default function TestTakingPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive font-black text-2xl">
               <AlertCircle className="w-8 h-8" />
-              SẮP HẾT GIỜ!
+              {t('timeRunningOut')}
             </DialogTitle>
             <DialogDescription className="text-lg pt-2">
-              Bạn chỉ còn <strong>5 phút</strong> để hoàn thành bài thi. Hãy nhanh chóng hoàn thiện các câu trả lời còn thiếu.
+              {t('fiveMinutesRemaining')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={() => setShowWarning(false)} className="w-full py-6 text-lg font-bold">Tôi đã hiểu</Button>
+            <Button onClick={() => setShowWarning(false)} className="w-full py-6 text-lg font-bold">{t('iUnderstand')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
     </div>
   );
 }

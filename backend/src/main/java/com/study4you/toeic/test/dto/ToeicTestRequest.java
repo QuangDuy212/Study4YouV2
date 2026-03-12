@@ -14,4 +14,8 @@ public class ToeicTestRequest {
     private String title;
 
     private Boolean active;
+
+    private String skill;
+
+    private String level;
 }

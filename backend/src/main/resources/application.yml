@@ -2,6 +2,11 @@ spring:
   application:
     name: study4you-backend
   
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
   # Global API versioning prefix
   mvc:
     servlet:
@@ -56,6 +61,6 @@ logging:
 # Set env var GEMINI_API_KEY to enable real AI generation.
 # If empty, AiService falls back to built-in mock data.
 gemini:
-  api-key: AIzaSyDDf9ivIRl-vxSGQrnj_sn3zJvTWpEUT68
+  api-key: AIzaSyCE0F0vf37hrSOEYDtUcvP9CfNCoBdd7zM
   model: gemini-2.0-flash
 

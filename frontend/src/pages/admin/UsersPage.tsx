@@ -108,52 +108,58 @@ export default function UsersPage() {
             <div className="flex flex-col lg:flex-row gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input placeholder="Search by name or email..." value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} className="pl-10" />
+                <Input placeholder={t('searchByNameEmail')} value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} className="pl-10" />
               </div>
+
               <div className="flex gap-2">
                 <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setCurrentPage(1); }}>
                   <SelectTrigger className="w-[140px]"><SelectValue placeholder="Status" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="disabled">Disabled</SelectItem>
+                    <SelectItem value="all">{t('allStatus')}</SelectItem>
+                    <SelectItem value="active">{t('active')}</SelectItem>
+                    <SelectItem value="disabled">{t('disabled')}</SelectItem>
                   </SelectContent>
+
                 </Select>
                 <Button variant="outline" className="gap-2" onClick={() => navigate("/admin/users/ai-generate")}>
-                  <Sparkles className="w-4 h-4" /> AI Generate Users
+                  <Sparkles className="w-4 h-4" /> {t('aiGenerateUsers')}
                 </Button>
                 <Button className="gap-2" onClick={() => navigate("/admin/users/create")}>
-                  <Plus className="w-4 h-4" /> Create User
+                  <Plus className="w-4 h-4" /> {t('createUser')}
                 </Button>
+
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <div className="text-sm text-muted-foreground">Showing {filteredUsers.length} users</div>
+        <div className="text-sm text-muted-foreground">{t('showingUsers').replace('{count}', String(filteredUsers.length))}</div>
 
         <Card>
+
           <CardContent className="p-0">
             {isLoading ? (
               <div className="p-6 space-y-4">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}</div>
             ) : paginatedUsers.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4"><User className="w-8 h-8 text-muted-foreground" /></div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">No users found</h3>
-                <p className="text-muted-foreground max-w-sm">Try adjusting your search.</p>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{t('noUsersFound')}</h3>
+                <p className="text-muted-foreground max-w-sm">{t('noUsersHint')}</p>
               </div>
+
             ) : (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/50">
-                      <TableHead className="min-w-[200px]">User</TableHead>
-                      <TableHead className="w-[160px]">Roles</TableHead>
-                      <TableHead className="w-[100px]">Status</TableHead>
-                      <TableHead className="w-[120px]">Registered</TableHead>
-                      <TableHead className="w-[140px] text-right">Actions</TableHead>
+                      <TableHead className="min-w-[200px]">{t('user')}</TableHead>
+                      <TableHead className="w-[160px]">{t('roles')}</TableHead>
+                      <TableHead className="w-[100px]">{t('status')}</TableHead>
+                      <TableHead className="w-[120px]">{t('registered')}</TableHead>
+                      <TableHead className="w-[140px] text-right">{t('actions')}</TableHead>
                     </TableRow>
                   </TableHeader>
+
                   <TableBody>
                     {paginatedUsers.map((user) => (
                       <TableRow key={user.id} className="hover:bg-muted/30 transition-colors">
@@ -173,8 +179,9 @@ export default function UsersPage() {
                            <div className="flex flex-wrap gap-1">
                              {user.roles.length > 0 ? user.roles.map((role) => (
                                <Badge key={role.id} variant="secondary" className="text-xs capitalize">{role.name}</Badge>
-                             )) : <span className="text-xs text-muted-foreground">No roles</span>}
+                             )) : <span className="text-xs text-muted-foreground">{t('noRoles')}</span>}
                            </div>
+
                          </TableCell>
                          <TableCell>
                            <Badge className={user.status.toLowerCase() === "active"
@@ -203,8 +210,9 @@ export default function UsersPage() {
  
              {totalPages > 1 && (
                <div className="flex items-center justify-between px-4 py-3 border-t border-border">
-                 <span className="text-sm text-muted-foreground">Page {currentPage} of {totalPages}</span>
+                 <span className="text-sm text-muted-foreground">{t('page')} {currentPage} {t('of')} {totalPages}</span>
                  <div className="flex gap-1">
+
                    <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)}>
                      <ChevronLeft className="w-4 h-4" />
                    </Button>
@@ -223,14 +231,15 @@ export default function UsersPage() {
          <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
            <DialogContent>
              <DialogHeader>
-               <DialogTitle className="flex items-center gap-2 text-destructive"><AlertTriangle className="w-5 h-5" /> Delete User</DialogTitle>
-               <DialogDescription>Are you sure you want to delete "{userToDelete?.fullName}"? This action cannot be undone.</DialogDescription>
+               <DialogTitle className="flex items-center gap-2 text-destructive"><AlertTriangle className="w-5 h-5" /> {t('deleteUser')}</DialogTitle>
+               <DialogDescription>{t('deleteUserConfirm').replace('{name}', userToDelete?.fullName || '')}</DialogDescription>
              </DialogHeader>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setDeleteOpen(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={confirmDelete}>Delete User</Button>
+              <Button variant="outline" onClick={() => setDeleteOpen(false)}>{t('cancel')}</Button>
+              <Button variant="destructive" onClick={confirmDelete}>{t('delete')}</Button>
             </DialogFooter>
           </DialogContent>
+
         </Dialog>
       </div>
     </AdminLayout>

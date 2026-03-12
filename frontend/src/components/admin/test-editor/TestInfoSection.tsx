@@ -32,9 +32,9 @@ export default function TestInfoSection({ data, onChange }: TestInfoSectionProps
             <Select value={data.skill} onValueChange={(v) => onChange({ skill: v as Skill })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="listening">{t("listening")}</SelectItem>
-                <SelectItem value="reading">{t("reading")}</SelectItem>
-                <SelectItem value="full">{t("full")}</SelectItem>
+                <SelectItem value="LISTENING">{t("listening")}</SelectItem>
+                <SelectItem value="READING">{t("reading")}</SelectItem>
+                <SelectItem value="FULL">{t("full")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -43,9 +43,9 @@ export default function TestInfoSection({ data, onChange }: TestInfoSectionProps
             <Select value={data.level} onValueChange={(v) => onChange({ level: v as Difficulty })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="beginner">{t("beginner")}</SelectItem>
-                <SelectItem value="intermediate">{t("intermediate")}</SelectItem>
-                <SelectItem value="advanced">{t("advanced")}</SelectItem>
+                <SelectItem value="EASY">{t("beginner")}</SelectItem>
+                <SelectItem value="MEDIUM">{t("intermediate")}</SelectItem>
+                <SelectItem value="HARD">{t("advanced")}</SelectItem>
               </SelectContent>
             </Select>
           </div>

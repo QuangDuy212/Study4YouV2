@@ -30,10 +30,14 @@ export const ko = {
   add: "추가",
   close: "닫기",
   actions: "작업",
+  duplicate: "복제",
+  archive: "보관",
   showing: "표시",
   of: "중",
   selected: "선택됨",
   noResultsFound: "결과를 찾을 수 없습니다",
+  updateStatus: "상태 업데이트",
+
 
   // Skills
   reading: "읽기",
@@ -109,6 +113,9 @@ export const ko = {
   listeningTest: "듣기 테스트",
   minuteRemaining: "1분 남았습니다!",
   minuteWarning: "테스트를 완료하는 데 1분이 남았습니다. 답변을 검토하세요.",
+  preparingTest: "테스트 환경을 준비 중입니다...",
+  audioPlayerListening: "오디오 플레이어 (리스닝 섹션)",
+
 
   // Result Page
   excellentWork: "훌륭합니다!",
@@ -135,6 +142,31 @@ export const ko = {
   questionBank: "문제 은행",
   aiGeneration: "AI 생성",
 
+  // Admin Test Management
+  testManagementTitle: "테스트 관리",
+  testManagementDesc: "모든 토익 모의고사를 생성, 관리 및 구성합니다.",
+  allCreatedTests: "생성된 모든 테스트",
+  activeTests: "활성 테스트",
+  publishedAvailable: "게시됨 & 사용 가능",
+  draftTests: "초안 테스트",
+  workInProgress: "진행 중",
+  searchByTestName: "테스트 이름으로 검색...",
+  skillType: "스킬 유형",
+  levelEasy: "쉬움",
+  levelMedium: "보통",
+  levelHard: "어려움",
+  activeFilters: "활성 필터:",
+  noTestsFoundFilter: "현재 필터와 일치하는 테스트가 없습니다. 검색 조건을 조정하거나 새 테스트를 생성해보세요.",
+  openEditor: "편집기 열기",
+  archiveTest: "테스트 보관",
+  archiveTestConfirm: '"{name}"을(를) 보관하시겠습니까? 이 테스트는 보관함으로 이동되며 사용자에게 표시되지 않습니다.',
+  failedToLoad: "테스트를 불러오지 못했습니다.",
+  duplicatedSuccess: "복제됨: {name}",
+  failedToArchive: "테스트 보관에 실패했습니다.",
+  archivedSuccess: "보관됨: {name}",
+  failedToDelete: "테스트 삭제에 실패했습니다.",
+  deletedSuccess: "삭제됨: {name}",
+
   // Admin Dashboard
   adminDashboard: "대시보드",
   adminDashboardDesc: "시스템 활동 및 성능 개요",
@@ -148,6 +180,19 @@ export const ko = {
   fromLastMonth: "지난달 대비 +12%",
   testsTakenOverTime: "시간별 테스트",
   skillDistribution: "기술 분포",
+  aiMagic: "AI 마법",
+  aiMagicDesc: "인공 지능으로 생산성을 높이십시오.",
+  generateReadingQuestionsShort: "독해 문제 생성",
+  generateReadingQuestionsShortDesc: "PART 5, 6, 7 문제를 즉시 생성",
+  bulkGenerateUsersShort: "대량 사용자 생성",
+  bulkGenerateUsersShortDesc: "실제와 같은 베트남 테스트 계정 생성",
+  loadingActivityLogs: "활동 로그를 불러오는 중...",
+  noRecentActivity: "최근 활동이 없습니다.",
+  testsTaken: "응시한 테스트",
+  count: "수",
+  system: "시스템",
+  activity: "활동",
+
 
   // Admin Question Bank
   questionBankDesc: "모든 기술과 난이도의 문제 관리",
@@ -166,6 +211,15 @@ export const ko = {
   beginner: "초급",
   intermediate: "중급",
   advanced: "고급",
+  allParts: "모든 파트",
+  part1Desc: "파트 1 – 사진 묘사",
+  part2Desc: "파트 2 – 질의 응답",
+  part3Desc: "파트 3 – 짧은 대화",
+  part4Desc: "파트 4 – 설명문",
+  part5Desc: "파트 5 – 단문 공란 메우기",
+  part6Desc: "파트 6 – 장문 공란 메우기",
+  part7Desc: "파트 7 – 독해",
+
   noQuestionsFound: "문제를 찾을 수 없습니다",
   noQuestionsHint: "필터를 조정하거나 새 문제를 추가해 보세요.",
   deleteQuestion: "문제 삭제",
@@ -188,10 +242,13 @@ export const ko = {
   noUsersFound: "사용자를 찾을 수 없습니다",
   noUsersHint: "검색 또는 필터 조건을 조정해 보세요.",
   userProfile: "사용자 프로필",
-  testsTaken: "참여한 테스트",
+
   joined: "가입일",
   testHistory: "테스트 기록",
   speakingAttempts: "말하기 시도",
+  aiQuestions: "AI 문제",
+  aiUsers: "AI 사용자",
+
 
   // Admin Analytics
   analyticsTitle: "분석",
@@ -264,22 +321,7 @@ export const ko = {
   // Admin User Editor
   createUser: "사용자 만들기",
   editUser: "사용자 편집",
-  registerNewUser: "새 사용자 계정 등록",
-  editingUser: "편집 중: {name}",
-  basicInformation: "기본 정보",
-  enterFullNamePlaceholder: "이름을 입력하세요",
-  enterEmailPlaceholder: "이메일 주소를 입력하세요",
-  resetPassword: "비밀번호 재설정",
-  leaveBlankPassword: "현재 비밀번호를 유지하려면 비워두세요",
-  roleAssignment: "역할 할당",
-  assignRolesDesc: "이 사용자에게 하나 이상의 역할을 할당합니다.",
-  assigned: "할당됨",
-  backToUsers: "사용자로 돌아가기",
-  nameRequired: "이름은 필수입니다",
-  emailRequired: "이메일은 필수입니다",
-  passwordRequired: "비밀번호는 필수입니다",
-  userCreationNote: "사용자 생성에는 관리자 API 통합이 필요합니다.",
-  userUpdated: "사용자가 성공적으로 업데이트되었습니다",
+  registerNewUser: "�� 업데이트되었습니다",
 
   // Admin Test Editor
   createNewTest: "새 테스트 만들기",
@@ -348,6 +390,7 @@ export const ko = {
   part: "파트",
   generatedQuestionsTitle: "생성된 문제",
 
+
   // AI Generate Users Page
   aiGenerateUsers: "AI 사용자 생성",
   aiGenerateUsersDesc: "AI를 사용하여 자연어 프롬프트로 대량 사용자 계정을 생성합니다.",
@@ -361,21 +404,16 @@ export const ko = {
   username: "사용자명",
   saveAllUsers: "모든 사용자 저장",
   confirmBulkSave: "대량 저장 확인",
-  bulkSaveConfirmDesc: "{count}명의 사용자를 생성하려고 합니다. 여러 계정이 한 번에 생성됩니다. 계속하시겠습니까?",
-
-  // AI User Generator Modal
-  aiUserGenerator: "AI 사용자 생성기",
-  configureParams: "AI 지원으로 사용자를 생성하려면 아래 매개변수를 구성하세요.",
-  successfullyGenerated: "{count}명의 사용자가 성공적으로 생성되었습니다. 아래에서 확인하세요.",
-  numberOfUsers: "사용자 수",
-  betweenUsers: "1에서 50명 사이",
-  emailDomain: "이메일 도메인",
-  optional: "선택사항",
-  generateUsers: "사용자 생성",
-  done: "완료",
-  confirmBulkGeneration: "대량 생성 확인",
-  bulkGenerationConfirmDesc: "{count}명의 사용자를 생성하려고 합니다. 여러 계정이 한 번에 생성됩니다. 계속하시겠습니까?",
-
+  bulkSaveConfirmDesc: "사용자 {count}명을 저장하려고 합니다. 이 과정은 몇 초 정도 걸릴 수 있습니다. 계속하시겠습니까?",
+  backToUsers: "사용자 목록으로 돌아가기",
+  inactive: "비활성",
+  banned: "차단됨",
+  pleaseSelectRole: "기본 역할을 선택하세요",
+  usersGeneratedSuccess: "사용자 {count}명을 성공적으로 생성했습니다.",
+  failedToGenerateUsers: "사용자 생성에 실패했습니다.",
+  usersCreatedSuccess: "사용자 {success} / {total}명을 성공적으로 생성했습니다.",
+  failedToSaveUsers: "사용자 저장에 실패했습니다.",
+  failedToLoadRoles: "역할 목록을 불러오지 못했습니다.",
   // Chatbot
   chatbotTitle: "Study4You 어시스턴트",
   chatbotSubtitle: "플랫폼에 대해 무엇이든 물어보세요",
@@ -387,8 +425,8 @@ export const ko = {
   // Common admin
   page: "페이지",
   noRoles: "역할 없음",
-  user: "사용자",
   showingUsers: "{count}명의 사용자 표시",
+
   deleteUser: "사용자 삭제",
   deleteUserConfirm: "\"{name}\"을(를) 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.",
 
@@ -471,4 +509,34 @@ export const ko = {
   practiceAndLearnDesc: "능력을 도전하고 향상시키도록 설계된 매력적인 연습을 완료하세요.",
   getAiFeedback: "AI 피드백 받기",
   getAiFeedbackDesc: "강점과 개선이 필요한 영역을 이해하기 위한 즉각적이고 상세한 피드백을 받으세요.",
+
+  // New Keys for Tests and Taking
+  toeicScore: "토익 점수 (TOEIC Score)",
+  listeningPart14: "듣기 (Part 1-4)",
+  readingPart57: "읽기 (Part 5-7)",
+  loadingTests: "테스트를 불러오는 중...",
+  noActiveTests: "현재 이용 가능한 테스트가 없습니다.",
+  toeicFullTests: "토익 전체 모의고사",
+  toeicFullTestsDesc: "전체 토익 테스트 연습 - 듣기 및 읽기 (200문제, 120분)",
+  testSubmitted: "테스트가 성공적으로 제출되었습니다!",
+  errorSubmitting: "테스트 제출에 실패했습니다. 다시 시도해주세요.",
+  preparingTestEnv: "테스트 환경을 준비하는 중...",
+  audioPlayerDesc: "오디오 플레이어 (듣기 섹션)",
+  flag: "표시하기",
+  flagged: "표시됨",
+  progress: "진행 상황",
+  unanswered: "미응답",
+  answered: "응답함",
+  current: "현재",
+  confirmSubmit: "제출 확인",
+  completedQuestionsDesc: "총 {total}문제 중 {answered}문제를 완료했습니다.",
+  unansweredQuestionsWarning: "아직 답변하지 않은 질문이 {count}개 있습니다.",
+  flaggedQuestionsWarning: "검토가 필요한 표시된 질문이 {count}개 있습니다.",
+  submitFinalWarning: "제출 후에는 답을 변경할 수 없습니다.",
+  timeRunningOut: "시간이 부족합니다!",
+  fiveMinutesRemaining: "5분 남았습니다. 답안을 마무리해주세요.",
+  iUnderstand: "확인했습니다",
+  testTaking: {
+    audioSection: "이 섹션의 오디오",
+  },
 } as const;

@@ -39,9 +39,12 @@ Thumbs.db
 backend/logs/
 
 # Application
+backend/.env
+backend/src/main/resources/application.yml
 backend/application-local.yml
 backend/application-dev.yml
 backend/application-prod.yml
+backend/uploads/*
 
 # Database
 *.db

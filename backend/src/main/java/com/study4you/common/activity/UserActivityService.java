@@ -1,8 +1,13 @@
 package com.study4you.common.activity;
 
+import com.study4you.common.dto.PageResponse;
 import com.study4you.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,14 +46,26 @@ public class UserActivityService {
     }
 
     /**
-     * Returns the 20 most recent activity records, enriched with user names.
+     * Returns paginated activity records, enriched with user names.
      */
     @Transactional(readOnly = true)
-    public List<UserActivityDTO> getRecentActivities() {
-        return userActivityRepository.findTop20ByOrderByCreatedAtDesc()
+    public PageResponse<UserActivityDTO> getRecentActivities(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<UserActivity> activityPage = userActivityRepository.findAll(pageable);
+        
+        List<UserActivityDTO> dtos = activityPage.getContent()
                 .stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
+
+        return PageResponse.<UserActivityDTO>builder()
+                .content(dtos)
+                .pageNumber(activityPage.getNumber())
+                .pageSize(activityPage.getSize())
+                .totalElements(activityPage.getTotalElements())
+                .totalPages(activityPage.getTotalPages())
+                .last(activityPage.isLast())
+                .build();
     }
 
     private UserActivityDTO mapToDTO(UserActivity activity) {

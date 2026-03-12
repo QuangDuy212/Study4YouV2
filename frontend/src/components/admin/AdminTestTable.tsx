@@ -12,6 +12,8 @@ import {
   FileText,
   Trash2,
   ExternalLink,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,16 +33,17 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export interface Test {
-  id: number;
+  id: string;
   name: string;
-  skill: "listening" | "reading";
-  level: "beginner" | "intermediate" | "advanced";
+  skill: "LISTENING" | "READING" | "FULL";
+  level: "EASY" | "MEDIUM" | "HARD";
   duration: number;
   questions: number;
   status: "active" | "draft" | "archived";
-  createdBy: "admin";
+  createdBy: string;
   updatedAt: string;
 }
 
@@ -53,17 +56,23 @@ interface AdminTestTableProps {
   onArchive: (test: Test) => void;
   onDelete?: (test: Test) => void;
   onNavigateToEdit?: (test: Test) => void;
+  currentPage?: number;
+  totalPages?: number;
+  onPageChange?: (page: number) => void;
+  totalCount?: number;
+  itemsPerPage?: number;
 }
 
-const skillConfig = {
-  listening: { icon: Headphones, color: "text-purple-600", bg: "bg-purple-500/10" },
-  reading: { icon: BookOpen, color: "text-blue-600", bg: "bg-blue-500/10" },
+const skillConfig: Record<string, { icon: any; color: string; bg: string }> = {
+  LISTENING: { icon: Headphones, color: "text-purple-600", bg: "bg-purple-500/10" },
+  READING: { icon: BookOpen, color: "text-blue-600", bg: "bg-blue-500/10" },
+  FULL: { icon: BookOpen, color: "text-emerald-600", bg: "bg-emerald-500/10" },
 };
 
 const levelConfig = {
-  beginner: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  intermediate: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-  advanced: "bg-rose-500/10 text-rose-600 border-rose-500/20",
+  EASY: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  MEDIUM: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+  HARD: "bg-rose-500/10 text-rose-600 border-rose-500/20",
 };
 
 const statusConfig = {
@@ -92,6 +101,7 @@ function TableSkeleton() {
 }
 
 function EmptyState() {
+  const { t } = useLanguage();
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -102,18 +112,31 @@ function EmptyState() {
         <FileText className="w-10 h-10 text-muted-foreground" />
       </div>
       <h3 className="font-display text-xl font-semibold text-foreground mb-2">
-        No tests found
+        {t('noResultsFound')}
       </h3>
       <p className="text-muted-foreground max-w-sm mb-6">
-        There are no tests matching your current filters. Try adjusting your search or create a new test.
+        {t('noTestsFoundFilter')}
       </p>
     </motion.div>
   );
 }
 
 export default function AdminTestTable({
-  tests, isLoading = false, onView, onEdit, onDuplicate, onArchive, onDelete, onNavigateToEdit,
+  tests, 
+  isLoading = false, 
+  onView, 
+  onEdit, 
+  onDuplicate, 
+  onArchive, 
+  onDelete, 
+  onNavigateToEdit,
+  currentPage = 1,
+  totalPages = 1,
+  onPageChange,
+  totalCount = 0,
+  itemsPerPage = 10,
 }: AdminTestTableProps) {
+  const { t } = useLanguage();
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedTest, setSelectedTest] = useState<Test | null>(null);
@@ -150,14 +173,14 @@ export default function AdminTestTable({
           <Table>
             <TableHeader className="sticky top-0 bg-muted/50 z-10">
               <TableRow>
-                <TableHead className="w-[280px]">Test Name</TableHead>
-                <TableHead className="w-[100px]">Skill</TableHead>
-                <TableHead className="w-[100px]">Level</TableHead>
-                <TableHead className="w-[80px]">Duration</TableHead>
-                <TableHead className="w-[80px]">Questions</TableHead>
-                <TableHead className="w-[100px]">Status</TableHead>
-                <TableHead className="w-[120px]">Last Updated</TableHead>
-                <TableHead className="w-[120px] text-right">Actions</TableHead>
+                <TableHead className="w-[280px]">{t('testName')}</TableHead>
+                <TableHead className="w-[100px]">{t('skill')}</TableHead>
+                <TableHead className="w-[100px]">{t('level')}</TableHead>
+                <TableHead className="w-[80px]">{t('duration')}</TableHead>
+                <TableHead className="w-[80px]">{t('questions')}</TableHead>
+                <TableHead className="w-[100px]">{t('status')}</TableHead>
+                <TableHead className="w-[120px]">{t('lastUpdated')}</TableHead>
+                <TableHead className="w-[120px] text-right">{t('actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -184,31 +207,31 @@ export default function AdminTestTable({
                       </TableCell>
                       <TableCell><span className="capitalize text-sm">{test.skill}</span></TableCell>
                       <TableCell><Badge className={cn("capitalize", levelConfig[test.level])}>{test.level}</Badge></TableCell>
-                      <TableCell className="text-muted-foreground">{test.duration} min</TableCell>
+                      <TableCell className="text-muted-foreground">{test.duration} {t('minutes')}</TableCell>
                       <TableCell className="text-muted-foreground">{test.questions}</TableCell>
-                      <TableCell><Badge className={cn("capitalize", statusConfig[test.status])}>{test.status}</Badge></TableCell>
+                      <TableCell><Badge className={cn("capitalize", statusConfig[test.status])}>{t(test.status)}</Badge></TableCell>
                       <TableCell className="text-muted-foreground text-sm">{test.updatedAt}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
                           <Tooltip>
                             <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onView(test)}><Eye className="w-4 h-4" /></Button></TooltipTrigger>
-                            <TooltipContent className="bg-card border border-border">View</TooltipContent>
+                            <TooltipContent className="bg-card border border-border">{t('view')}</TooltipContent>
                           </Tooltip>
                           <Tooltip>
                             <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(test)}><Pencil className="w-4 h-4" /></Button></TooltipTrigger>
-                            <TooltipContent className="bg-card border border-border">Edit</TooltipContent>
+                            <TooltipContent className="bg-card border border-border">{t('edit')}</TooltipContent>
                           </Tooltip>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="w-4 h-4" /></Button></DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="bg-card border border-border">
-                              <DropdownMenuItem onClick={() => onDuplicate(test)} className="gap-2"><Copy className="w-4 h-4" />Duplicate</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => onDuplicate(test)} className="gap-2"><Copy className="w-4 h-4" />{t('duplicate')}</DropdownMenuItem>
                               {onNavigateToEdit && (
-                                <DropdownMenuItem onClick={() => onNavigateToEdit(test)} className="gap-2"><ExternalLink className="w-4 h-4" />Open Editor</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => onNavigateToEdit(test)} className="gap-2"><ExternalLink className="w-4 h-4" />{t('openEditor')}</DropdownMenuItem>
                               )}
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={() => handleArchiveClick(test)} className="gap-2 text-destructive focus:text-destructive"><Archive className="w-4 h-4" />Archive</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleArchiveClick(test)} className="gap-2 text-destructive focus:text-destructive"><Archive className="w-4 h-4" />{t('archive')}</DropdownMenuItem>
                               {onDelete && (
-                                <DropdownMenuItem onClick={() => handleDeleteClick(test)} className="gap-2 text-destructive focus:text-destructive"><Trash2 className="w-4 h-4" />Delete</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleDeleteClick(test)} className="gap-2 text-destructive focus:text-destructive"><Trash2 className="w-4 h-4" />{t('delete')}</DropdownMenuItem>
                               )}
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -221,6 +244,50 @@ export default function AdminTestTable({
             </TableBody>
           </Table>
         </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-muted/20">
+            <div className="text-sm text-muted-foreground">
+              {t('showing')} {totalCount > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-{Math.min(currentPage * itemsPerPage, totalCount)} {t('of')} {totalCount} {t('tests').toLowerCase()}
+            </div>
+            <div className="flex gap-1">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                disabled={currentPage === 1} 
+                onClick={() => onPageChange?.(currentPage - 1)}
+                className="h-8 w-8 p-0"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(p => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+                .map((p, i, arr) => (
+                  <div key={p} className="flex gap-1">
+                    {i > 0 && arr[i - 1] !== p - 1 && <span className="px-1 self-center text-muted-foreground">...</span>}
+                    <Button 
+                      key={p}
+                      variant={p === currentPage ? "default" : "outline"} 
+                      size="sm" 
+                      onClick={() => onPageChange?.(p)} 
+                      className="w-8 h-8 p-0 font-medium"
+                    >
+                      {p}
+                    </Button>
+                  </div>
+                ))}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                disabled={currentPage === totalPages} 
+                onClick={() => onPageChange?.(currentPage + 1)}
+                className="h-8 w-8 p-0"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
       </Card>
 
       {/* Mobile Card View */}
@@ -245,42 +312,59 @@ export default function AdminTestTable({
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="w-4 h-4" /></Button></DropdownMenuTrigger>
                        <DropdownMenuContent align="end" className="bg-card border border-border">
-                         <DropdownMenuItem onClick={() => onView(test)} className="gap-2"><Eye className="w-4 h-4" />View</DropdownMenuItem>
-                         <DropdownMenuItem onClick={() => onEdit(test)} className="gap-2"><Pencil className="w-4 h-4" />Edit</DropdownMenuItem>
-                         <DropdownMenuItem onClick={() => onDuplicate(test)} className="gap-2"><Copy className="w-4 h-4" />Duplicate</DropdownMenuItem>
+                         <DropdownMenuItem onClick={() => onView(test)} className="gap-2"><Eye className="w-4 h-4" />{t('view')}</DropdownMenuItem>
+                         <DropdownMenuItem onClick={() => onEdit(test)} className="gap-2"><Pencil className="w-4 h-4" />{t('edit')}</DropdownMenuItem>
+                         <DropdownMenuItem onClick={() => onDuplicate(test)} className="gap-2"><Copy className="w-4 h-4" />{t('duplicate')}</DropdownMenuItem>
                          {onNavigateToEdit && (
-                           <DropdownMenuItem onClick={() => onNavigateToEdit(test)} className="gap-2"><ExternalLink className="w-4 h-4" />Open Editor</DropdownMenuItem>
+                           <DropdownMenuItem onClick={() => onNavigateToEdit(test)} className="gap-2"><ExternalLink className="w-4 h-4" />{t('openEditor')}</DropdownMenuItem>
                          )}
                          <DropdownMenuSeparator />
-                         <DropdownMenuItem onClick={() => handleArchiveClick(test)} className="gap-2 text-destructive focus:text-destructive"><Archive className="w-4 h-4" />Archive</DropdownMenuItem>
+                         <DropdownMenuItem onClick={() => handleArchiveClick(test)} className="gap-2 text-destructive focus:text-destructive"><Archive className="w-4 h-4" />{t('archive')}</DropdownMenuItem>
                          {onDelete && (
-                           <DropdownMenuItem onClick={() => handleDeleteClick(test)} className="gap-2 text-destructive focus:text-destructive"><Trash2 className="w-4 h-4" />Delete</DropdownMenuItem>
+                           <DropdownMenuItem onClick={() => handleDeleteClick(test)} className="gap-2 text-destructive focus:text-destructive"><Trash2 className="w-4 h-4" />{t('delete')}</DropdownMenuItem>
                          )}
                        </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
                   <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div><p className="text-muted-foreground text-xs mb-0.5">Level</p><Badge className={cn("capitalize text-xs", levelConfig[test.level])}>{test.level}</Badge></div>
-                    <div><p className="text-muted-foreground text-xs mb-0.5">Duration</p><p className="font-medium">{test.duration} min</p></div>
-                    <div><p className="text-muted-foreground text-xs mb-0.5">Questions</p><p className="font-medium">{test.questions}</p></div>
+                    <div><p className="text-muted-foreground text-xs mb-0.5">{t('level')}</p><Badge className={cn("capitalize text-xs", levelConfig[test.level])}>{test.level}</Badge></div>
+                    <div><p className="text-muted-foreground text-xs mb-0.5">{t('duration')}</p><p className="font-medium">{test.duration} {t('minutes')}</p></div>
+                    <div><p className="text-muted-foreground text-xs mb-0.5">{t('questions')}</p><p className="font-medium">{test.questions}</p></div>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-3 pt-3 border-t border-border">Updated {test.updatedAt}</p>
+                  <p className="text-xs text-muted-foreground mt-3 pt-3 border-t border-border">{t('updated')} {test.updatedAt}</p>
                 </CardContent>
               </Card>
             </motion.div>
           );
         })}
+
+        {/* Mobile Pagination */}
+        {totalPages > 1 && (
+          <div className="flex flex-col gap-4 items-center py-4">
+             <div className="text-xs text-muted-foreground">
+              {t('showing')} {totalCount > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-{Math.min(currentPage * itemsPerPage, totalCount)} {t('of')} {totalCount} {t('tests').toLowerCase()}
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => onPageChange?.(currentPage - 1)} className="h-9 px-4">
+                <ChevronLeft className="w-4 h-4 mr-1" /> {t('back')}
+              </Button>
+              <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => onPageChange?.(currentPage + 1)} className="h-9 px-4">
+                {t('next')} <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       <AlertDialog open={archiveDialogOpen} onOpenChange={setArchiveDialogOpen}>
         <AlertDialogContent className="bg-card border border-border">
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2"><AlertCircle className="w-5 h-5 text-destructive" />Archive Test</AlertDialogTitle>
-            <AlertDialogDescription>Are you sure you want to archive "{selectedTest?.name}"? This test will be moved to the archive and won't be visible to users.</AlertDialogDescription>
+            <AlertDialogTitle className="flex items-center gap-2"><AlertCircle className="w-5 h-5 text-destructive" />{t('archiveTest')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('archiveTestConfirm').replace('{name}', selectedTest?.name || '')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmArchive} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Archive</AlertDialogAction>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmArchive} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{t('archive')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -288,12 +372,12 @@ export default function AdminTestTable({
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent className="bg-card border border-border">
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2"><Trash2 className="w-5 h-5 text-destructive" />Delete Test</AlertDialogTitle>
-            <AlertDialogDescription>Are you sure you want to permanently delete "{selectedTest?.name}"? This action cannot be undone.</AlertDialogDescription>
+            <AlertDialogTitle className="flex items-center gap-2"><Trash2 className="w-5 h-5 text-destructive" />{t('deleteTest')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('deleteTestConfirm').replace('{name}', selectedTest?.name || '')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{t('delete')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

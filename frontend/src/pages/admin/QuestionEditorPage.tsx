@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils";
 import type { PartType, TestOption } from "@/components/admin/test-editor/types";
 import { PART_LABELS, LISTENING_PARTS } from "@/components/admin/test-editor/types";
+import ListeningMediaUploader from "@/components/admin/test-editor/ListeningMediaUploader";
 
 const ANSWER_LABELS = ["A", "B", "C", "D"] as const;
 
@@ -26,7 +27,7 @@ export default function QuestionEditorPage() {
   const isCreate = !id;
 
   const [partType, setPartType] = useState<PartType>("PART_5");
-  const [difficulty, setDifficulty] = useState("intermediate");
+  const [level, setLevel] = useState("MEDIUM");
   const [content, setContent] = useState("");
   const [passage, setPassage] = useState("");
   const [correctAnswer, setCorrectAnswer] = useState<"A" | "B" | "C" | "D">("A");
@@ -57,6 +58,7 @@ export default function QuestionEditorPage() {
           setContent(q.content);
           setPassage(q.passage || "");
           setCorrectAnswer(q.correctAnswer as any);
+          setLevel(q.level || "MEDIUM");
           setAudioUrl(q.audioUrl);
           setImageUrl(q.imageUrl);
           
@@ -97,7 +99,7 @@ export default function QuestionEditorPage() {
         content,
         passage: needsPassage ? passage : null,
         correctAnswer,
-        difficulty,
+        level,
         audioUrl: isListeningPart ? audioUrl : null,
         imageUrl: needsImage ? imageUrl : null,
         options: options.map(o => ({ label: o.label, content: o.content }))
@@ -118,7 +120,7 @@ export default function QuestionEditorPage() {
     } finally {
       setIsSaving(false);
     }
-  }, [content, options, passage, audioUrl, imageUrl, isCreate, needsPassage, isListeningPart, needsImage, navigate, partType, correctAnswer, difficulty, id, t, allParts]);
+  }, [content, options, passage, audioUrl, imageUrl, isCreate, needsPassage, isListeningPart, needsImage, navigate, partType, correctAnswer, level, id, t, allParts]);
 
   if (isLoadingData) {
     return (
@@ -160,13 +162,13 @@ export default function QuestionEditorPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>{t("difficulty")}</Label>
-                <Select value={difficulty} onValueChange={setDifficulty}>
+                <Label>{t("level")}</Label>
+                <Select value={level} onValueChange={setLevel}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="beginner">{t("beginner")}</SelectItem>
-                    <SelectItem value="intermediate">{t("intermediate")}</SelectItem>
-                    <SelectItem value="advanced">{t("advanced")}</SelectItem>
+                    <SelectItem value="EASY">{t("levelEasy")}</SelectItem>
+                    <SelectItem value="MEDIUM">{t("levelMedium")}</SelectItem>
+                    <SelectItem value="HARD">{t("levelHard")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -190,24 +192,19 @@ export default function QuestionEditorPage() {
           </Card>
         )}
 
-        {needsImage && (
-          <Card>
-            <CardHeader><CardTitle className="text-lg">Image URL</CardTitle></CardHeader>
-            <CardContent>
-              <Input value={imageUrl || ""} onChange={(e) => setImageUrl(e.target.value)} placeholder="Enter image URL..." />
-              {imageUrl && <img src={imageUrl} alt="Preview" className="mt-4 max-h-48 rounded border" />}
-            </CardContent>
-          </Card>
-        )}
-
         {isListeningPart && (
-          <Card>
-            <CardHeader><CardTitle className="text-lg">Audio URL</CardTitle></CardHeader>
-            <CardContent>
-              <Input value={audioUrl || ""} onChange={(e) => setAudioUrl(e.target.value)} placeholder="Enter audio URL..." />
-              {audioUrl && <audio controls src={audioUrl} className="mt-4 w-full" />}
-            </CardContent>
-          </Card>
+           <Card>
+             <CardHeader><CardTitle className="text-lg">{t("media") || "Media"}</CardTitle></CardHeader>
+             <CardContent>
+                <ListeningMediaUploader
+                  hideImage={!needsImage}
+                  audioUrl={audioUrl}
+                  imageUrl={needsImage ? imageUrl : null}
+                  onAudioChange={setAudioUrl}
+                  onImageChange={setImageUrl}
+                />
+             </CardContent>
+           </Card>
         )}
 
         <Card>

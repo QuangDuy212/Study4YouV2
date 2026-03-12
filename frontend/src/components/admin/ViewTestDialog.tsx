@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { BookOpen, Headphones, Clock, HelpCircle, Calendar, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Test } from "./AdminTestTable";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const levelConfig = {
   beginner: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
@@ -27,6 +28,7 @@ interface Props {
 }
 
 export default function ViewTestDialog({ open, onOpenChange, test, onEdit }: Props) {
+  const { t } = useLanguage();
   if (!test) return null;
 
   const SkillIcon = test.skill === "listening" ? Headphones : BookOpen;
@@ -39,25 +41,25 @@ export default function ViewTestDialog({ open, onOpenChange, test, onEdit }: Pro
             <SkillIcon className="w-5 h-5 text-primary" />
             {test.name}
           </DialogTitle>
-          <DialogDescription>Test details and information</DialogDescription>
+          <DialogDescription>{t('testDetails')}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           <div className="grid grid-cols-2 gap-4">
-            <InfoItem icon={<SkillIcon className="w-4 h-4" />} label="Skill" value={<span className="capitalize">{test.skill}</span>} />
-            <InfoItem icon={<HelpCircle className="w-4 h-4" />} label="Level" value={<Badge className={cn("capitalize", levelConfig[test.level])}>{test.level}</Badge>} />
-            <InfoItem icon={<Clock className="w-4 h-4" />} label="Duration" value={`${test.duration} minutes`} />
-            <InfoItem icon={<HelpCircle className="w-4 h-4" />} label="Questions" value={`${test.questions}`} />
-            <InfoItem icon={<Calendar className="w-4 h-4" />} label="Last Updated" value={test.updatedAt} />
-            <InfoItem icon={<HelpCircle className="w-4 h-4" />} label="Status" value={<Badge className={cn("capitalize", statusConfig[test.status])}>{test.status}</Badge>} />
+            <InfoItem icon={<SkillIcon className="w-4 h-4" />} label={t('skill')} value={<span className="capitalize">{t(test.skill)}</span>} />
+            <InfoItem icon={<HelpCircle className="w-4 h-4" />} label={t('level')} value={<Badge className={cn("capitalize", levelConfig[test.level])}>{t(test.level)}</Badge>} />
+            <InfoItem icon={<Clock className="w-4 h-4" />} label={t('duration')} value={`${test.duration} ${t('minutes')}`} />
+            <InfoItem icon={<HelpCircle className="w-4 h-4" />} label={t('questions')} value={`${test.questions}`} />
+            <InfoItem icon={<Calendar className="w-4 h-4" />} label={t('lastUpdated')} value={test.updatedAt} />
+            <InfoItem icon={<HelpCircle className="w-4 h-4" />} label={t('status')} value={<Badge className={cn("capitalize", statusConfig[test.status])}>{t(test.status)}</Badge>} />
           </div>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t('close')}</Button>
           <Button onClick={() => { onOpenChange(false); onEdit(test); }} className="gap-2">
             <Pencil className="w-4 h-4" />
-            Edit Test
+            {t('editTest')}
           </Button>
         </DialogFooter>
       </DialogContent>

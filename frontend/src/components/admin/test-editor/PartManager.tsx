@@ -4,6 +4,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState } from "react";
 import type { TestPart, PartType } from "./types";
 import { PART_LABELS } from "./types";
+import { useLanguage } from "@/contexts/LanguageContext";
+
 import PartItem from "./PartItem";
 
 interface PartManagerProps {
@@ -13,7 +15,9 @@ interface PartManagerProps {
 }
 
 export default function PartManager({ parts, onChange, onOpenAIPanel }: PartManagerProps) {
+  const { t } = useLanguage();
   const [addPartType, setAddPartType] = useState<PartType | "">("");
+
 
   const existingTypes = parts.map((p) => p.type);
   const availableTypes = (Object.keys(PART_LABELS) as PartType[]).filter((t) => !existingTypes.includes(t));
@@ -24,7 +28,9 @@ export default function PartManager({ parts, onChange, onOpenAIPanel }: PartMana
       id: crypto.randomUUID(),
       type: addPartType as PartType,
       questions: [],
+      audioUrl: null,
     };
+
     // Insert in correct order
     const allTypes: PartType[] = ["PART_1", "PART_2", "PART_3", "PART_4", "PART_5", "PART_6", "PART_7"];
     const updated = [...parts, newPart].sort(
@@ -47,14 +53,17 @@ export default function PartManager({ parts, onChange, onOpenAIPanel }: PartMana
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-display text-base font-semibold text-foreground">Parts & Questions</h2>
+        <h2 className="font-display text-base font-semibold text-foreground">{t('partsAndQuestions')}</h2>
         {availableTypes.length > 0 && (
+
+
           <div className="flex items-center gap-2">
             <Select value={addPartType} onValueChange={(v) => setAddPartType(v as PartType)}>
               <SelectTrigger className="w-[200px] h-9 text-sm">
-                <SelectValue placeholder="Select part to add" />
+                <SelectValue placeholder={t('selectPartToAdd')} />
               </SelectTrigger>
               <SelectContent>
+
                 {availableTypes.map((t) => (
                   <SelectItem key={t} value={t}>
                     {PART_LABELS[t].label} — {PART_LABELS[t].description}
@@ -63,18 +72,21 @@ export default function PartManager({ parts, onChange, onOpenAIPanel }: PartMana
               </SelectContent>
             </Select>
             <Button size="sm" onClick={addPart} disabled={!addPartType}>
-              <Plus className="w-3.5 h-3.5 mr-1" /> Add Part
+              <Plus className="w-3.5 h-3.5 mr-1" /> {t('addPart')}
             </Button>
           </div>
+
+
         )}
       </div>
 
       {parts.length === 0 ? (
         <div className="text-center py-12 border-2 border-dashed border-border rounded-xl text-muted-foreground">
-          <p className="text-sm">No parts added yet.</p>
-          <p className="text-xs mt-1">Select a part type above and click "Add Part".</p>
+          <p className="text-sm">{t('noPartsAdded')}</p>
+          <p className="text-xs mt-1">{t('noPartsAddedHint')}</p>
         </div>
       ) : (
+
         <div className="space-y-3">
           {parts.map((part, i) => (
             <PartItem

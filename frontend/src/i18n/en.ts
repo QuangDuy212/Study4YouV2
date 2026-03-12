@@ -30,10 +30,15 @@ export const en = {
   add: "Add",
   close: "Close",
   actions: "Actions",
+  duplicate: "Duplicate",
+  archive: "Archive",
   showing: "Showing",
   of: "of",
   selected: "selected",
   noResultsFound: "No results found",
+  user: "User",
+  updateStatus: "Update Status",
+
 
   // Skills
   reading: "Reading",
@@ -109,6 +114,9 @@ export const en = {
   listeningTest: "Listening Test",
   minuteRemaining: "1 Minute Remaining!",
   minuteWarning: "You have 1 minute left to complete the test. Please review your answers.",
+  preparingTest: "Preparing your test environment...",
+  audioPlayerListening: "Audio Player (Listening Section)",
+
 
   // Result Page
   excellentWork: "Excellent work!",
@@ -135,6 +143,31 @@ export const en = {
   questionBank: "Question Bank",
   aiGeneration: "AI Generation",
 
+  // Admin Test Management
+  testManagementTitle: "Test Management",
+  testManagementDesc: "Create, manage, and organize all TOEIC practice tests",
+  allCreatedTests: "All created tests",
+  activeTests: "Active Tests",
+  publishedAvailable: "Published & available",
+  draftTests: "Draft Tests",
+  workInProgress: "Work in progress",
+  searchByTestName: "Search by test name...",
+  skillType: "Skill Type",
+  levelEasy: "Easy",
+  levelMedium: "Medium",
+  levelHard: "Hard",
+  activeFilters: "Active filters:",
+  noTestsFoundFilter: "There are no tests matching your current filters. Try adjusting your search or create a new test.",
+  openEditor: "Open Editor",
+  archiveTest: "Archive Test",
+  archiveTestConfirm: 'Are you sure you want to archive "{name}"? This test will be moved to the archive and won\'t be visible to users.',
+  failedToLoad: "Failed to load tests",
+  duplicatedSuccess: "Duplicated: {name}",
+  failedToArchive: "Failed to archive test",
+  archivedSuccess: "Archived: {name}",
+  failedToDelete: "Failed to delete test",
+  deletedSuccess: "Deleted: {name}",
+
   // Admin Dashboard
   adminDashboard: "Dashboard",
   adminDashboardDesc: "Overview of system activity and performance",
@@ -148,6 +181,19 @@ export const en = {
   fromLastMonth: "+12% from last month",
   testsTakenOverTime: "Tests Taken Over Time",
   skillDistribution: "Skill Distribution",
+  aiMagic: "AI Magic",
+  aiMagicDesc: "Boost your productivity with artificial intelligence.",
+  generateReadingQuestionsShort: "Generate Reading Questions",
+  generateReadingQuestionsShortDesc: "Create PART_5, 6, 7 questions instantly",
+  bulkGenerateUsersShort: "Bulk Generate Users",
+  bulkGenerateUsersShortDesc: "Create realistic Vietnamese test accounts",
+  loadingActivityLogs: "Loading activity logs...",
+  noRecentActivity: "No recent activity.",
+  testsTaken: "Tests Taken",
+  count: "Count",
+  system: "System",
+  activity: "Activity",
+
 
   // Admin Question Bank
   questionBankDesc: "Manage all questions across skills and difficulty levels",
@@ -166,6 +212,15 @@ export const en = {
   beginner: "Beginner",
   intermediate: "Intermediate",
   advanced: "Advanced",
+  allParts: "All Parts",
+  part1Desc: "Part 1 – Photos",
+  part2Desc: "Part 2 – Q&R",
+  part3Desc: "Part 3 – Conversations",
+  part4Desc: "Part 4 – Talks",
+  part5Desc: "Part 5 – Incomplete",
+  part6Desc: "Part 6 – Text Comp.",
+  part7Desc: "Part 7 – Reading",
+
   noQuestionsFound: "No questions found",
   noQuestionsHint: "Try adjusting your filters or add new questions to the bank.",
   deleteQuestion: "Delete Question",
@@ -188,26 +243,31 @@ export const en = {
   noUsersFound: "No users found",
   noUsersHint: "Try adjusting your search or filter criteria.",
   userProfile: "User Profile",
-  testsTaken: "Tests Taken",
   joined: "Joined",
   testHistory: "Test History",
   speakingAttempts: "Speaking Attempts",
+  aiQuestions: "AI Questions",
+  aiUsers: "AI Users",
+
+
 
   // Admin Analytics
   analyticsTitle: "Analytics",
   analyticsDesc: "Academic performance and system analytics",
+  loadingAnalytics: "Loading analytics data...",
   testCompletionRate: "Test Completion Rate",
   avgSessionDuration: "Avg. Session Duration",
   dailyActiveUsers: "Daily Active Users",
   aiContentUsage: "AI Content Usage",
   skillPerformanceOverview: "Skill Performance Overview",
-  avgScoreLabel: "Avg Score",
   passRate: "Pass Rate",
   userEngagementDaily: "User Engagement (Daily)",
+  activeUsers: "Active Users",
+  completedTests: "Completed Tests",
   weeklyActiveUsers: "Weekly Active Users",
   aiVsHumanContent: "AI vs Human Created Content",
   aiVsHumanPerformance: "AI vs Human Question Performance",
-  passFailBySkill: "Pass/Fail Rate by Skill",
+  passFailRateBySkill: "Pass/Fail Rate by Skill",
   pass: "Pass",
   fail: "Fail",
 
@@ -349,6 +409,14 @@ export const en = {
   generatedQuestionsTitle: "Generated Questions",
 
   // AI Generate Users Page
+  inactive: "Inactive",
+  banned: "Banned",
+  pleaseSelectRole: "Please select a default role",
+  usersGeneratedSuccess: "{count} users generated successfully",
+  failedToGenerateUsers: "Failed to generate users",
+  usersCreatedSuccess: "{success} / {total} users created successfully",
+  failedToSaveUsers: "Failed to save users",
+  failedToLoadRoles: "Failed to load roles",
   aiGenerateUsers: "AI Generate Users",
   aiGenerateUsersDesc: "Use AI to bulk-generate user accounts with a natural language prompt.",
   aiPrompt: "AI Prompt",
@@ -376,6 +444,7 @@ export const en = {
   confirmBulkGeneration: "Confirm Bulk Generation",
   bulkGenerationConfirmDesc: "You are about to generate {count} users. This action will create multiple accounts at once. Continue?",
 
+
   // Chatbot
   chatbotTitle: "Study4You Assistant",
   chatbotSubtitle: "Ask me anything about the platform",
@@ -387,8 +456,8 @@ export const en = {
   // Common admin
   page: "Page",
   noRoles: "No roles",
-  user: "User",
   showingUsers: "Showing {count} users",
+
   deleteUser: "Delete User",
   deleteUserConfirm: "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
 
@@ -471,4 +540,33 @@ export const en = {
   practiceAndLearnDesc: "Complete engaging exercises designed to challenge and improve your abilities.",
   getAiFeedback: "Get AI Feedback",
   getAiFeedbackDesc: "Receive instant, detailed feedback to understand your strengths and areas for improvement.",
+
+  // New Keys for Tests and Taking
+  toeicScore: "TOEIC Score",
+  listeningPart14: "Listening (Part 1-4)",
+  readingPart57: "Reading (Part 5-7)",
+  loadingTests: "Loading tests...",
+  noActiveTests: "No active tests available yet.",
+  toeicFullTests: "TOEIC Full Tests",
+  toeicFullTestsDesc: "Full TOEIC test practice – Listening & Reading (200 questions, 120 minutes)",
+  testSubmitted: "Test submitted successfully!",
+  errorSubmitting: "Failed to submit test. Please try again.",
+  preparingTestEnv: "Preparing your test environment...",
+  audioPlayerDesc: "Audio Player (Listening Section)",
+  flag: "Flag",
+  flagged: "Flagged",
+  progress: "Progress",
+  unanswered: "Unanswered",
+  answered: "Answered",
+  current: "Current",
+  confirmSubmit: "Confirm Submit",
+  completedQuestionsDesc: "You have completed {answered} out of {total} questions.",
+  unansweredQuestionsWarning: "You still have {count} unanswered questions.",
+  flaggedQuestionsWarning: "You have {count} flagged questions to review.",
+  submitFinalWarning: "Once submitted, you cannot change your answers.",
+  timeRunningOut: "TIME RUNNING OUT!",
+  iUnderstand: "I understand",
+  testTaking: {
+    audioSection: "Audio for this section",
+  },
 } as const;

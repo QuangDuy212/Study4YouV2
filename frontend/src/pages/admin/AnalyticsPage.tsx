@@ -1,7 +1,8 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
-  TrendingUp, Users, BookOpen, Headphones, CheckCircle, XCircle, Activity,
+  TrendingUp, Users, BookOpen, Headphones, CheckCircle, XCircle, Activity, Loader2,
 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,28 +13,7 @@ import {
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend,
 } from "recharts";
-
-const skillPerformanceData = [
-  { skill: "Reading", avgScore: 76, passRate: 82 },
-  { skill: "Listening", avgScore: 72, passRate: 78 },
-];
-
-const userEngagementData = [
-  { day: "Mon", active: 245, completed: 180 },
-  { day: "Tue", active: 312, completed: 220 },
-  { day: "Wed", active: 289, completed: 195 },
-  { day: "Thu", active: 356, completed: 265 },
-  { day: "Fri", active: 298, completed: 210 },
-  { day: "Sat", active: 178, completed: 120 },
-  { day: "Sun", active: 156, completed: 95 },
-];
-
-const weeklyActiveUsers = [
-  { week: "Week 1", users: 890 },
-  { week: "Week 2", users: 1020 },
-  { week: "Week 3", users: 945 },
-  { week: "Week 4", users: 1150 },
-];
+import activityService, { type AnalyticsResponse } from "@/services/activityService";
 
 const lineChartConfig: ChartConfig = {
   active: { label: "Active Users", color: "hsl(var(--primary))" },
@@ -46,14 +26,44 @@ const barChartConfig: ChartConfig = {
   users: { label: "Users", color: "hsl(var(--primary))" },
 };
 
-const summaryStats = [
-  { title: "Test Completion Rate", value: "78%", change: "+5%", trend: "up", icon: CheckCircle },
-  { title: "Avg. Session Duration", value: "24 min", change: "+3 min", trend: "up", icon: Activity },
-  { title: "Daily Active Users", value: "342", change: "+12%", trend: "up", icon: Users },
-];
-
 export default function AnalyticsPage() {
   const { t } = useLanguage();
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<AnalyticsResponse | null>(null);
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const stats = await activityService.getAnalyticsData();
+        setData(stats);
+      } catch (err) {
+        console.error("Failed to load analytics data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAnalytics();
+  }, []);
+
+  if (loading || !data) {
+    return (
+      <AdminLayout pageTitle={t('analyticsTitle')} pageDescription={t('analyticsDesc')}>
+        <div className="flex flex-col items-center justify-center min-h-[400px]">
+          <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
+          <p className="text-muted-foreground">{t('loadingAnalytics') || "Loading analytics data..."}</p>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  const summaryStats = [
+    { title: t('testCompletionRate') || "Test Completion Rate", value: data.summary.completionRate, change: data.summary.completionRateChange, trend: data.summary.completionRateChange.startsWith("+") ? "up" : "down", icon: CheckCircle },
+    { title: t('avgSessionDuration') || "Avg. Session Duration", value: data.summary.avgSessionDuration, change: data.summary.sessionDurationChange, trend: data.summary.sessionDurationChange.startsWith("+") ? "up" : "down", icon: Activity },
+    { title: t('dailyActiveUsers') || "Daily Active Users", value: data.summary.dailyActiveUsers, change: data.summary.dauChange, trend: data.summary.dauChange.startsWith("+") ? "up" : "down", icon: Users },
+  ];
+
+  const readingStat = data.skillPerformance.find(s => s.skill.toLowerCase() === "reading") || { avgScore: 0, passRate: 0 };
+  const listeningStat = data.skillPerformance.find(s => s.skill.toLowerCase() === "listening") || { avgScore: 0, passRate: 0 };
 
   return (
     <AdminLayout pageTitle={t('analyticsTitle')} pageDescription={t('analyticsDesc')}>
@@ -82,28 +92,28 @@ export default function AnalyticsPage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><TrendingUp className="w-5 h-5 text-primary" />Skill Performance Overview</CardTitle>
+              <CardTitle className="flex items-center gap-2"><TrendingUp className="w-5 h-5 text-primary" />{t('skillPerformanceOverview') || "Skill Performance Overview"}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-100 dark:border-blue-800">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded-lg bg-blue-100"><BookOpen className="w-5 h-5 text-blue-600" /></div>
-                    <h4 className="font-semibold text-foreground">Reading</h4>
+                    <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-800"><BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" /></div>
+                    <h4 className="font-semibold text-foreground">{t('reading')}</h4>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
-                    <div><p className="text-2xl font-bold text-blue-600">76%</p><p className="text-sm text-muted-foreground">Avg Score</p></div>
-                    <div><p className="text-2xl font-bold text-blue-600">82%</p><p className="text-sm text-muted-foreground">Pass Rate</p></div>
+                    <div><p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{readingStat.avgScore}%</p><p className="text-sm text-muted-foreground">{t('avgScore') || "Avg Score"}</p></div>
+                    <div><p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{readingStat.passRate}%</p><p className="text-sm text-muted-foreground">{t('passRate') || "Pass Rate"}</p></div>
                   </div>
                 </div>
-                <div className="p-4 bg-green-50 rounded-lg border border-green-100">
+                <div className="p-4 bg-green-50 dark:bg-green-900/10 rounded-lg border border-green-100 dark:border-green-800">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded-lg bg-green-100"><Headphones className="w-5 h-5 text-green-600" /></div>
-                    <h4 className="font-semibold text-foreground">Listening</h4>
+                    <div className="p-2 rounded-lg bg-green-100 dark:bg-green-800"><Headphones className="w-5 h-5 text-green-600 dark:text-green-400" /></div>
+                    <h4 className="font-semibold text-foreground">{t('listening')}</h4>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
-                    <div><p className="text-2xl font-bold text-green-600">72%</p><p className="text-sm text-muted-foreground">Avg Score</p></div>
-                    <div><p className="text-2xl font-bold text-green-600">78%</p><p className="text-sm text-muted-foreground">Pass Rate</p></div>
+                    <div><p className="text-2xl font-bold text-green-600 dark:text-green-400">{listeningStat.avgScore}%</p><p className="text-sm text-muted-foreground">{t('avgScore') || "Avg Score"}</p></div>
+                    <div><p className="text-2xl font-bold text-green-600 dark:text-green-400">{listeningStat.passRate}%</p><p className="text-sm text-muted-foreground">{t('passRate') || "Pass Rate"}</p></div>
                   </div>
                 </div>
               </div>
@@ -115,17 +125,17 @@ export default function AnalyticsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
             <Card>
-              <CardHeader><CardTitle>User Engagement (Daily)</CardTitle></CardHeader>
+              <CardHeader><CardTitle>{t('userEngagementDaily') || "User Engagement (Daily)"}</CardTitle></CardHeader>
               <CardContent>
                 <ChartContainer config={lineChartConfig} className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={userEngagementData}>
+                    <LineChart data={data.userEngagement}>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                       <XAxis dataKey="day" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} />
                       <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} />
                       <ChartTooltip content={<ChartTooltipContent />} />
-                      <Line type="monotone" dataKey="active" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ fill: "hsl(var(--primary))" }} name="Active Users" />
-                      <Line type="monotone" dataKey="completed" stroke="hsl(var(--chart-2))" strokeWidth={2} dot={{ fill: "hsl(var(--chart-2))" }} name="Completed Tests" />
+                      <Line type="monotone" dataKey="active" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ fill: "hsl(var(--primary))" }} name={t('activeUsers') || "Active Users"} />
+                      <Line type="monotone" dataKey="completed" stroke="hsl(var(--chart-2))" strokeWidth={2} dot={{ fill: "hsl(var(--chart-2))" }} name={t('completedTests') || "Completed Tests"} />
                       <Legend />
                     </LineChart>
                   </ResponsiveContainer>
@@ -136,16 +146,16 @@ export default function AnalyticsPage() {
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
             <Card>
-              <CardHeader><CardTitle>Weekly Active Users</CardTitle></CardHeader>
+              <CardHeader><CardTitle>{t('weeklyActiveUsers') || "Weekly Active Users"}</CardTitle></CardHeader>
               <CardContent>
                 <ChartContainer config={barChartConfig} className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={weeklyActiveUsers}>
+                    <BarChart data={data.weeklyActiveUsers}>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                       <XAxis dataKey="week" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} />
                       <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} />
                       <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="users" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="Users" />
+                      <Bar dataKey="users" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name={t('users') || "Users"} />
                     </BarChart>
                   </ResponsiveContainer>
                 </ChartContainer>
@@ -157,16 +167,16 @@ export default function AnalyticsPage() {
         {/* Pass/Fail Summary */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
           <Card>
-            <CardHeader><CardTitle>Pass/Fail Rate by Skill</CardTitle></CardHeader>
+            <CardHeader><CardTitle>{t('passFailRateBySkill') || "Pass/Fail Rate by Skill"}</CardTitle></CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {skillPerformanceData.map((skill) => (
+                {data.skillPerformance.map((skill) => (
                   <div key={skill.skill} className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="font-medium">{skill.skill}</span>
+                      <span className="font-medium">{t(skill.skill.toLowerCase() as any) || skill.skill}</span>
                       <div className="flex items-center gap-4">
-                        <span className="flex items-center gap-1 text-green-600"><CheckCircle className="w-4 h-4" />{skill.passRate}% Pass</span>
-                        <span className="flex items-center gap-1 text-red-600"><XCircle className="w-4 h-4" />{100 - skill.passRate}% Fail</span>
+                        <span className="flex items-center gap-1 text-green-600"><CheckCircle className="w-4 h-4" />{skill.passRate}% {t('pass') || "Pass"}</span>
+                        <span className="flex items-center gap-1 text-red-600"><XCircle className="w-4 h-4" />{100 - skill.passRate}% {t('fail') || "Fail"}</span>
                       </div>
                     </div>
                     <div className="h-3 bg-muted rounded-full overflow-hidden">

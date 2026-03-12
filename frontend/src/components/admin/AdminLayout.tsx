@@ -16,6 +16,7 @@ import {
   Settings,
   LogOut,
   User,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -49,6 +50,9 @@ export default function AdminLayout({ children, pageTitle, pageDescription }: Ad
     { icon: Database, label: t("questionBank"), href: "/admin/questions" },
     { icon: Users, label: t("users"), href: "/admin/users" },
     { icon: Shield, label: t("roles"), href: "/admin/roles" },
+    { icon: Sparkles, label: t("aiQuestions"), href: "/admin/questions/ai-generate" },
+    { icon: Sparkles, label: t("aiUsers"), href: "/admin/users/ai-generate" },
+
     { icon: BarChart3, label: t("analytics"), href: "/admin/analytics" },
   ];
 

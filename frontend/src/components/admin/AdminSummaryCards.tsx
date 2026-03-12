@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { FileText, CheckCircle, FileEdit } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SummaryCard {
   icon: React.ElementType;
@@ -11,29 +12,11 @@ interface SummaryCard {
   color: "primary" | "success" | "warning";
 }
 
-const summaryCards: SummaryCard[] = [
-  {
-    icon: FileText,
-    title: "Total Tests",
-    value: 48,
-    description: "All created tests",
-    color: "primary",
-  },
-  {
-    icon: CheckCircle,
-    title: "Active Tests",
-    value: 32,
-    description: "Published & available",
-    color: "success",
-  },
-  {
-    icon: FileEdit,
-    title: "Draft Tests",
-    value: 12,
-    description: "Work in progress",
-    color: "warning",
-  },
-];
+interface AdminSummaryCardsProps {
+  tests: {
+    status: "active" | "draft" | "archived";
+  }[];
+}
 
 const colorStyles = {
   primary: {
@@ -53,7 +36,37 @@ const colorStyles = {
   },
 };
 
-export default function AdminSummaryCards() {
+export default function AdminSummaryCards({ tests }: AdminSummaryCardsProps) {
+  const { t } = useLanguage();
+
+  const totalTests = tests.length;
+  const activeTests = tests.filter(t => t.status === "active").length;
+  const draftTests = tests.filter(t => t.status === "draft" || t.status === "archived").length;
+
+  const summaryCards: SummaryCard[] = [
+    {
+      icon: FileText,
+      title: t('totalTests'),
+      value: totalTests,
+      description: t('allCreatedTests'),
+      color: "primary",
+    },
+    {
+      icon: CheckCircle,
+      title: t('activeTests'),
+      value: activeTests,
+      description: t('publishedAvailable'),
+      color: "success",
+    },
+    {
+      icon: FileEdit,
+      title: t('draftTests'),
+      value: draftTests,
+      description: t('workInProgress'),
+      color: "warning",
+    },
+  ];
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       {summaryCards.map((card, index) => {

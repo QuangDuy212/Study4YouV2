@@ -1,30 +1,58 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import AdminLayout from "@/components/admin/AdminLayout";
 import AdminSummaryCards from "@/components/admin/AdminSummaryCards";
 import AdminFilters from "@/components/admin/AdminFilters";
+import { Button } from "@/components/ui/button";
 import AdminTestTable, { Test } from "@/components/admin/AdminTestTable";
 import ViewTestDialog from "@/components/admin/ViewTestDialog";
 
-const initialTests: Test[] = [
-  { id: 1, name: "TOEIC Reading - Climate Change", skill: "reading", level: "intermediate", duration: 60, questions: 40, status: "active", createdBy: "admin", updatedAt: "2 hours ago" },
-  { id: 2, name: "TOEIC Listening - Business English", skill: "listening", level: "advanced", duration: 45, questions: 30, status: "active", createdBy: "admin", updatedAt: "5 hours ago" },
-  { id: 4, name: "TOEIC Listening - University Lecture", skill: "listening", level: "advanced", duration: 40, questions: 25, status: "draft", createdBy: "admin", updatedAt: "2 days ago" },
-  { id: 5, name: "TOEIC Reading - Technology Article", skill: "reading", level: "intermediate", duration: 30, questions: 20, status: "active", createdBy: "admin", updatedAt: "3 days ago" },
-  { id: 7, name: "TOEIC Listening - News Report", skill: "listening", level: "beginner", duration: 25, questions: 15, status: "active", createdBy: "admin", updatedAt: "5 days ago" },
-  { id: 8, name: "TOEIC Reading - Academic Essay", skill: "reading", level: "advanced", duration: 50, questions: 35, status: "archived", createdBy: "admin", updatedAt: "1 week ago" },
-  { id: 10, name: "TOEIC Reading - Scientific Research", skill: "reading", level: "advanced", duration: 55, questions: 38, status: "draft", createdBy: "admin", updatedAt: "2 weeks ago" },
-];
+import { testService } from "@/services/testService";
+import { formatDistanceToNow } from "date-fns";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+const ITEMS_PER_PAGE = 8;
 
 export default function AdminPage() {
   const navigate = useNavigate();
-  const [tests, setTests] = useState<Test[]>(initialTests);
+  const { t } = useLanguage();
+  const [tests, setTests] = useState<Test[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [skillFilter, setSkillFilter] = useState("all");
   const [levelFilter, setLevelFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [isLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    fetchTests();
+  }, []);
+
+  const fetchTests = async () => {
+    try {
+      setIsLoading(true);
+      const response = await testService.getTests(0, 100);
+      const formattedTests: Test[] = response.content.map((t) => ({
+        id: t.id,
+        name: t.title,
+        skill: (t.skill as any) || "FULL",
+        level: (t.level as any) || "MEDIUM",
+        duration: t.durationMinutes || 120,
+        questions: 200, // Default for full test
+        status: t.active ? "active" : "draft",
+        createdBy: "admin",
+        updatedAt: formatDistanceToNow(new Date(t.updatedAt), { addSuffix: true }),
+      }));
+      setTests(formattedTests);
+    } catch (error) {
+      toast.error(t('failedToLoad'));
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const [viewOpen, setViewOpen] = useState(false);
   const [viewingTest, setViewingTest] = useState<Test | null>(null);
@@ -39,6 +67,14 @@ export default function AdminPage() {
     });
   }, [tests, searchTerm, skillFilter, levelFilter, statusFilter]);
 
+  const totalPages = Math.ceil(filteredTests.length / ITEMS_PER_PAGE);
+  const paginatedTests = filteredTests.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, skillFilter, levelFilter, statusFilter]);
+
   const handleView = (test: Test) => {
     navigate(`/admin/tests/${test.id}/view`);
   };
@@ -48,20 +84,32 @@ export default function AdminPage() {
   };
 
   const handleDuplicate = (test: Test) => {
-    const newId = Math.max(...tests.map((t) => t.id)) + 1;
+    // Currently frontend-only mock, real API might need duplicate endpoint
+    const newId = crypto.randomUUID();
     const duplicated: Test = { ...test, id: newId, name: `${test.name} (Copy)`, status: "draft", updatedAt: "Just now" };
     setTests((prev) => [duplicated, ...prev]);
-    toast.success(`Duplicated: ${test.name}`);
+    toast.success(t('duplicatedSuccess').replace('{name}', test.name));
   };
 
-  const handleArchive = (test: Test) => {
-    setTests((prev) => prev.map((t) => (t.id === test.id ? { ...t, status: "archived" as const, updatedAt: "Just now" } : t)));
-    toast.success(`Archived: ${test.name}`);
+  const handleArchive = async (test: Test) => {
+    try {
+      // Toggle active status (assuming archive = false active)
+      await testService.updateTest(test.id, { title: test.name, active: false });
+      setTests((prev) => prev.map((t) => (t.id === test.id ? { ...t, status: "archived" as const, updatedAt: "Just now" } : t)));
+      toast.success(t('archivedSuccess').replace('{name}', test.name));
+    } catch (error) {
+      toast.error(t('failedToArchive'));
+    }
   };
 
-  const handleDelete = (test: Test) => {
-    setTests((prev) => prev.filter((t) => t.id !== test.id));
-    toast.success(`Deleted: ${test.name}`);
+  const handleDelete = async (test: Test) => {
+    try {
+      await testService.deleteTest(test.id);
+      setTests((prev) => prev.filter((t) => t.id !== test.id));
+      toast.success(t('deletedSuccess').replace('{name}', test.name));
+    } catch (error) {
+      toast.error(t('failedToDelete'));
+    }
   };
 
   const handleCreateTest = () => {
@@ -69,9 +117,9 @@ export default function AdminPage() {
   };
 
   return (
-    <AdminLayout pageTitle="Test Management" pageDescription="Create, manage, and organize all TOEIC practice tests">
+    <AdminLayout pageTitle={t('testManagementTitle')} pageDescription={t('testManagementDesc')}>
       <div className="space-y-6">
-        <AdminSummaryCards />
+        <AdminSummaryCards tests={tests} />
         <AdminFilters
           searchTerm={searchTerm} onSearchChange={setSearchTerm}
           skillFilter={skillFilter} onSkillFilterChange={setSkillFilter}
@@ -79,14 +127,20 @@ export default function AdminPage() {
           statusFilter={statusFilter} onStatusFilterChange={setStatusFilter}
           onCreateTest={handleCreateTest}
         />
-        <div className="text-sm text-muted-foreground">
-          Showing {filteredTests.length} of {tests.length} tests
-        </div>
         <AdminTestTable
-          tests={filteredTests} isLoading={isLoading}
-          onView={handleView} onEdit={handleEdit}
-          onDuplicate={handleDuplicate} onArchive={handleArchive}
-          onDelete={handleDelete} onNavigateToEdit={handleEdit}
+          tests={paginatedTests} 
+          isLoading={isLoading}
+          onView={handleView} 
+          onEdit={handleEdit}
+          onDuplicate={handleDuplicate} 
+          onArchive={handleArchive}
+          onDelete={handleDelete} 
+          onNavigateToEdit={handleEdit}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalCount={filteredTests.length}
+          itemsPerPage={ITEMS_PER_PAGE}
         />
       </div>
       <ViewTestDialog open={viewOpen} onOpenChange={setViewOpen} test={viewingTest} onEdit={handleEdit} />

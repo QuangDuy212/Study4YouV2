@@ -15,7 +15,7 @@ export interface ToeicQuestionResponse {
   audioUrl: string | null;
   imageUrl: string | null;
   correctAnswer: string;
-  difficulty: string;
+  level: string;
   sortOrder: number;
   options: ToeicOptionResponse[];
   createdAt: string;
@@ -29,7 +29,7 @@ export interface ToeicQuestionRequest {
   audioUrl?: string | null;
   imageUrl?: string | null;
   correctAnswer: string;
-  difficulty?: string;
+  level?: string;
   sortOrder?: number;
   options?: Array<{ label: string; content: string }>;
 }
@@ -55,11 +55,11 @@ export const questionService = {
     sortBy = "createdAt",
     sortDir = "DESC",
     partId?: string,
-    difficulty?: string
+    level?: string
   ): Promise<PageResponse<ToeicQuestionResponse>> {
     let url = `/toeic/questions?page=${page}&size=${size}&sortBy=${sortBy}&sortDir=${sortDir}`;
     if (partId && partId !== "all") url += `&partId=${partId}`;
-    if (difficulty && difficulty !== "all") url += `&difficulty=${difficulty}`;
+    if (level && level !== "all") url += `&level=${level}`;
     
     const { data } = await apiClient.get<ApiWrapped<PageResponse<ToeicQuestionResponse>>>(url);
     return data.data;

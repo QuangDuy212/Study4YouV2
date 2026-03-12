@@ -8,6 +8,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+import com.study4you.toeic.option.entity.ToeicOption;
+import com.study4you.common.enums.Level;
+
 import java.util.UUID;
 
 @Entity
@@ -37,4 +41,10 @@ public class ToeicQuestion extends BaseEntity {
 
     @Column(nullable = false, length = 1)
     private String correctAnswer;
+
+    @Enumerated(EnumType.STRING)
+    private Level level;
+
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ToeicOption> options;
 }

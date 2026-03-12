@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import com.study4you.common.enums.Level;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -20,6 +21,7 @@ public class ToeicQuestionResponse {
     private String imageUrl;
     private String passage;
     private String correctAnswer;
+    private Level level;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<ToeicOptionResponse> options;

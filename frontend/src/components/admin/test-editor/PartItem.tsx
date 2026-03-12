@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import type { TestPart, PartType } from "./types";
 import { PART_LABELS, READING_PARTS, LISTENING_PARTS, createEmptyQuestion } from "./types";
 import QuestionEditor from "./QuestionEditor";
+import ListeningMediaUploader from "./ListeningMediaUploader";
 
 interface PartItemProps {
   part: TestPart;
@@ -99,6 +100,17 @@ export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: Pa
                   </Button>
                 </div>
               </div>
+
+              {/* Part Level Audio */}
+              {isListening && (
+                <div className="pt-2 pb-1 border-b border-border/50">
+                  <ListeningMediaUploader
+                    hideImage
+                    audioUrl={part.audioUrl || null}
+                    onAudioChange={(url) => onChange({ ...part, audioUrl: url })}
+                  />
+                </div>
+              )}
 
               {/* Questions */}
               {part.questions.length === 0 ? (

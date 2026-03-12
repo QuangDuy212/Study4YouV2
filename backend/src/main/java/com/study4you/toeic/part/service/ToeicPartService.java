@@ -52,6 +52,7 @@ public class ToeicPartService {
         part.setTestId(request.getTestId());
         part.setPart(request.getPart());
         part.setOrderIndex(request.getOrderIndex());
+        part.setAudioUrl(request.getAudioUrl());
 
         ToeicPart savedPart = toeicPartRepository.save(part);
         return mapToResponse(savedPart);
@@ -65,6 +66,9 @@ public class ToeicPartService {
         part.setTestId(request.getTestId());
         part.setPart(request.getPart());
         part.setOrderIndex(request.getOrderIndex());
+        if (request.getAudioUrl() != null || part.getAudioUrl() != null) {
+            part.setAudioUrl(request.getAudioUrl());
+        }
 
         ToeicPart updatedPart = toeicPartRepository.save(part);
         return mapToResponse(updatedPart);
@@ -78,12 +82,22 @@ public class ToeicPartService {
         toeicPartRepository.deleteById(id);
     }
 
+    @Transactional
+    public ToeicPartResponse updateAudioUrl(@org.springframework.lang.NonNull UUID id, String audioUrl) {
+        ToeicPart part = toeicPartRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ToeicPart", "id", id));
+        part.setAudioUrl(audioUrl);
+        ToeicPart updatedPart = toeicPartRepository.save(part);
+        return mapToResponse(updatedPart);
+    }
+
     private ToeicPartResponse mapToResponse(ToeicPart part) {
         ToeicPartResponse response = new ToeicPartResponse();
         response.setId(part.getId());
         response.setTestId(part.getTestId());
         response.setPart(part.getPart());
         response.setOrderIndex(part.getOrderIndex());
+        response.setAudioUrl(part.getAudioUrl());
         response.setCreatedAt(part.getCreatedAt());
         response.setUpdatedAt(part.getUpdatedAt());
         return response;

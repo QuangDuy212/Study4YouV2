@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
+import { cn, getMediaUrl } from "@/lib/utils";
 
 interface TestOption {
   label: string;
@@ -33,6 +33,7 @@ interface TestPart {
   id: string;
   partType: string;
   sortOrder: number;
+  audioUrl: string | null;
   questions: TestQuestion[];
 }
 
@@ -78,6 +79,7 @@ export default function TestViewPage() {
         id: part.id,
         partType: part.part,
         sortOrder: part.orderIndex,
+        audioUrl: part.audioUrl || null,
         questions: (part.questions || []).map((q) => ({
           id: q.id,
           content: q.content,
@@ -175,6 +177,19 @@ export default function TestViewPage() {
               <h3 className="text-lg font-semibold">{PART_LABELS[part.partType]?.label} — {PART_LABELS[part.partType]?.description}</h3>
               <p className="text-sm text-muted-foreground">{part.questions.length} {t("questions")}</p>
             </div>
+
+            {part.audioUrl && (
+              <div className="bg-card px-6 py-4 border-b border-border flex flex-col items-center shadow-sm rounded-lg mb-4">
+                <p className="text-xs font-semibold text-muted-foreground self-start mb-2">{t("testTaking.audioSection")}</p>
+                <audio 
+                  controls 
+                  src={getMediaUrl(part.audioUrl)} 
+                  className="w-full" 
+                  controlsList="nodownload" 
+                />
+              </div>
+            )}
+
             {part.questions.length === 0 ? (
               <Card><CardContent className="py-12 text-center text-muted-foreground">{t("noQuestionsInPart")}</CardContent></Card>
             ) : (
@@ -187,6 +202,7 @@ export default function TestViewPage() {
           </TabsContent>
         ))}
       </Tabs>
+
     </AdminLayout>
   );
 }
@@ -202,6 +218,8 @@ function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string
 
 function QuestionCard({ question, questionNumber, partType, t }: { question: any; questionNumber: number; partType: string; t: (key: string) => string }) {
   const showPassage = partType === "PART_6" || partType === "PART_7";
+  const isPart1 = partType === "PART_1";
+  const showQuestionAudio = !["PART_1", "PART_2", "PART_3"].includes(partType);
 
   return (
     <Card>
@@ -218,33 +236,35 @@ function QuestionCard({ question, questionNumber, partType, t }: { question: any
             <p className="text-sm whitespace-pre-wrap">{question.passage}</p>
           </div>
         )}
-        {question.imageUrl && (
+        {isPart1 && question.imageUrl && (
           <div className="flex justify-center">
-            <img src={question.imageUrl} alt={`${t("question")} ${questionNumber}`} className="max-w-md rounded-lg border shadow-sm" />
+            <img src={getMediaUrl(question.imageUrl)} alt={`${t("question")} ${questionNumber}`} className="max-w-md rounded-lg border shadow-sm" />
           </div>
         )}
-        {question.audioUrl && (
+        {showQuestionAudio && question.audioUrl && (
           <div className="bg-muted/50 rounded-lg p-3 border">
             <p className="text-xs font-semibold text-muted-foreground mb-2">{t("audio")}</p>
-            <audio controls src={question.audioUrl} className="w-full" />
+            <audio controls src={getMediaUrl(question.audioUrl)} className="w-full" />
           </div>
         )}
         {question.content && <div><p className="text-sm font-medium">{question.content}</p></div>}
         <Separator />
-        <div className="space-y-2">
-          <p className="text-xs font-semibold text-muted-foreground">{t("answerOptionsLabel")}</p>
-          <div className="grid gap-2">
-            {question.options.map((option: any) => {
-              const isCorrect = option.label === question.correctAnswer;
-              return (
-                <div key={option.label} className={cn("flex items-start gap-3 p-3 rounded-lg border", isCorrect && "bg-success/10 border-success/30")}>
-                  <Badge variant={isCorrect ? "default" : "outline"} className={cn(isCorrect && "bg-success")}>{option.label}</Badge>
-                  <p className="text-sm flex-1">{option.content}</p>
-                </div>
-              );
-            })}
+        {question.options && question.options.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-muted-foreground">{t("answerOptionsLabel")}</p>
+            <div className="grid gap-2">
+              {[...question.options].sort((a: any, b: any) => a.label.localeCompare(b.label)).map((option: any) => {
+                const isCorrect = option.label === question.correctAnswer;
+                return (
+                  <div key={option.label} className={cn("flex items-start gap-3 p-3 rounded-lg border", isCorrect && "bg-success/10 border-success/30")}>
+                    <Badge variant={isCorrect ? "default" : "outline"} className={cn(isCorrect && "bg-success")}>{option.label}</Badge>
+                    <p className="text-sm flex-1">{option.content}</p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
         <div className="flex items-center gap-2 pt-2">
           <p className="text-xs text-muted-foreground">{t("correctAnswer")}:</p>
           <Badge className="bg-success">{question.correctAnswer}</Badge>

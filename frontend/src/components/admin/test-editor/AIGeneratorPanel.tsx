@@ -12,6 +12,8 @@ import aiService from "@/services/aiService";
 import type { PartType, Difficulty, TestQuestion } from "./types";
 import { AI_QUESTION_COUNTS, PART_LABELS } from "./types";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/contexts/LanguageContext";
+
 
 interface AIGeneratorPanelProps {
   open: boolean;
@@ -62,8 +64,10 @@ function QuestionCard({ question, index }: { question: TestQuestion; index: numb
 }
 
 export default function AIGeneratorPanel({ open, initialPart, onClose, onQuestionsGenerated }: AIGeneratorPanelProps) {
+  const { t } = useLanguage();
   const [selectedPart, setSelectedPart] = useState<PartType>(initialPart);
-  const [difficulty, setDifficulty] = useState<Difficulty>("intermediate");
+
+  const [difficulty, setDifficulty] = useState<Difficulty>("MEDIUM");
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [statusMessage, setStatusMessage] = useState("");
@@ -140,9 +144,10 @@ export default function AIGeneratorPanel({ open, initialPart, onClose, onQuestio
               <Sparkles className="w-4.5 h-4.5 text-primary" />
             </div>
             <div>
-              <h3 className="font-display font-semibold text-foreground text-base">AI Question Generator</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">Generate TOEIC Reading questions automatically using AI.</p>
+              <h3 className="font-display font-semibold text-foreground text-base">{t('aiQuestionGenerator')}</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">{t('generateReadingQuestionsDesc')}</p>
             </div>
+
           </div>
           <Button variant="ghost" size="icon" className="rounded-lg" onClick={onClose}>
             <X className="w-4 h-4" />
@@ -156,28 +161,30 @@ export default function AIGeneratorPanel({ open, initialPart, onClose, onQuestio
           {/* Generator Settings */}
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Part</Label>
+              <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('part')}</Label>
               <Select value={selectedPart} onValueChange={(v) => setSelectedPart(v as PartType)} disabled={isGenerating}>
                 <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="PART_5">Part 5 — Incomplete Sentences (30)</SelectItem>
-                  <SelectItem value="PART_6">Part 6 — Text Completion (16)</SelectItem>
-                  <SelectItem value="PART_7">Part 7 — Reading Comprehension (54)</SelectItem>
+                  <SelectItem value="PART_5">{t('part5Desc')} (30)</SelectItem>
+                  <SelectItem value="PART_6">{t('part6Desc')} (16)</SelectItem>
+                  <SelectItem value="PART_7">{t('part7Desc')} (54)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
+
             <div className="space-y-2">
-              <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Difficulty</Label>
+              <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('difficulty')}</Label>
               <Select value={difficulty} onValueChange={(v) => setDifficulty(v as Difficulty)} disabled={isGenerating}>
                 <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="beginner">Beginner</SelectItem>
-                  <SelectItem value="intermediate">Intermediate</SelectItem>
-                  <SelectItem value="advanced">Advanced</SelectItem>
+                  <SelectItem value="EASY">{t('beginner')}</SelectItem>
+                  <SelectItem value="MEDIUM">{t('intermediate')}</SelectItem>
+                  <SelectItem value="HARD">{t('advanced')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+
 
             <div className="rounded-lg bg-muted/40 border border-border/50 p-3.5 text-sm text-muted-foreground">
               Will generate <span className="font-semibold text-foreground">{count}</span> questions for{" "}
@@ -189,11 +196,12 @@ export default function AIGeneratorPanel({ open, initialPart, onClose, onQuestio
           {/* Generate Button */}
           <Button onClick={handleGenerate} disabled={isGenerating} className="w-full h-11" size="lg">
             {isGenerating ? (
-              <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Generating questions with AI...</>
+              <><Loader2 className="w-4 h-4 animate-spin mr-2" /> {t('aiIsGenerating')}</>
             ) : (
-              <><Sparkles className="w-4 h-4 mr-2" /> Generate {count} Questions</>
+              <><Sparkles className="w-4 h-4 mr-2" /> {t('generateQuestions')} ({count})</>
             )}
           </Button>
+
 
           {/* Progress */}
           {(isGenerating || progress > 0) && (
@@ -219,13 +227,14 @@ export default function AIGeneratorPanel({ open, initialPart, onClose, onQuestio
                 {/* Preview Header */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <h4 className="text-sm font-semibold text-foreground">Preview</h4>
-                    <Badge variant="secondary" className="text-xs">{previewQuestions.length} questions</Badge>
+                    <h4 className="text-sm font-semibold text-foreground">{t('generatedPreview')}</h4>
+                    <Badge variant="secondary" className="text-xs">{previewQuestions.length} {t('questions').toLowerCase()}</Badge>
                   </div>
                   <Button size="sm" onClick={handleInsert} className="h-8">
-                    Insert All
+                    {t('add')}
                   </Button>
                 </div>
+
 
                 {/* Question Cards */}
                 <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1">

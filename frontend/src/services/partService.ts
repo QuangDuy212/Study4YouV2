@@ -3,15 +3,18 @@ import apiClient from "./apiClient";
 export interface ToeicPartResponse {
   id: string;
   testId: string;
-  partType: string;
-  sortOrder: number;
+  part: string;
+  orderIndex: number;
+  audioUrl?: string | null;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface ToeicPartRequest {
   testId: string;
-  partType: string;
-  sortOrder?: number;
+  part: string;
+  orderIndex?: number;
+  audioUrl?: string | null;
 }
 
 export interface PageResponse<T> {
@@ -32,7 +35,7 @@ export const partService = {
   async getParts(
     page = 0,
     size = 100,
-    sortBy = "sortOrder",
+    sortBy = "orderIndex",
     sortDir = "ASC"
   ): Promise<PageResponse<ToeicPartResponse>> {
     const { data } = await apiClient.get<ApiWrapped<PageResponse<ToeicPartResponse>>>(

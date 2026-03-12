@@ -30,10 +30,14 @@ export const zh = {
   add: "添加",
   close: "关闭",
   actions: "操作",
+  duplicate: "复制",
+  archive: "归档",
   showing: "显示",
   of: "共",
   selected: "已选",
-  noResultsFound: "未找到结果",
+  noResultsFound: "结果未找到",
+  updateStatus: "更新状态",
+
 
   // Skills
   reading: "阅读",
@@ -109,6 +113,9 @@ export const zh = {
   listeningTest: "听力测试",
   minuteRemaining: "还剩1分钟！",
   minuteWarning: "您还有1分钟完成测试。请检查您的答案。",
+  preparingTest: "正在准备测试环境...",
+  audioPlayerListening: "音频播放器（听力部分）",
+
 
   // Result Page
   excellentWork: "太棒了！",
@@ -135,6 +142,31 @@ export const zh = {
   questionBank: "题库",
   aiGeneration: "AI生成",
 
+  // Admin Test Management
+  testManagementTitle: "测试管理",
+  testManagementDesc: "创建、管理和组织所有托业模拟测试",
+  allCreatedTests: "所有已创建的测试",
+  activeTests: "活动测试",
+  publishedAvailable: "已发布且可用",
+  draftTests: "草稿测试",
+  workInProgress: "进行中",
+  searchByTestName: "按测试名称搜索...",
+  skillType: "技能类型",
+  levelEasy: "简单",
+  levelMedium: "中等",
+  levelHard: "困难",
+  activeFilters: "当前过滤条件:",
+  noTestsFoundFilter: "没有找到符合当前过滤条件的测试。请尝试调整搜索条件或创建新测试。",
+  openEditor: "打开编辑器",
+  archiveTest: "归档测试",
+  archiveTestConfirm: '您确定要归档"{name}"吗？该测试将被移至归档区，用户将无法看到。',
+  failedToLoad: "加载测试失败",
+  duplicatedSuccess: "已复制: {name}",
+  failedToArchive: "归档测试失败",
+  archivedSuccess: "已归档: {name}",
+  failedToDelete: "删除测试失败",
+  deletedSuccess: "已删除: {name}",
+
   // Admin Dashboard
   adminDashboard: "仪表板",
   adminDashboardDesc: "系统活动和性能概览",
@@ -148,6 +180,19 @@ export const zh = {
   fromLastMonth: "较上月+12%",
   testsTakenOverTime: "测试趋势",
   skillDistribution: "技能分布",
+  aiMagic: "AI 魔法",
+  aiMagicDesc: "利用人工智能提升您的生产力。",
+  generateReadingQuestionsShort: "生成阅读题目",
+  generateReadingQuestionsShortDesc: "立即创建第 5、6、7 部分的题目",
+  bulkGenerateUsersShort: "批量生成用户",
+  bulkGenerateUsersShortDesc: "创建真实的越南测试账户",
+  loadingActivityLogs: "正在加载活动日志...",
+  noRecentActivity: "最近没有活动。",
+  testsTaken: "已参加测试",
+  count: "数量",
+  system: "系统",
+  activity: "活动",
+
 
   // Admin Question Bank
   questionBankDesc: "管理所有技能和难度级别的题目",
@@ -166,6 +211,15 @@ export const zh = {
   beginner: "初级",
   intermediate: "中级",
   advanced: "高级",
+  allParts: "所有部分",
+  part1Desc: "第一部分 – 照片描述",
+  part2Desc: "第二部分 – 应答测试",
+  part3Desc: "第三部分 – 简短对话",
+  part4Desc: "第四部分 – 简短独白",
+  part5Desc: "第五部分 – 完成句子",
+  part6Desc: "第六部分 – 短文填空",
+  part7Desc: "第七部分 – 阅读理解",
+
   noQuestionsFound: "未找到题目",
   noQuestionsHint: "尝试调整筛选条件或添加新题目。",
   deleteQuestion: "删除题目",
@@ -188,10 +242,13 @@ export const zh = {
   noUsersFound: "未找到用户",
   noUsersHint: "尝试调整搜索或筛选条件。",
   userProfile: "用户资料",
-  testsTaken: "已参加测试",
+
   joined: "加入时间",
   testHistory: "测试历史",
   speakingAttempts: "口语尝试",
+  aiQuestions: "AI 题目",
+  aiUsers: "AI 用户",
+
 
   // Admin Analytics
   analyticsTitle: "分析",
@@ -376,6 +433,8 @@ export const zh = {
   confirmBulkGeneration: "确认批量生成",
   bulkGenerationConfirmDesc: "您即将生成{count}个用户。此操作将同时创建多个账户。继续？",
 
+
+
   // Chatbot
   chatbotTitle: "Study4You助手",
   chatbotSubtitle: "有关平台的任何问题都可以问我",
@@ -387,8 +446,8 @@ export const zh = {
   // Common admin
   page: "页面",
   noRoles: "无角色",
-  user: "用户",
   showingUsers: "显示{count}个用户",
+
   deleteUser: "删除用户",
   deleteUserConfirm: "确定要删除\"{name}\"吗？此操作无法撤销。",
 
@@ -470,5 +529,35 @@ export const zh = {
   practiceAndLearn: "练习与学习",
   practiceAndLearnDesc: "完成旨在挑战和提高您能力的引人入胜的练习。",
   getAiFeedback: "获取AI反馈",
-  getAiFeedbackDesc: "获得即时详细的反馈，了解您的优势和需要改进的领域。",
+  getAiFeedbackDesc: "接收即使详细反馈，以了解您的优势和改进领域。",
+
+  // New Keys for Tests and Taking
+  toeicScore: "托业分数 (TOEIC Score)",
+  listeningPart14: "听力 (第 1-4 部分)",
+  readingPart57: "阅读 (第 5-7 部分)",
+  loadingTests: "正在加载测试...",
+  noActiveTests: "暂无可用测试。",
+  toeicFullTests: "托业全真模拟测试",
+  toeicFullTestsDesc: "完整的托业测试练习 - 听力和阅读（200题，120分钟）",
+  testSubmitted: "测试提交成功！",
+  errorSubmitting: "提交测试失败。请重试。",
+  preparingTestEnv: "正在准备您的测试环境...",
+  audioPlayerDesc: "音频播放器（听力部分）",
+  flag: "标记",
+  flagged: "已标记",
+  progress: "进度",
+  unanswered: "未答",
+  answered: "已答",
+  current: "当前",
+  confirmSubmit: "确认提交",
+  completedQuestionsDesc: "您已完成 {answered} 道题（共 {total} 道）。",
+  unansweredQuestionsWarning: "您还有 {count} 道未答问题。",
+  flaggedQuestionsWarning: "您有 {count} 道已标记的问题需要复查。",
+  submitFinalWarning: "提交后将无法更改您的答案。",
+  timeRunningOut: "时间快到了！",
+  fiveMinutesRemaining: "您还剩 5 分钟。请确认您的答案。",
+  iUnderstand: "我明白了",
+  testTaking: {
+    audioSection: "此部分的音频",
+  },
 } as const;

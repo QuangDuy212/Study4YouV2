@@ -21,9 +21,12 @@ import { toast } from "sonner";
 import aiService, { type GeneratedUserResponse } from "@/services/aiService";
 import userService from "@/services/userService";
 import roleService, { type RoleResponse } from "@/services/roleService";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function AIGenerateUsersPage() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
+
   const [count, setCount] = useState(5);
   const [selectedRole, setSelectedRole] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("ACTIVE");
@@ -47,7 +50,7 @@ export default function AIGenerateUsersPage() {
           setSelectedRole(studentRole?.id || data.content[0].id);
         }
       } catch (err) {
-        toast.error("Failed to load roles");
+        toast.error(t('failedToLoadRoles'));
       }
     };
     fetchRoles();
@@ -55,7 +58,7 @@ export default function AIGenerateUsersPage() {
 
   const handleGenerate = async () => {
     if (!selectedRole) {
-      toast.error("Please select a default role");
+      toast.error(t('pleaseSelectRole'));
       return;
     }
 
@@ -65,9 +68,9 @@ export default function AIGenerateUsersPage() {
     try {
       const data = await aiService.generateUsers(count, selectedRole, selectedStatus);
       setGeneratedUsers(data);
-      toast.success(`${data.length} users generated successfully`);
+      toast.success(t('usersGeneratedSuccess').replace('{count}', String(data.length)));
     } catch (err: any) {
-      toast.error("Failed to generate users", {
+      toast.error(t('failedToGenerateUsers'), {
         description: err?.response?.data?.message || err.message,
       });
     } finally {
@@ -141,10 +144,10 @@ export default function AIGenerateUsersPage() {
         }
       }
 
-      toast.success(`${successCount} / ${generatedUsers.length} users created successfully`);
+      toast.success(t('usersCreatedSuccess').replace('{success}', String(successCount)).replace('{total}', String(generatedUsers.length)));
       navigate("/admin/users");
     } catch (err: any) {
-      toast.error("Failed to save users", {
+      toast.error(t('failedToSaveUsers'), {
         description: err.message,
       });
     } finally {
@@ -165,11 +168,12 @@ export default function AIGenerateUsersPage() {
   };
 
   return (
-    <AdminLayout pageTitle="AI Generate Users" pageDescription="Use AI to bulk-generate user accounts with parameter-based logic.">
-      <div className="space-y-6 max-w-5xl">
+    <AdminLayout pageTitle={t('aiGenerateUsers')} pageDescription={t('aiGenerateUsersDesc')}>
+      <div className="space-y-6 w-full">
         <Button variant="ghost" className="gap-2 -ml-2" onClick={() => navigate("/admin/users")}>
-          <ArrowLeft className="w-4 h-4" /> Back to Users
+          <ArrowLeft className="w-4 h-4" /> {t('backToUsers')}
         </Button>
+
 
         <Card>
           <CardHeader>
@@ -177,17 +181,19 @@ export default function AIGenerateUsersPage() {
               <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-primary" />
               </div>
-              Generation Settings
+              {t('aiGenerationForm')}
             </CardTitle>
             <CardDescription>
-              Configure how many users to generate and their default attributes.
+              {t('configureParams')}
             </CardDescription>
+
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
-                <Label>Number of Users (Max 20)</Label>
+                <Label>{t('numberOfUsers')} (Max 20)</Label>
                 <Input 
+
                   type="number" 
                   min={1} 
                   max={20} 
@@ -197,9 +203,9 @@ export default function AIGenerateUsersPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Default Role</Label>
+                <Label>{t('role')}</Label>
                 <Select value={selectedRole} onValueChange={setSelectedRole} disabled={isGenerating}>
-                  <SelectTrigger><SelectValue placeholder="Select role" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t('select')} /></SelectTrigger>
                   <SelectContent>
                     {roles.map(role => (
                       <SelectItem key={role.id} value={role.id}>{role.name}</SelectItem>
@@ -208,14 +214,15 @@ export default function AIGenerateUsersPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Initial Status</Label>
+                <Label>{t('status')}</Label>
                 <Select value={selectedStatus} onValueChange={setSelectedStatus} disabled={isGenerating}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ACTIVE">Active</SelectItem>
-                    <SelectItem value="INACTIVE">Inactive</SelectItem>
-                    <SelectItem value="BANNED">Banned</SelectItem>
+                    <SelectItem value="ACTIVE">{t('active')}</SelectItem>
+                    <SelectItem value="INACTIVE">{t('inactive')}</SelectItem>
+                    <SelectItem value="BANNED">{t('banned')}</SelectItem>
                   </SelectContent>
+
                 </Select>
               </div>
             </div>
@@ -223,38 +230,41 @@ export default function AIGenerateUsersPage() {
             <div className="flex gap-2">
               <Button onClick={handleGenerate} disabled={isGenerating || !selectedRole} className="gap-2">
                 {isGenerating ? (
-                   <><Loader2 className="w-4 h-4 animate-spin" /> Generating...</>
+                   <><Loader2 className="w-4 h-4 animate-spin" /> {t('generating')}</>
                 ) : (
-                  <><Sparkles className="w-4 h-4" /> Generate Users (AI)</>
+                  <><Sparkles className="w-4 h-4" /> {t('generateUsersAI')}</>
                 )}
               </Button>
               <Button variant="outline" onClick={handleReset} disabled={isGenerating} className="gap-2">
-                <RotateCcw className="w-4 h-4" /> Reset
+                <RotateCcw className="w-4 h-4" /> {t('reset')}
               </Button>
             </div>
+
           </CardContent>
         </Card>
 
         {generatedUsers.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Generated Users Preview</CardTitle>
+              <CardTitle className="text-lg">{t('generatedUsersPreview')}</CardTitle>
               <CardDescription>
-                Review and edit the generated names and emails before saving.
+                {t('reviewGeneratedUsers')}
               </CardDescription>
             </CardHeader>
+
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/50">
                       <TableHead className="w-[50px]">#</TableHead>
-                      <TableHead>Full Name</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead className="w-[150px]">Role</TableHead>
-                      <TableHead className="w-[120px] text-right">Actions</TableHead>
+                      <TableHead>{t('fullName')}</TableHead>
+                      <TableHead>{t('email')}</TableHead>
+                      <TableHead className="w-[150px]">{t('role')}</TableHead>
+                      <TableHead className="w-[120px] text-right">{t('actions')}</TableHead>
                     </TableRow>
                   </TableHeader>
+
                   <TableBody>
                     {generatedUsers.map((user, idx) => (
                       <TableRow key={idx}>
@@ -330,33 +340,35 @@ export default function AIGenerateUsersPage() {
         {generatedUsers.length > 0 && (
           <div className="flex justify-end gap-3">
             <Button variant="outline" onClick={() => navigate("/admin/users")} disabled={isSaving}>
-              Cancel
+              {t('cancel')}
             </Button>
             <Button onClick={handleSaveAll} disabled={isSaving || generatedUsers.length === 0} className="gap-2">
               {isSaving ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
+                <><Loader2 className="w-4 h-4 animate-spin" /> {t('saving')}</>
               ) : (
-                <><Save className="w-4 h-4" /> Save All Users ({generatedUsers.length})</>
+                <><Save className="w-4 h-4" /> {t('saveAllUsers')} ({generatedUsers.length})</>
               )}
             </Button>
           </div>
         )}
+
       </div>
 
       <AlertDialog open={confirmSaveOpen} onOpenChange={setConfirmSaveOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Bulk Save</AlertDialogTitle>
+            <AlertDialogTitle>{t('confirmBulkSave')}</AlertDialogTitle>
             <AlertDialogDescription>
-              You are about to create <strong>{generatedUsers.length}</strong> users. This will take a few moments as they are created sequentially. Continue?
+              {t('bulkSaveConfirmDesc')?.replace('{count}', String(generatedUsers.length))}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={executeSave}>Continue</AlertDialogAction>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={executeSave}>{t('continue')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
     </AdminLayout>
   );
 }

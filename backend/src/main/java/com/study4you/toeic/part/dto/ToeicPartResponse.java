@@ -18,6 +18,7 @@ public class ToeicPartResponse {
     private UUID testId;
     private PartNumber part;
     private Integer orderIndex;
+    private String audioUrl;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<ToeicQuestionResponse> questions;

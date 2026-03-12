@@ -29,11 +29,15 @@ export const vi = {
   export: "Xuất",
   add: "Thêm",
   close: "Đóng",
-  actions: "Hành động",
+  actions: "Thao tác",
+  duplicate: "Nhân bản",
+  archive: "Lưu trữ",
   showing: "Hiển thị",
   of: "trong",
   selected: "đã chọn",
   noResultsFound: "Không tìm thấy kết quả",
+  updateStatus: "Cập nhật trạng thái",
+
 
   // Skills
   reading: "Đọc",
@@ -109,6 +113,9 @@ export const vi = {
   listeningTest: "Bài kiểm tra Nghe",
   minuteRemaining: "Còn 1 phút!",
   minuteWarning: "Bạn còn 1 phút để hoàn thành bài kiểm tra. Hãy kiểm tra lại các câu trả lời.",
+  preparingTest: "Đang chuẩn bị phòng thi...",
+  audioPlayerListening: "Trình phát âm thanh (Phần nghe)",
+
 
   // Result Page
   excellentWork: "Xuất sắc!",
@@ -131,9 +138,34 @@ export const vi = {
   adminPortal: "Cổng quản trị",
   users: "Người dùng",
   analytics: "Phân tích",
-  manageTests: "Quản lý bài kiểm tra",
-  questionBank: "Ngân hàng câu hỏi",
+  manageTests: "Quản lý Bài thi",
+  questionBank: "Ngân hàng Câu hỏi",
   aiGeneration: "Tạo bằng AI",
+
+  // Admin Test Management
+  testManagementTitle: "Quản lý Bài kiểm tra",
+  testManagementDesc: "Tạo, quản lý và sắp xếp tất cả các bài thi thử TOEIC",
+  allCreatedTests: "Tất cả bài thi đã tạo",
+  activeTests: "Bài thi đang hoạt động",
+  publishedAvailable: "Đã xuất bản & có sẵn",
+  draftTests: "Bài thi nháp",
+  workInProgress: "Đang tiến hành",
+  searchByTestName: "Tìm kiếm theo tên bài kiểm tra...",
+  skillType: "Loại Kỹ năng",
+  levelEasy: "Dễ",
+  levelMedium: "Trung bình",
+  levelHard: "Khó",
+  activeFilters: "Bộ lọc đang hoạt động:",
+  noTestsFoundFilter: "Không có bài kiểm tra nào phù hợp với bộ lọc. Thử điều chỉnh hoặc tạo mới.",
+  openEditor: "Mở Trình chỉnh sửa",
+  archiveTest: "Lưu trữ Bài kiểm tra",
+  archiveTestConfirm: 'Bạn có chắc muốn lưu trữ "{name}"? Bài kiểm tra sẽ được dời sang lưu trữ và người dùng sẽ không thấy được.',
+  failedToLoad: "Tải bài kiểm tra thất bại",
+  duplicatedSuccess: "Đã nhân bản: {name}",
+  failedToArchive: "Lưu trữ bài kiểm tra thất bại",
+  archivedSuccess: "Đã lưu trữ: {name}",
+  failedToDelete: "Xóa bài kiểm tra thất bại",
+  deletedSuccess: "Đã xóa: {name}",
 
   // Admin Dashboard
   adminDashboard: "Bảng điều khiển",
@@ -148,6 +180,19 @@ export const vi = {
   fromLastMonth: "+12% so với tháng trước",
   testsTakenOverTime: "Bài kiểm tra theo thời gian",
   skillDistribution: "Phân bổ kỹ năng",
+  aiMagic: "Ma thuật AI",
+  aiMagicDesc: "Nâng cao năng suất với trí tuệ nhân tạo.",
+  generateReadingQuestionsShort: "Tạo câu hỏi Đọc",
+  generateReadingQuestionsShortDesc: "Tạo câu hỏi PART 5, 6, 7 ngay lập tức",
+  bulkGenerateUsersShort: "Tạo người dùng hàng loạt",
+  bulkGenerateUsersShortDesc: "Tạo các tài khoản thử nghiệm thực tế",
+  loadingActivityLogs: "Đang tải nhật ký hoạt động...",
+  noRecentActivity: "Không có hoạt động gần đây.",
+  testsTaken: "Bài đã làm",
+  count: "Số lượng",
+  system: "Hệ thống",
+  activity: "Hoạt động",
+
 
   // Admin Question Bank
   questionBankDesc: "Quản lý tất cả câu hỏi theo kỹ năng và mức độ",
@@ -166,6 +211,15 @@ export const vi = {
   beginner: "Sơ cấp",
   intermediate: "Trung cấp",
   advanced: "Nâng cao",
+  allParts: "Tất cả các phần",
+  part1Desc: "Phần 1 – Mô tả tranh",
+  part2Desc: "Phần 2 – Hỏi & Đáp",
+  part3Desc: "Phần 3 – Hội thoại",
+  part4Desc: "Phần 4 – Bài nói",
+  part5Desc: "Phần 5 – Hoàn thành câu",
+  part6Desc: "Phần 6 – Hoàn thành đoạn văn",
+  part7Desc: "Phần 7 – Đọc hiểu",
+
   noQuestionsFound: "Không tìm thấy câu hỏi",
   noQuestionsHint: "Thử điều chỉnh bộ lọc hoặc thêm câu hỏi mới.",
   deleteQuestion: "Xóa câu hỏi",
@@ -188,10 +242,13 @@ export const vi = {
   noUsersFound: "Không tìm thấy người dùng",
   noUsersHint: "Thử điều chỉnh tìm kiếm hoặc bộ lọc.",
   userProfile: "Hồ sơ người dùng",
-  testsTaken: "Bài đã làm",
   joined: "Ngày tham gia",
   testHistory: "Lịch sử kiểm tra",
   speakingAttempts: "Bài nói đã thử",
+  aiQuestions: "Câu hỏi AI",
+  aiUsers: "Người dùng AI",
+
+
 
   // Admin Analytics
   analyticsTitle: "Phân tích",
@@ -376,6 +433,8 @@ export const vi = {
   confirmBulkGeneration: "Xác nhận tạo hàng loạt",
   bulkGenerationConfirmDesc: "Bạn sắp tạo {count} người dùng. Hành động này sẽ tạo nhiều tài khoản cùng lúc. Tiếp tục?",
 
+
+
   // Chatbot
   chatbotTitle: "Trợ lý Study4You",
   chatbotSubtitle: "Hỏi tôi bất cứ điều gì về nền tảng",
@@ -387,8 +446,8 @@ export const vi = {
   // Common admin
   page: "Trang",
   noRoles: "Chưa có vai trò",
-  user: "Người dùng",
   showingUsers: "Hiển thị {count} người dùng",
+
   deleteUser: "Xóa người dùng",
   deleteUserConfirm: "Bạn có chắc chắn muốn xóa \"{name}\"? Hành động này không thể hoàn tác.",
 
@@ -470,5 +529,35 @@ export const vi = {
   practiceAndLearn: "Luyện Tập & Học",
   practiceAndLearnDesc: "Hoàn thành các bài tập hấp dẫn được thiết kế để thử thách và cải thiện khả năng của bạn.",
   getAiFeedback: "Nhận Phản Hồi AI",
-  getAiFeedbackDesc: "Nhận phản hồi chi tiết tức thì để hiểu điểm mạnh và điểm cần cải thiện.",
+  getAiFeedbackDesc: "Nhận phản hồi chi tiết ngay lập tức để hiểu rõ điểm mạnh và điểm cần cải thiện của bạn.",
+
+  // New Keys for Tests and Taking
+  toeicScore: "Điểm TOEIC",
+  listeningPart14: "Nghe (Phần 1-4)",
+  readingPart57: "Đọc (Phần 5-7)",
+  loadingTests: "Đang tải bài thi...",
+  noActiveTests: "Chưa có bài thi nào khả dụng.",
+  toeicFullTests: "Đề thi TOEIC Đầy đủ",
+  toeicFullTestsDesc: "Luyện thi TOEIC đầy đủ 7 phần – Listening & Reading (200 câu, 120 phút)",
+  testSubmitted: "Nộp bài thành công!",
+  errorSubmitting: "Lỗi nộp bài. Vui lòng thử lại.",
+  preparingTestEnv: "Đang chuẩn bị môi trường thi...",
+  audioPlayerDesc: "Trình Phát Âm Thanh (Phần Nghe)",
+  flag: "Đánh dấu",
+  flagged: "Đã đánh dấu",
+  progress: "Tiến độ",
+  unanswered: "Chưa trả lời",
+  answered: "Đã trả lời",
+  current: "Hiện tại",
+  confirmSubmit: "Xác nhận Nộp bài",
+  completedQuestionsDesc: "Bạn đã hoàn thành {answered} trên tổng số {total} câu hỏi.",
+  unansweredQuestionsWarning: "Bạn còn {count} câu hỏi chưa trả lời.",
+  flaggedQuestionsWarning: "Bạn có {count} câu hỏi đã đánh dấu cần xem lại.",
+  submitFinalWarning: "Sau khi nộp bài, bạn sẽ không thể thay đổi đáp án.",
+  timeRunningOut: "SẮP HẾT GIỜ!",
+  fiveMinutesRemaining: "Bạn chỉ còn 5 phút để hoàn thành bài thi.",
+  iUnderstand: "Tôi đã hiểu",
+  testTaking: {
+    audioSection: "Bài nghe cho phần này",
+  },
 } as const;

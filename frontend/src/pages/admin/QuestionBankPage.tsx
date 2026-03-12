@@ -42,11 +42,11 @@ const getSkillIcon = (skill: string) => {
 
 const getDifficultyBadge = (difficulty: string) => {
   const map: Record<string, string> = {
-    beginner: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
-    intermediate: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
-    advanced: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
+    EASY: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
+    MEDIUM: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
+    HARD: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
   };
-  return <Badge className={`${map[difficulty?.toLowerCase()] || ""} hover:opacity-90`}>{difficulty || "N/A"}</Badge>;
+  return <Badge className={`${map[difficulty] || ""} hover:opacity-90`}>{difficulty || "N/A"}</Badge>;
 };
 
 export default function QuestionBankPage() {
@@ -56,7 +56,7 @@ export default function QuestionBankPage() {
   const [partsMap, setPartsMap] = useState<Record<string, string>>({});
   const [searchTerm, setSearchTerm] = useState("");
   const [partFilter, setPartFilter] = useState("all");
-  const [difficultyFilter, setDifficultyFilter] = useState("all");
+  const [levelFilter, setLevelFilter] = useState("all");
   const [selectedQuestions, setSelectedQuestions] = useState<string[]>([]);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [questionToDelete, setQuestionToDelete] = useState<ToeicQuestionResponse | null>(null);
@@ -75,13 +75,16 @@ export default function QuestionBankPage() {
           pMap[p.id] = p.part; // e.g. "PART_1"
         });
         setPartsMap(pMap);
+
       }
 
       const data = await questionService.getQuestions(
         currentPage - 1, 
         ITEMS_PER_PAGE, 
         "createdAt", 
-        "DESC"
+        "DESC",
+        partFilter,
+        levelFilter
       );
       setQuestions(data.content);
       setTotalCount(data.totalElements);
@@ -95,7 +98,7 @@ export default function QuestionBankPage() {
 
   useEffect(() => {
     fetchQuestions();
-  }, [currentPage, partFilter, difficultyFilter]);
+  }, [currentPage, partFilter, levelFilter]);
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
@@ -161,28 +164,30 @@ export default function QuestionBankPage() {
                 <Select value={partFilter} onValueChange={(v) => { setPartFilter(v); setCurrentPage(1); }}>
                   <SelectTrigger className="w-[160px]"><Filter className="w-4 h-4 mr-2" /><SelectValue placeholder="Part" /></SelectTrigger>
                   <SelectContent>
-                     <SelectItem value="all">All Parts</SelectItem>
-                     <SelectItem value="PART_1">Part 1 – Photos</SelectItem>
-                     <SelectItem value="PART_2">Part 2 – Q&R</SelectItem>
-                     <SelectItem value="PART_3">Part 3 – Conversations</SelectItem>
-                     <SelectItem value="PART_4">Part 4 – Talks</SelectItem>
-                     <SelectItem value="PART_5">Part 5 – Incomplete</SelectItem>
-                     <SelectItem value="PART_6">Part 6 – Text Comp.</SelectItem>
-                     <SelectItem value="PART_7">Part 7 – Reading</SelectItem>
+                     <SelectItem value="all">{t('allParts')}</SelectItem>
+                     <SelectItem value="PART_1">{t('part1Desc')}</SelectItem>
+                     <SelectItem value="PART_2">{t('part2Desc')}</SelectItem>
+                     <SelectItem value="PART_3">{t('part3Desc')}</SelectItem>
+                     <SelectItem value="PART_4">{t('part4Desc')}</SelectItem>
+                     <SelectItem value="PART_5">{t('part5Desc')}</SelectItem>
+                     <SelectItem value="PART_6">{t('part6Desc')}</SelectItem>
+                     <SelectItem value="PART_7">{t('part7Desc')}</SelectItem>
+
                    </SelectContent>
                 </Select>
-                <Select value={difficultyFilter} onValueChange={(v) => { setDifficultyFilter(v); setCurrentPage(1); }}>
-                  <SelectTrigger className="w-[140px]"><SelectValue placeholder="Difficulty" /></SelectTrigger>
+                <Select value={levelFilter} onValueChange={(v) => { setLevelFilter(v); setCurrentPage(1); }}>
+                  <SelectTrigger className="w-[140px]"><SelectValue placeholder="Level" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">{t('allLevels')}</SelectItem>
-                    <SelectItem value="beginner">{t('beginner')}</SelectItem>
-                    <SelectItem value="intermediate">{t('intermediate')}</SelectItem>
-                    <SelectItem value="advanced">{t('advanced')}</SelectItem>
+                    <SelectItem value="EASY">{t('levelEasy')}</SelectItem>
+                    <SelectItem value="MEDIUM">{t('levelMedium')}</SelectItem>
+                    <SelectItem value="HARD">{t('levelHard')}</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button variant="outline" className="gap-2" onClick={() => navigate("/admin/questions/ai-generate")}>
-                  <Sparkles className="w-4 h-4" /> AI Generate
+                  <Sparkles className="w-4 h-4" /> {t('aiGeneration')}
                 </Button>
+
                 <Button className="gap-2" onClick={() => navigate("/admin/questions/create")}>
                   <Plus className="w-4 h-4" />{t('addQuestion')}
                 </Button>
@@ -216,8 +221,9 @@ export default function QuestionBankPage() {
                     <TableRow className="bg-muted/50">
                       <TableHead className="w-[50px]"><Checkbox checked={selectedQuestions.length === questions.length && questions.length > 0} onCheckedChange={(checked) => handleSelectAll(checked as boolean)} /></TableHead>
                       <TableHead className="min-w-[300px]">{t('questionPreview')}</TableHead>
-                      <TableHead className="w-[120px]">Part</TableHead>
+                      <TableHead className="w-[120px]">{t('part')}</TableHead>
                       <TableHead className="w-[100px]">{t('skill')}</TableHead>
+
                       <TableHead className="w-[120px]">{t('difficulty')}</TableHead>
                       <TableHead className="w-[80px]">{t('answer')}</TableHead>
                       <TableHead className="w-[120px]">{t('updated')}</TableHead>
@@ -233,8 +239,9 @@ export default function QuestionBankPage() {
                           <TableCell><Checkbox checked={selectedQuestions.includes(question.id)} onCheckedChange={(checked) => handleSelectQuestion(question.id, checked as boolean)} /></TableCell>
                           <TableCell><p className="text-sm font-medium text-foreground truncate max-w-[300px]">{question.content || "(empty)"}</p></TableCell>
                           <TableCell><Badge variant="outline" className="text-xs font-mono">{partType}</Badge></TableCell>
-                          <TableCell><div className="flex items-center gap-2">{getSkillIcon(skill)}<span className="capitalize text-sm">{skill}</span></div></TableCell>
-                          <TableCell>{getDifficultyBadge(question.difficulty)}</TableCell>
+                          <TableCell><div className="flex items-center gap-2">{getSkillIcon(skill)}<span className="capitalize text-sm">{t(skill as any)}</span></div></TableCell>
+                          <TableCell>{getDifficultyBadge(question.level)}</TableCell>
+
                           <TableCell><span className="font-mono text-sm font-semibold">{question.correctAnswer}</span></TableCell>
                           <TableCell><span className="text-sm text-muted-foreground">{formatDate(question.updatedAt)}</span></TableCell>
                           <TableCell>
@@ -253,8 +260,9 @@ export default function QuestionBankPage() {
 
             {totalPages > 1 && (
               <div className="flex items-center justify-between px-4 py-3 border-t border-border">
-                <span className="text-sm text-muted-foreground">Page {currentPage} of {totalPages}</span>
+                <span className="text-sm text-muted-foreground">{t('page')} {currentPage} {t('of')} {totalPages}</span>
                 <div className="flex gap-1">
+
                   <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)}>
                     <ChevronLeft className="w-4 h-4" />
                   </Button>

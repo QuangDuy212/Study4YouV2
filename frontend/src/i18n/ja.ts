@@ -30,10 +30,14 @@ export const ja = {
   add: "追加",
   close: "閉じる",
   actions: "アクション",
+  duplicate: "複製",
+  archive: "アーカイブ",
   showing: "表示中",
   of: "/",
   selected: "選択済み",
   noResultsFound: "結果が見つかりません",
+  updateStatus: "ステータス更新",
+
 
   // Skills
   reading: "リーディング",
@@ -109,6 +113,9 @@ export const ja = {
   listeningTest: "リスニングテスト",
   minuteRemaining: "残り1分！",
   minuteWarning: "テスト完了まで残り1分です。回答を確認してください。",
+  preparingTest: "テスト環境を準備しています...",
+  audioPlayerListening: "オーディオプレーヤー (リスニングセクション)",
+
 
   // Result Page
   excellentWork: "素晴らしい成績です！",
@@ -135,6 +142,31 @@ export const ja = {
   questionBank: "問題バンク",
   aiGeneration: "AI生成",
 
+  // Admin Test Management
+  testManagementTitle: "テスト管理",
+  testManagementDesc: "すべてのTOEIC模擬テストを作成、管理、構成します",
+  allCreatedTests: "作成されたすべてのテスト",
+  activeTests: "アクティブなテスト",
+  publishedAvailable: "公開済みで利用可能",
+  draftTests: "下書きテスト",
+  workInProgress: "進行中",
+  searchByTestName: "テスト名で検索...",
+  skillType: "スキルタイプ",
+  levelEasy: "簡単",
+  levelMedium: "普通",
+  levelHard: "難しい",
+  activeFilters: "アクティブなフィルター:",
+  noTestsFoundFilter: "現在のフィルターに一致するテストはありません。検索条件を調整するか、新しいテストを作成してください。",
+  openEditor: "エディターを開く",
+  archiveTest: "テストをアーカイブ",
+  archiveTestConfirm: '"{name}"をアーカイブしてもよろしいですか？このテストはアーカイブに移動され、ユーザーには表示されなくなります。',
+  failedToLoad: "テストの読み込みに失敗しました",
+  duplicatedSuccess: "複製しました: {name}",
+  failedToArchive: "テストのアーカイブに失敗しました",
+  archivedSuccess: "アーカイブしました: {name}",
+  failedToDelete: "テストの削除に失敗しました",
+  deletedSuccess: "削除しました: {name}",
+
   // Admin Dashboard
   adminDashboard: "ダッシュボード",
   adminDashboardDesc: "システムアクティビティとパフォーマンスの概要",
@@ -148,6 +180,19 @@ export const ja = {
   fromLastMonth: "先月比+12%",
   testsTakenOverTime: "テスト受験推移",
   skillDistribution: "スキル分布",
+  aiMagic: "AIマジック",
+  aiMagicDesc: "人工知能で生産性を向上させましょう。",
+  generateReadingQuestionsShort: "読解問題の生成",
+  generateReadingQuestionsShortDesc: "パート5、6、7の問題を即座に作成",
+  bulkGenerateUsersShort: "ユーザーの一括生成",
+  bulkGenerateUsersShortDesc: "リアルなベトナムのテストアカウントを作成",
+  loadingActivityLogs: "アクティビティログを読み込み中...",
+  noRecentActivity: "最近のアクティビティはありません。",
+  testsTaken: "完了したテスト",
+  count: "件数",
+  system: "システム",
+  activity: "アクティビティ",
+
 
   // Admin Question Bank
   questionBankDesc: "スキルと難易度レベル別の全問題を管理",
@@ -166,6 +211,15 @@ export const ja = {
   beginner: "初級",
   intermediate: "中級",
   advanced: "上級",
+  allParts: "すべてのパート",
+  part1Desc: "パート1 – 写真描写",
+  part2Desc: "パート2 – 応答問題",
+  part3Desc: "パート3 – 会話問題",
+  part4Desc: "パート4 – 説明文",
+  part5Desc: "パート5 – 短文穴埋め",
+  part6Desc: "パート6 – 長文穴埋め",
+  part7Desc: "パート7 – 読解問題",
+
   noQuestionsFound: "問題が見つかりません",
   noQuestionsHint: "フィルターを調整するか、新しい問題を追加してください。",
   deleteQuestion: "問題を削除",
@@ -188,10 +242,13 @@ export const ja = {
   noUsersFound: "ユーザーが見つかりません",
   noUsersHint: "検索条件やフィルターを調整してください。",
   userProfile: "ユーザープロフィール",
-  testsTaken: "受験テスト数",
+
   joined: "参加日",
   testHistory: "テスト履歴",
   speakingAttempts: "スピーキング試行回数",
+  aiQuestions: "AI問題",
+  aiUsers: "AIユーザー",
+
 
   // Admin Analytics
   analyticsTitle: "アナリティクス",
@@ -348,34 +405,30 @@ export const ja = {
   part: "パート",
   generatedQuestionsTitle: "生成された問題",
 
+
   // AI Generate Users Page
   aiGenerateUsers: "AIユーザー生成",
   aiGenerateUsersDesc: "AIを使用して自然言語プロンプトでユーザーアカウントを一括生成します。",
   aiPrompt: "AIプロンプト",
   aiPromptDesc: "生成したいユーザーを説明してください。名前、ロール、メールパターンを具体的に記述してください。",
-  generateUsersAI: "ユーザーを生成（AI）",
+  generateUsersAI: "ユーザーを生成 (AI)",
   reset: "リセット",
-  generatedUsersPreview: "生成ユーザープレビュー",
-  reviewGeneratedUsers: "保存前に生成されたユーザーを確認・編集してください。",
+  generatedUsersPreview: "生成されたユーザーのプレビュー",
+  reviewGeneratedUsers: "保存する前に生成されたユーザーをプレビューして編集します。",
   usersReady: "名のユーザー準備完了。",
   username: "ユーザー名",
-  saveAllUsers: "すべてのユーザーを保存",
+  saveAllUsers: "すべて保存",
   confirmBulkSave: "一括保存の確認",
-  bulkSaveConfirmDesc: "{count}名のユーザーを作成しようとしています。複数のアカウントが一度に作成されます。続けますか？",
+  bulkSaveConfirmDesc: "{count}人のユーザーを保存しようとしています。少し時間がかかる場合があります。続行しますか？",
 
-  // AI User Generator Modal
-  aiUserGenerator: "AIユーザー生成器",
-  configureParams: "以下のパラメータを設定してAI支援でユーザーを生成します。",
-  successfullyGenerated: "{count}名のユーザーが正常に生成されました。以下で確認してください。",
-  numberOfUsers: "ユーザー数",
-  betweenUsers: "1〜50名",
-  emailDomain: "メールドメイン",
-  optional: "任意",
-  generateUsers: "ユーザーを生成",
-  done: "完了",
-  confirmBulkGeneration: "一括生成の確認",
-  bulkGenerationConfirmDesc: "{count}名のユーザーを生成しようとしています。複数のアカウントが一度に作成されます。続けますか？",
-
+  inactive: "非アクティブ",
+  banned: "禁止",
+  pleaseSelectRole: "デフォルトの役割を選択してください",
+  usersGeneratedSuccess: "{count}人のユーザーを正常に生成しました",
+  failedToGenerateUsers: "ユーザーの生成に失敗しました",
+  usersCreatedSuccess: "{success} / {total} 人のユーザーを正常に作成しました",
+  failedToSaveUsers: "ユーザーの保存に失敗しました",
+  failedToLoadRoles: "役割の読み出しに失敗しました",
   // Chatbot
   chatbotTitle: "Study4Youアシスタント",
   chatbotSubtitle: "プラットフォームについて何でもお聞きください",
@@ -387,8 +440,8 @@ export const ja = {
   // Common admin
   page: "ページ",
   noRoles: "ロールなし",
-  user: "ユーザー",
   showingUsers: "{count}名のユーザーを表示",
+
   deleteUser: "ユーザーを削除",
   deleteUserConfirm: "「{name}」を削除してもよろしいですか？この操作は元に戻せません。",
 
@@ -470,5 +523,35 @@ export const ja = {
   practiceAndLearn: "練習して学ぶ",
   practiceAndLearnDesc: "能力を挑戦し向上させるために設計された魅力的な演習を完了しましょう。",
   getAiFeedback: "AIフィードバックを得る",
-  getAiFeedbackDesc: "強みと改善点を理解するための即座の詳細なフィードバックを受けましょう。",
+  getAiFeedbackDesc: "強みと改善点を理解するための即時かつ詳細なフィードバックを受け取ります。",
+
+  // New Keys for Tests and Taking
+  toeicScore: "TOEIC スコア",
+  listeningPart14: "リスニング (Part 1-4)",
+  readingPart57: "リーディング (Part 5-7)",
+  loadingTests: "テストを読み込んでいます...",
+  noActiveTests: "利用可能なテストはまだありません。",
+  toeicFullTests: "TOEIC 完全模擬演習",
+  toeicFullTestsDesc: "完全なTOEICテスト練習 - リスニングとリーディング (200問、120分)",
+  testSubmitted: "テストが正常に提出されました！",
+  errorSubmitting: "テストの提出に失敗しました。もう一度お試しください。",
+  preparingTestEnv: "テスト環境を準備しています...",
+  audioPlayerDesc: "オーディオプレーヤー（リスニングセクション）",
+  flag: "マーク",
+  flagged: "マーク済み",
+  progress: "進捗",
+  unanswered: "未回答",
+  answered: "回答済み",
+  current: "現在",
+  confirmSubmit: "提出の確認",
+  completedQuestionsDesc: "全{total}問中、{answered}問を完了しました。",
+  unansweredQuestionsWarning: "未回答の質問が {count} 件あります。",
+  flaggedQuestionsWarning: "見直す必要のあるマークされた質問が {count} 件あります。",
+  submitFinalWarning: "提出後は回答を変更できません。",
+  timeRunningOut: "残り時間が少なくなっています！",
+  fiveMinutesRemaining: "残り5分です。回答を確定してください。",
+  iUnderstand: "わかりました",
+  testTaking: {
+    audioSection: "このセクションの音声",
+  },
 } as const;

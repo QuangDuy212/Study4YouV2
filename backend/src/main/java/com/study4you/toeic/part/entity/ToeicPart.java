@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+import com.study4you.toeic.question.entity.ToeicQuestion;
 import java.util.UUID;
 
 @Entity
@@ -32,4 +34,9 @@ public class ToeicPart extends BaseEntity {
 
     @Column(nullable = false)
     private Integer orderIndex;
+
+    private String audioUrl;
+
+    @OneToMany(mappedBy = "part", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ToeicQuestion> questions;
 }

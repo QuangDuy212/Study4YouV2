@@ -13,7 +13,7 @@ import TestInfoSection from "@/components/admin/test-editor/TestInfoSection";
 import PartManager from "@/components/admin/test-editor/PartManager";
 import AIGeneratorPanel from "@/components/admin/test-editor/AIGeneratorPanel";
 import TestSidebar from "@/components/admin/test-editor/TestSidebar";
-import type { TestData, PartType, TestQuestion } from "@/components/admin/test-editor/types";
+import type { TestData, PartType, TestQuestion, Difficulty } from "@/components/admin/test-editor/types";
 import { getDefaultParts } from "@/components/admin/test-editor/types";
 
 export default function TestEditorPage() {
@@ -23,8 +23,8 @@ export default function TestEditorPage() {
   const isCreate = !id;
 
   const [testData, setTestData] = useState<TestData>({
-    name: "", skill: "full", level: "intermediate", duration: 120, status: "draft",
-    parts: getDefaultParts("full"),
+    name: "", skill: "FULL", level: "MEDIUM", duration: 120, status: "draft",
+    parts: getDefaultParts("FULL"),
   });
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
   const [aiPanelPart, setAiPanelPart] = useState<PartType>("PART_5");
@@ -38,13 +38,14 @@ export default function TestEditorPage() {
         const fullTest = await testService.getTestById(id!);
         setTestData({
           name: fullTest.title,
-          skill: fullTest.parts?.length === 4 ? (fullTest.parts[0].part.startsWith("PART_1") ? "listening" : "reading") : "full", // Rough heuristic
-          level: "intermediate",
+          skill: (fullTest.skill as any) || "FULL",
+          level: (fullTest.level as Difficulty) || "MEDIUM",
           duration: fullTest.durationMinutes,
           status: fullTest.active ? "active" : "draft",
           parts: (fullTest.parts || []).map(p => ({
             id: p.id,
             type: p.part as PartType,
+            audioUrl: p.audioUrl || null,
             questions: (p.questions || []).map(q => ({
               id: q.id,
               content: q.content,
@@ -91,13 +92,17 @@ export default function TestEditorPage() {
       if (isCreate) {
         const newTest = await testService.createTest({
           title: testData.name,
-          active: testData.status === "active"
+          active: testData.status === "active",
+          skill: testData.skill,
+          level: testData.level
         });
         testId = newTest.id;
       } else {
         await testService.updateTest(id!, {
           title: testData.name,
-          active: testData.status === "active"
+          active: testData.status === "active",
+          skill: testData.skill,
+          level: testData.level
         });
       }
 
@@ -109,9 +114,17 @@ export default function TestEditorPage() {
       for (const frontendPart of testData.parts) {
         const matchingPart = backendParts.find(p => p.part === frontendPart.type);
         if (matchingPart) {
+          // Update part info (like audioUrl if changed)
+          if (frontendPart.audioUrl !== matchingPart.audioUrl) {
+            await partService.updatePart(matchingPart.id, {
+              testId: testId!,
+              part: frontendPart.type,
+              orderIndex: matchingPart.orderIndex,
+              audioUrl: frontendPart.audioUrl
+            });
+          }
+
           // For each question in frontendPart, save it to matchingPart.id
-          // This is potentially many requests. In a real app we'd want bulk create.
-          // For now, sequentially save new questions.
           for (const q of frontendPart.questions) {
             // Check if question exists (has a UUID that might be from backend)
             const isNew = !q.id || q.id.length < 30; // Simple heuristic for crypto.randomUUID vs DB ID if not careful

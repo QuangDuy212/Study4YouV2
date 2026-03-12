@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { Sparkles } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,8 +19,10 @@ import { AI_QUESTION_COUNTS, PART_LABELS } from "@/components/admin/test-editor/
 import { toast } from "sonner";
 
 export default function AIGeneratePage() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [selectedPart, setSelectedPart] = useState<PartType>("PART_5");
+
   const [difficulty, setDifficulty] = useState("intermediate");
   const [generatedQuestions, setGeneratedQuestions] = useState<TestQuestion[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -30,48 +34,50 @@ export default function AIGeneratePage() {
   };
 
   return (
-    <AdminLayout pageTitle="AI Question Generator" pageDescription="Generate TOEIC Reading questions using AI">
-      <div className="max-w-4xl space-y-6">
+    <AdminLayout pageTitle={t('aiQuestionGenerator')} pageDescription={t('generateReadingQuestionsDesc')}>
+      <div className="w-full space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-primary" />
-              Generate Reading Questions
+              {t('generateReadingQuestions')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              AI can generate questions for Reading parts only (Part 5, 6, 7). Select a part and difficulty, then generate.
+              {t('aiReadingOnlyDesc')}
             </p>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label>Part</Label>
+                <Label>{t('part')}</Label>
                 <Select value={selectedPart} onValueChange={(v) => setSelectedPart(v as PartType)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="PART_5">Part 5 – Incomplete Sentences (30 Q)</SelectItem>
-                    <SelectItem value="PART_6">Part 6 – Text Completion (16 Q)</SelectItem>
-                    <SelectItem value="PART_7">Part 7 – Reading Comprehension (54 Q)</SelectItem>
+                    <SelectItem value="PART_5">{t('part5Desc')} (30 Q)</SelectItem>
+                    <SelectItem value="PART_6">{t('part6Desc')} (16 Q)</SelectItem>
+                    <SelectItem value="PART_7">{t('part7Desc')} (54 Q)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Difficulty</Label>
+                <Label>{t('difficulty')}</Label>
                 <Select value={difficulty} onValueChange={setDifficulty}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="beginner">Beginner</SelectItem>
-                    <SelectItem value="intermediate">Intermediate</SelectItem>
-                    <SelectItem value="advanced">Advanced</SelectItem>
+                    <SelectItem value="beginner">{t('beginner')}</SelectItem>
+                    <SelectItem value="intermediate">{t('intermediate')}</SelectItem>
+                    <SelectItem value="advanced">{t('advanced')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="flex items-end">
                 <Button className="w-full gap-2" onClick={() => setShowPanel(true)}>
                   <Sparkles className="w-4 h-4" />
-                  Generate {AI_QUESTION_COUNTS[selectedPart]} Questions
+                  {t('generateQuestions')} ({AI_QUESTION_COUNTS[selectedPart]})
                 </Button>
               </div>
+
             </div>
           </CardContent>
         </Card>
@@ -81,10 +87,11 @@ export default function AIGeneratePage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">
-                Generated Questions
+                {t('generatedQuestionsTitle')}
                 <Badge variant="secondary" className="ml-2">{generatedQuestions.length}</Badge>
               </CardTitle>
             </CardHeader>
+
             <CardContent className="space-y-3 max-h-[500px] overflow-y-auto">
               {generatedQuestions.map((q, i) => (
                 <div key={q.id} className="p-3 border border-border rounded-lg">

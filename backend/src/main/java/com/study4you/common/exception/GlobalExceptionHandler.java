@@ -59,7 +59,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Object>> handleGlobalException(Exception ex) {
+    public ResponseEntity<?> handleGlobalException(Exception ex) {
+        // Ignore ClientAbortException which happens when client cancels/scrubs audio streams
+        if (ex.getClass().getName().contains("ClientAbortException")) {
+            return null;
+        }
+        
         ex.printStackTrace();
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)

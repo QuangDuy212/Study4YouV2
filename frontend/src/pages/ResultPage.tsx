@@ -90,8 +90,9 @@ export default function ResultPage() {
             <div className="mb-8">
               <span className={`font-display text-6xl font-bold ${getScoreColor()}`}>{score}</span>
               <span className="text-2xl text-muted-foreground font-medium">/{maxScore}</span>
-              <p className="text-muted-foreground mt-2">TOEIC Score</p>
+              <p className="text-muted-foreground mt-2">{t('toeicScore')}</p>
             </div>
+
 
             <div className="mb-8">
               <Progress value={percentage} className="h-3 mb-4" />
@@ -115,15 +116,16 @@ export default function ResultPage() {
                   <span className="text-foreground font-medium">{total}/{total}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Listening (Part 1-4)</span>
+                  <span className="text-muted-foreground">{t('listeningPart14')}</span>
                   <span className="text-foreground font-medium">~{Math.round(score * 0.5)}/495</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Reading (Part 5-7)</span>
+                  <span className="text-muted-foreground">{t('readingPart57')}</span>
                   <span className="text-foreground font-medium">~{Math.max(0, score - Math.round(score * 0.5))}/495</span>
                 </div>
               </div>
             </div>
+
 
             <div className="flex flex-col gap-3">
               <Button onClick={() => navigate("/dashboard")} className="w-full gap-2"><Home className="w-4 h-4" />{t('backToDashboard')}</Button>

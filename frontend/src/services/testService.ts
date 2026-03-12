@@ -5,6 +5,8 @@ export interface ToeicTestResponse {
   title: string;
   durationMinutes: number;
   active: boolean;
+  skill: string;
+  level: string;
   createdAt: string;
   updatedAt: string;
   parts?: ToeicPartResponse[]; // Nested for getTestById
@@ -13,6 +15,8 @@ export interface ToeicTestResponse {
 export interface ToeicTestRequest {
   title: string;
   active?: boolean;
+  skill?: string;
+  level?: string;
 }
 
 export interface ToeicPartResponse {
@@ -20,6 +24,7 @@ export interface ToeicPartResponse {
   testId: string;
   part: string; // Enum PART_1, PART_2 etc.
   orderIndex: number;
+  audioUrl?: string | null;
   createdAt: string;
   updatedAt: string;
   questions?: ToeicQuestionResponse[]; // Nested

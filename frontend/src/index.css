@@ -65,6 +65,12 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
 
+    --chart-1: 221 83% 53%;
+    --chart-2: 172 66% 50%;
+    --chart-3: 142 71% 45%;
+    --chart-4: 38 92% 50%;
+    --chart-5: 0 84% 60%;
+
     /* Custom gradients */
     --gradient-primary: linear-gradient(135deg, hsl(221, 83%, 53%) 0%, hsl(199, 89%, 48%) 100%);
     --gradient-hero: linear-gradient(135deg, hsl(221, 83%, 53%) 0%, hsl(262, 83%, 58%) 50%, hsl(199, 89%, 48%) 100%);
@@ -117,6 +123,12 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    --chart-1: 217 91% 60%;
+    --chart-2: 172 66% 50%;
+    --chart-3: 142 71% 45%;
+    --chart-4: 38 92% 50%;
+    --chart-5: 0 84% 60%;
   }
 
   /* Soft Blue Theme - Academic */
@@ -163,6 +175,12 @@
     --sidebar-accent-foreground: 210 40% 15%;
     --sidebar-border: 210 30% 88%;
     --sidebar-ring: 210 80% 50%;
+
+    --chart-1: 210 80% 50%;
+    --chart-2: 190 70% 45%;
+    --chart-3: 170 60% 50%;
+    --chart-4: 200 65% 55%;
+    --chart-5: 220 75% 60%;
   }
 
   /* Emerald / Green Theme - Success-oriented */
@@ -209,6 +227,12 @@
     --sidebar-accent-foreground: 150 40% 10%;
     --sidebar-border: 150 20% 88%;
     --sidebar-ring: 160 84% 39%;
+
+    --chart-1: 160 84% 39%;
+    --chart-2: 142 71% 45%;
+    --chart-3: 172 66% 50%;
+    --chart-4: 155 50% 45%;
+    --chart-5: 140 60% 40%;
   }
 
   /* Purple Gradient Theme - Modern AI style */
@@ -255,6 +279,12 @@
     --sidebar-accent-foreground: 270 40% 12%;
     --sidebar-border: 270 20% 88%;
     --sidebar-ring: 270 70% 55%;
+
+    --chart-1: 270 70% 55%;
+    --chart-2: 290 70% 50%;
+    --chart-3: 310 65% 55%;
+    --chart-4: 250 60% 60%;
+    --chart-5: 230 75% 65%;
   }
 }
 

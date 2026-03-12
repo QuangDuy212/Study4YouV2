@@ -1,6 +1,6 @@
 export type PartType = "PART_1" | "PART_2" | "PART_3" | "PART_4" | "PART_5" | "PART_6" | "PART_7";
-export type Skill = "listening" | "reading" | "full";
-export type Difficulty = "beginner" | "intermediate" | "advanced";
+export type Skill = "LISTENING" | "READING" | "FULL";
+export type Difficulty = "EASY" | "MEDIUM" | "HARD";
 export type TestStatus = "active" | "draft" | "archived";
 
 export interface TestOption {
@@ -21,6 +21,7 @@ export interface TestQuestion {
 export interface TestPart {
   id: string;
   type: PartType;
+  audioUrl: string | null;
   questions: TestQuestion[];
 }
 
@@ -73,12 +74,13 @@ export function createEmptyPart(type: PartType): TestPart {
   return {
     id: crypto.randomUUID(),
     type,
+    audioUrl: null,
     questions: [],
   };
 }
 
 export function getDefaultParts(skill: Skill): TestPart[] {
-  if (skill === "listening") return LISTENING_PARTS.map(createEmptyPart);
-  if (skill === "reading") return READING_PARTS.map(createEmptyPart);
+  if (skill === "LISTENING") return LISTENING_PARTS.map(createEmptyPart);
+  if (skill === "READING") return READING_PARTS.map(createEmptyPart);
   return [...LISTENING_PARTS, ...READING_PARTS].map(createEmptyPart);
 }

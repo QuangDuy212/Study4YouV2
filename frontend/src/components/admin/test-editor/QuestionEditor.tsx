@@ -22,12 +22,15 @@ interface QuestionEditorProps {
 export default function QuestionEditor({ question, index, partType, onChange, onDelete }: QuestionEditorProps) {
   const [collapsed, setCollapsed] = useState(false);
   const isListening = LISTENING_PARTS.includes(partType);
+  const isPart1 = partType === "PART_1";
   const needsPassage = partType === "PART_6" || partType === "PART_7";
 
   const updateOption = (label: "A" | "B" | "C" | "D", content: string) => {
     onChange({
       ...question,
-      options: question.options.map((o) => (o.label === label ? { ...o, content } : o)),
+      options: question.options?.some(o => o.label === label) 
+        ? question.options.map((o) => (o.label === label ? { ...o, content } : o))
+        : [...(question.options || []), { label, content }]
     });
   };
 
@@ -57,11 +60,13 @@ export default function QuestionEditor({ question, index, partType, onChange, on
 
       {!collapsed && (
         <div className="space-y-4 pt-2 border-t border-border">
-          {/* Listening media */}
+          {/* Listening media (Audio for all listening parts, Image for Part 1) */}
           {isListening && (
             <ListeningMediaUploader
+              hideAudio={["PART_1", "PART_2", "PART_3"].includes(partType)}
+              hideImage={!isPart1}
               audioUrl={question.audioUrl}
-              imageUrl={question.imageUrl}
+              imageUrl={isPart1 ? question.imageUrl : null}
               onAudioChange={(audioUrl) => onChange({ ...question, audioUrl })}
               onImageChange={(imageUrl) => onChange({ ...question, imageUrl })}
             />
@@ -100,7 +105,7 @@ export default function QuestionEditor({ question, index, partType, onChange, on
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {(["A", "B", "C", "D"] as const).map((label) => {
-                  const opt = question.options.find((o) => o.label === label);
+                  const opt = question.options?.find((o) => o.label === label);
                   const isCorrect = question.correctAnswer === label;
                   return (
                     <div

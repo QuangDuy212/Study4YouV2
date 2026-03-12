@@ -38,10 +38,11 @@ export default function TestsPage() {
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
               <FileText className="w-5 h-5 text-primary" />
             </div>
-            <h1 className="font-display text-3xl font-bold text-foreground">TOEIC Full Tests</h1>
+            <h1 className="font-display text-3xl font-bold text-foreground">{t('toeicFullTests')}</h1>
           </div>
-          <p className="text-muted-foreground">Luyện thi TOEIC đầy đủ 7 phần – Listening & Reading (200 câu, 120 phút)</p>
+          <p className="text-muted-foreground">{t('toeicFullTestsDesc')}</p>
         </motion.div>
+
 
         {/* Stats */}
         {!isLoading && (
@@ -66,13 +67,14 @@ export default function TestsPage() {
           {isLoading ? (
             <div className="col-span-full py-20 flex flex-col items-center justify-center text-muted-foreground">
               <Loader2 className="w-10 h-10 animate-spin mb-4 text-primary" />
-              <p>Loading available tests...</p>
+              <p>{t('loadingTests')}</p>
             </div>
           ) : tests.length === 0 ? (
             <div className="col-span-full py-20 text-center text-muted-foreground border border-dashed rounded-2xl">
-              No active tests available yet.
+              {t('noActiveTests')}
             </div>
           ) : (
+
             tests.map((test, index) => (
               <motion.div
                 key={test.id}
@@ -82,17 +84,20 @@ export default function TestsPage() {
                 transition={{ duration: 0.3, delay: 0.05 * index }}
               >
                 <div className="flex items-start justify-between mb-3">
-                  <Badge variant="outline" className="text-xs">Full Test</Badge>
+                  <Badge variant="outline" className="text-xs">{t('fullTest')}</Badge>
                 </div>
+
                 <h3 className="font-display font-semibold text-lg text-foreground mb-3">{test.title}</h3>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
                   <div className="flex items-center gap-1.5"><Headphones className="w-4 h-4 text-purple-500" />Part 1–4</div>
                   <div className="flex items-center gap-1.5"><BookOpen className="w-4 h-4 text-blue-500" />Part 5–7</div>
                 </div>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground mb-5">
-                  <div className="flex items-center gap-1.5"><FileText className="w-4 h-4" />200 câu</div>
-                  <div className="flex items-center gap-1.5"><Clock className="w-4 h-4" />{test.durationMinutes} min</div>
+                  <div className="flex items-center gap-1.5"><FileText className="w-4 h-4" />200 {t('questions').toLowerCase()}</div>
+                  <div className="flex items-center gap-1.5"><Clock className="w-4 h-4" />{test.durationMinutes} {t('minutes')}</div>
                 </div>
+
+
                 <Link to={`/tests/${test.id}/attempt`}>
                   <Button className="w-full gap-2">
                     {t('startTest')}
