@@ -17,9 +17,17 @@ interface QuestionEditorProps {
   partType: PartType;
   onChange: (question: TestQuestion) => void;
   onDelete: () => void;
+  hidePassageField?: boolean;
 }
 
-export default function QuestionEditor({ question, index, partType, onChange, onDelete }: QuestionEditorProps) {
+export default function QuestionEditor({ 
+  question, 
+  index, 
+  partType, 
+  onChange, 
+  onDelete,
+  hidePassageField = false 
+}: QuestionEditorProps) {
   const [collapsed, setCollapsed] = useState(false);
   const isListening = LISTENING_PARTS.includes(partType);
   const isPart1 = partType === "PART_1";
@@ -73,7 +81,7 @@ export default function QuestionEditor({ question, index, partType, onChange, on
           )}
 
           {/* Passage for Part 6, 7 */}
-          {needsPassage && (
+          {needsPassage && !hidePassageField && (
             <div className="space-y-2">
               <Label>Passage</Label>
               <Textarea
@@ -104,7 +112,7 @@ export default function QuestionEditor({ question, index, partType, onChange, on
               onValueChange={(v) => onChange({ ...question, correctAnswer: v as "A" | "B" | "C" | "D" })}
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {(["A", "B", "C", "D"] as const).map((label) => {
+                {(partType === "PART_2" ? ["A", "B", "C"] : ["A", "B", "C", "D"] as const).map((label) => {
                   const opt = question.options?.find((o) => o.label === label);
                   const isCorrect = question.correctAnswer === label;
                   return (
@@ -125,7 +133,7 @@ export default function QuestionEditor({ question, index, partType, onChange, on
                         className="h-8 text-sm border-0 bg-transparent focus-visible:ring-0 p-0"
                         placeholder={`Option ${label}`}
                         value={opt?.content || ""}
-                        onChange={(e) => updateOption(label, e.target.value)}
+                        onChange={(e) => updateOption(label as any, e.target.value)}
                       />
                     </div>
                   );

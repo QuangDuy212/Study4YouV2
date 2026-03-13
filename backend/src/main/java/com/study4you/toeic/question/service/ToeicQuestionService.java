@@ -65,6 +65,15 @@ public class ToeicQuestionService {
         question.setCorrectAnswer(request.getCorrectAnswer());
         question.setLevel(request.getLevel());
 
+        // Validate Part 2: Exactly 3 options
+        ToeicPart part = toeicPartRepository.findById(request.getPartId())
+                .orElseThrow(() -> new ResourceNotFoundException("ToeicPart", "id", request.getPartId()));
+        if (part.getPart() == PartNumber.PART_2) {
+            if (request.getOptions() == null || request.getOptions().size() != 3) {
+                throw new IllegalArgumentException("Part 2 questions must have exactly 3 options (A, B, C).");
+            }
+        }
+
         ToeicQuestion savedQuestion = toeicQuestionRepository.save(question);
         
         if (request.getOptions() != null) {
@@ -93,6 +102,15 @@ public class ToeicQuestionService {
         question.setPassage(request.getPassage());
         question.setCorrectAnswer(request.getCorrectAnswer());
         question.setLevel(request.getLevel());
+
+        // Validate Part 2: Exactly 3 options
+        ToeicPart part = toeicPartRepository.findById(request.getPartId())
+                .orElseThrow(() -> new ResourceNotFoundException("ToeicPart", "id", request.getPartId()));
+        if (part.getPart() == PartNumber.PART_2) {
+            if (request.getOptions() == null || request.getOptions().size() != 3) {
+                throw new IllegalArgumentException("Part 2 questions must have exactly 3 options (A, B, C).");
+            }
+        }
 
         ToeicQuestion updatedQuestion = toeicQuestionRepository.save(question);
         

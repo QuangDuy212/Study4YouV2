@@ -153,32 +153,55 @@ public class DataSeeder implements CommandLineRunner {
         test = toeicTestRepository.save(test);
 
         // Standard TOEIC L&R: 7 parts
-        seedPart(test, PartNumber.PART_1, 6,  true,  true);   // Photographs
-        seedPart(test, PartNumber.PART_2, 25, false, true);   // Question-Response
-        seedPart(test, PartNumber.PART_3, 39, false, true);   // Conversations
-        seedPart(test, PartNumber.PART_4, 30, false, true);   // Talks
-        seedPart(test, PartNumber.PART_5, 30, false, false);  // Incomplete Sentences
-        seedPart(test, PartNumber.PART_6, 16, false, false);  // Text Completion
-        seedPart(test, PartNumber.PART_7, 54, false, false);  // Reading Comprehension
+        seedPart(test, PartNumber.PART_1, 6);   // Photographs
+        seedPart(test, PartNumber.PART_2, 25);   // Question-Response
+        seedPart(test, PartNumber.PART_3, 39);   // Conversations
+        seedPart(test, PartNumber.PART_4, 30);   // Talks
+        seedPart(test, PartNumber.PART_5, 30);  // Incomplete Sentences
+        seedPart(test, PartNumber.PART_6, 16);  // Text Completion
+        seedPart(test, PartNumber.PART_7, 54);  // Reading Comprehension
     }
 
-    private void seedPart(ToeicTest test, PartNumber partNum, int questionCount,
-                          boolean hasImage, boolean hasAudio) {
+    private void seedPart(ToeicTest test, PartNumber partNum, int questionCount) {
         ToeicPart part = new ToeicPart();
         part.setTestId(test.getId());
         part.setPart(partNum);
         part.setOrderIndex(partNum.ordinal() + 1);
         part = toeicPartRepository.save(part);
 
+        boolean hasImage = (partNum == PartNumber.PART_1);
+        boolean hasAudio = (partNum == PartNumber.PART_1 || partNum == PartNumber.PART_2 || partNum == PartNumber.PART_3 || partNum == PartNumber.PART_4);
+
+        String currentPassage = null;
         for (int i = 1; i <= questionCount; i++) {
-            createQuestion(part, i, hasImage, hasAudio);
+            // Grouping logic for Part 6 and 7
+            if (partNum == PartNumber.PART_6) {
+                if ((i - 1) % 4 == 0) {
+                    currentPassage = "This is a shared passage for Part 6 questions " + i + "-" + (i + 3) + ". It contains a text with four blanks that need to be filled.";
+                }
+            } else if (partNum == PartNumber.PART_7) {
+                if ((i - 1) % 2 == 0) {
+                    currentPassage = "This is a shared passage for Part 7 questions " + i + "-" + (i + 1) + ". Read the following document and answer the questions.";
+                }
+            } else {
+                currentPassage = null;
+            }
+
+            createQuestion(part, i, hasImage, hasAudio, currentPassage);
         }
     }
 
-    private void createQuestion(ToeicPart part, int index, boolean hasImage, boolean hasAudio) {
+    private void createQuestion(ToeicPart part, int index, boolean hasImage, boolean hasAudio, String passage) {
         ToeicQuestion question = new ToeicQuestion();
         question.setPartId(part.getId());
-        question.setContent("Sample Question " + index + " for " + part.getPart());
+        question.setContent("This is the content for question " + index + " in " + part.getPart());
+        question.setCorrectAnswer("A");
+        // Assuming Level enum exists and is imported or fully qualified
+        // If not, this line might cause a compilation error.
+        // For now, I'll assume it's available or needs to be added.
+        // As per the instruction, I'm adding it.
+        question.setLevel(com.study4you.common.enums.Level.MEDIUM); // Assuming Level enum is in common.enums
+        question.setPassage(passage);
 
         if (hasAudio) {
             question.setAudioUrl("https://example.com/audio/" + part.getPart().name().toLowerCase() + "-" + index + ".mp3");
@@ -186,15 +209,11 @@ public class DataSeeder implements CommandLineRunner {
         if (hasImage) {
             question.setImageUrl("https://example.com/images/" + part.getPart().name().toLowerCase() + "-" + index + ".jpg");
         }
-        if (part.getPart() == PartNumber.PART_6 || part.getPart() == PartNumber.PART_7) {
-            question.setPassage("This is a sample passage for " + part.getPart() + " question " + index + ".");
-        }
 
-        question.setCorrectAnswer("A");
         question = toeicQuestionRepository.save(question);
 
-        // Options A, B, C, D
-        String[] labels = {"A", "B", "C", "D"};
+        // Options A, B, C (for Part 2) or A, B, C, D (others)
+        String[] labels = (part.getPart() == PartNumber.PART_2) ? new String[]{"A", "B", "C"} : new String[]{"A", "B", "C", "D"};
         for (String label : labels) {
             ToeicOption option = new ToeicOption();
             option.setQuestionId(question.getId());

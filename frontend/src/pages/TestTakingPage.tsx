@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Clock, Flag, AlertCircle, X, ChevronLeft, ChevronRight, Volume2, Bookmark, Loader2 } from "lucide-react";
+import { Clock, Flag, AlertCircle, X, ChevronLeft, ChevronRight, Volume2, Bookmark, Loader2, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, getMediaUrl } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import testService from "@/services/testService";
@@ -356,92 +357,225 @@ export default function TestTakingPage() {
               <div className="py-20 text-center text-muted-foreground">{t('noQuestionsFound')}</div>
             ) : (
               <>
+                {/* Passage Grouping Logic */}
+                {(() => {
+                  const isPart6 = part?.description === "PART_6";
+                  const isPart7 = part?.description === "PART_7";
+                  
+                  if (isPart6 || isPart7) {
+                    const setSize = isPart6 ? 4 : 2;
+                    const setIndex = Math.floor(currentQuestionInPart / setSize);
+                    const startIndex = setIndex * setSize;
+                    const setQuestions = part.questions.slice(startIndex, startIndex + setSize);
+                    const firstQuestion = setQuestions[0];
 
-                {question.passage && (
-                  <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
-                    <p className="text-sm text-muted-foreground font-medium mb-2 border-b pb-1">{t('readingPassage')}</p>
-                    <p className="text-foreground whitespace-pre-line leading-relaxed italic">{question.passage}</p>
-                  </div>
-                )}
+                    return (
+                      <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        {firstQuestion?.passage && (
+                          <div className="bg-card rounded-xl border border-border p-6 shadow-sm ring-1 ring-primary/5">
+                            <div className="flex items-center justify-between mb-3 border-b border-border/50 pb-2">
+                              <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest flex items-center gap-2">
+                                <BookOpen className="w-3.5 h-3.5 text-primary" />
+                                {t('readingPassage')}
+                              </p>
+                              <Badge variant="outline" className="text-[10px] font-black uppercase tracking-tighter bg-primary/5 text-primary border-primary/20">
+                                {t('questions')} {getGlobalIndex(currentPart, startIndex) + 1} - {getGlobalIndex(currentPart, startIndex + setQuestions.length)}
+                              </Badge>
+                            </div>
+                            <p className="text-foreground text-base leading-relaxed whitespace-pre-line italic font-serif">
+                              {firstQuestion.passage}
+                            </p>
+                          </div>
+                        )}
 
-
-                {/* Image for Part 1 */}
-                {question.image && (
-                  <div className="bg-card rounded-xl border border-border p-4 flex items-center justify-center shadow-sm">
-                    <img src={getMediaUrl(question.image)} alt="Question Graphic" className="max-h-80 object-contain rounded" />
-                  </div>
-                )}
-
-                {/* Question */}
-                <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-semibold">
-                      {t('question')} {question.displayNumber}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={toggleFlag}
-                      className={cn(
-                        "gap-1",
-                        flaggedQuestions.has(globalQuestionIndex) ? "text-amber-500 " : "text-muted-foreground"
-                      )}
-                    >
-                      <Bookmark className={cn("w-4 h-4", flaggedQuestions.has(globalQuestionIndex) && "fill-current")} />
-                      {flaggedQuestions.has(globalQuestionIndex) ? t('flagged') : t('flag')}
-                    </Button>
-                  </div>
-                  <p className="text-foreground text-lg leading-relaxed">{question.question}</p>
-                </div>
-
-
-                {/* Options */}
-                <div className="space-y-3">
-                  {question.options.map((option, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleAnswer(index)}
-                      className={cn(
-                        "w-full p-4 rounded-xl border-2 text-left transition-all duration-200",
-                        answers[globalQuestionIndex] === index
-                          ? "border-primary bg-primary/5 text-foreground shadow-sm"
-                          : "border-border bg-card hover:border-primary/50 text-foreground hover:bg-secondary/50"
-                      )}
-                    >
-                      <div className="flex items-center gap-4">
-                        <span className={cn(
-                          "w-10 h-10 rounded-full flex items-center justify-center font-bold text-base border-2 shrink-0 transition-colors",
-                          answers[globalQuestionIndex] === index
-                            ? "border-primary bg-primary text-primary-foreground"
-                            : "border-muted-foreground/30 text-muted-foreground group-hover:border-primary/50"
-                        )}>
-                          {String.fromCharCode(65 + index)}
-                        </span>
-                        <span className="text-base">{option}</span>
+                        <div className="space-y-8">
+                          {setQuestions.map((q, idx) => {
+                            const localQIdx = startIndex + idx;
+                            const globalQIdx = getGlobalIndex(currentPart, localQIdx);
+                            
+                            return (
+                              <div key={q.id} className="space-y-4 pt-4 border-t border-border/30 first:border-0 first:pt-0">
+                                <div className="flex items-center justify-between">
+                                  <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold ring-1 ring-primary/20">
+                                    {t('question')} {getGlobalIndex(currentPart, localQIdx) + 1}
+                                  </span>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      const next = new Set(flaggedQuestions);
+                                      if (next.has(globalQIdx)) next.delete(globalQIdx);
+                                      else next.add(globalQIdx);
+                                      setFlaggedQuestions(next);
+                                    }}
+                                    className={cn(
+                                      "h-8 gap-1.5 text-[10px] font-bold uppercase tracking-wider",
+                                      flaggedQuestions.has(globalQIdx) ? "text-amber-500 bg-amber-50" : "text-muted-foreground"
+                                    )}
+                                  >
+                                    <Bookmark className={cn("w-3.5 h-3.5", flaggedQuestions.has(globalQIdx) && "fill-current")} />
+                                    {flaggedQuestions.has(globalQIdx) ? t('flagged') : t('flag')}
+                                  </Button>
+                                </div>
+                                <p className="text-foreground font-medium text-lg mb-4">{q.question}</p>
+                                
+                                <div className="grid grid-cols-1 gap-2.5">
+                                  {q.options.map((option, optIdx) => (
+                                    <button
+                                      key={optIdx}
+                                      onClick={() => setAnswers((prev) => ({ ...prev, [globalQIdx]: optIdx }))}
+                                      className={cn(
+                                        "w-full p-3.5 rounded-xl border-2 text-left transition-all duration-200 group relative overflow-hidden",
+                                        answers[globalQIdx] === optIdx
+                                          ? "border-primary bg-primary/5 text-foreground shadow-sm ring-1 ring-primary/10"
+                                          : "border-border bg-card hover:border-primary/40 text-foreground hover:bg-secondary/30"
+                                      )}
+                                    >
+                                      <div className="flex items-center gap-3 relative z-10">
+                                        <span className={cn(
+                                          "w-9 h-9 rounded-full flex items-center justify-center font-black text-sm border-2 shrink-0 transition-all",
+                                          answers[globalQIdx] === optIdx
+                                            ? "border-primary bg-primary text-primary-foreground scale-105 shadow-md"
+                                            : "border-muted-foreground/30 text-muted-foreground bg-muted/20"
+                                        )}>
+                                          {String.fromCharCode(65 + optIdx)}
+                                        </span>
+                                        <span className="text-base font-medium">{option}</span>
+                                      </div>
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </button>
-                  ))}
-                </div>
+                    );
+                  }
+
+                  // Default Single Question View
+                  return (
+                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                      {question.passage && (
+                         <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+                          <p className="text-sm text-muted-foreground font-medium mb-2 border-b pb-1">{t('readingPassage')}</p>
+                          <p className="text-foreground whitespace-pre-line leading-relaxed italic">{question.passage}</p>
+                        </div>
+                      )}
+
+                      {question.image && (
+                        <div className="bg-card rounded-xl border border-border p-4 flex items-center justify-center shadow-sm overflow-hidden text-center group">
+                          <img 
+                            src={getMediaUrl(question.image)} 
+                            alt="Question Graphic" 
+                            className="max-h-80 w-auto object-contain rounded transition-transform duration-500 group-hover:scale-[1.02]" 
+                          />
+                        </div>
+                      )}
+
+                      <div className="bg-card rounded-xl border border-border p-6 shadow-sm ring-1 ring-primary/5">
+                        <div className="flex items-center justify-between mb-4">
+                          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-bold border border-primary/10">
+                            {t('question')} {globalQuestionIndex + 1}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={toggleFlag}
+                            className={cn(
+                              "gap-1.5 text-[10px] font-bold uppercase tracking-wider",
+                              flaggedQuestions.has(globalQuestionIndex) ? "text-amber-500 bg-amber-50" : "text-muted-foreground"
+                            )}
+                          >
+                            <Bookmark className={cn("w-4 h-4", flaggedQuestions.has(globalQuestionIndex) && "fill-current")} />
+                            {flaggedQuestions.has(globalQuestionIndex) ? t('flagged') : t('flag')}
+                          </Button>
+                        </div>
+                        <p className="text-foreground text-xl font-medium leading-relaxed">{question.question}</p>
+                      </div>
+
+                      <div className="space-y-3">
+                        {question.options.map((option, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleAnswer(index)}
+                            className={cn(
+                              "w-full p-4 rounded-xl border-2 text-left transition-all duration-200 group relative overflow-hidden",
+                              answers[globalQuestionIndex] === index
+                                ? "border-primary bg-primary/5 text-foreground shadow-sm ring-1 ring-primary/10"
+                                : "border-border bg-card hover:border-primary/40 text-foreground hover:bg-secondary/30"
+                            )}
+                          >
+                            <div className="flex items-center gap-4 relative z-10">
+                              <span className={cn(
+                                "w-10 h-10 rounded-full flex items-center justify-center font-black text-sm border-2 shrink-0 transition-all",
+                                answers[globalQuestionIndex] === index
+                                  ? "border-primary bg-primary text-primary-foreground scale-105 shadow-md"
+                                  : "border-muted-foreground/30 text-muted-foreground bg-muted/20"
+                              )}>
+                                {String.fromCharCode(65 + index)}
+                              </span>
+                              <span className="text-base font-medium">{option}</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* Navigation Buttons */}
-                <div className="flex items-center justify-between pt-8">
+                <div className="flex items-center justify-between pt-12 border-t border-border/50">
                   <Button
                     variant="outline"
-                    onClick={handlePrevious}
+                    onClick={() => {
+                        const isPart6 = part?.description === "PART_6";
+                        const isPart7 = part?.description === "PART_7";
+                        if (isPart6 || isPart7) {
+                            const setSize = isPart6 ? 4 : 2;
+                            const currentSetIdx = Math.floor(currentQuestionInPart / setSize);
+                            if (currentSetIdx > 0) {
+                                setCurrentQuestionInPart((currentSetIdx - 1) * setSize);
+                            } else {
+                                handlePrevious();
+                            }
+                        } else {
+                            handlePrevious();
+                        }
+                    }}
                     disabled={currentPart === 0 && currentQuestionInPart === 0 || isSubmitting}
-                    className="gap-2 px-6"
+                    className="gap-2 px-8 h-12 font-bold rounded-xl border-2 hover:bg-secondary/50 group"
                   >
-                    <ChevronLeft className="w-4 h-4" />{t('previous')}
+                    <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />{t('previous')}
                   </Button>
-                  <span className="text-sm font-medium text-muted-foreground bg-secondary px-3 py-1 rounded-full">
-                    {globalQuestionIndex + 1} / {totalQuestions}
-                  </span>
+                  
+                  <div className="hidden sm:flex flex-col items-center">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{t('progress')}</span>
+                    <span className="text-sm font-black text-foreground bg-secondary/80 px-4 py-1.5 rounded-full ring-1 ring-border">
+                        {globalQuestionIndex + 1} / {totalQuestions}
+                    </span>
+                  </div>
+
                   <Button
-                    onClick={handleNext}
+                    onClick={() => {
+                        const isPart6 = part?.description === "PART_6";
+                        const isPart7 = part?.description === "PART_7";
+                        if (isPart6 || isPart7) {
+                            const setSize = isPart6 ? 4 : 2;
+                            const nextSetStart = (Math.floor(currentQuestionInPart / setSize) + 1) * setSize;
+                            if (nextSetStart < part.questions.length) {
+                                setCurrentQuestionInPart(nextSetStart);
+                            } else {
+                                handleNext();
+                            }
+                        } else {
+                            handleNext();
+                        }
+                    }}
                     disabled={currentPart === parts.length - 1 && currentQuestionInPart === part.questions.length - 1 || isSubmitting}
-                    className="gap-2 px-6"
+                    className="gap-2 px-8 h-12 font-bold rounded-xl border-2 border-primary bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all group"
                   >
-                    {t('next')}<ChevronRight className="w-4 h-4" />
+                    {t('next')}<ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                   </Button>
                 </div>
               </>

@@ -7,6 +7,7 @@ import { PART_LABELS } from "./types";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 import PartItem from "./PartItem";
+import { BookOpen } from "lucide-react";
 
 interface PartManagerProps {
   parts: TestPart[];

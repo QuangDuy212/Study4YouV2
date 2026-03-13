@@ -53,7 +53,10 @@ export const AI_QUESTION_COUNTS: Partial<Record<PartType, number>> = {
   PART_7: 54,
 };
 
-export function createEmptyQuestion(): TestQuestion {
+export function createEmptyQuestion(partType?: PartType): TestQuestion {
+  const isPart2 = partType === "PART_2";
+  const labels: ("A" | "B" | "C" | "D")[] = isPart2 ? ["A", "B", "C"] : ["A", "B", "C", "D"];
+  
   return {
     id: crypto.randomUUID(),
     content: "",
@@ -61,12 +64,7 @@ export function createEmptyQuestion(): TestQuestion {
     imageUrl: null,
     passage: null,
     correctAnswer: "A",
-    options: [
-      { label: "A", content: "" },
-      { label: "B", content: "" },
-      { label: "C", content: "" },
-      { label: "D", content: "" },
-    ],
+    options: labels.map(label => ({ label, content: "" })),
   };
 }
 

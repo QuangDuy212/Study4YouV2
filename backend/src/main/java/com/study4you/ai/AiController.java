@@ -14,14 +14,15 @@ import java.util.List;
 public class AiController {
 
     private final AiService aiService;
+    private final com.study4you.ai.service.AiTutorService aiTutorService;
 
     /**
      * POST /api/v1/ai/chat
-     * Handles chatbot messages via AI.
+     * Handles chatbot messages via AI Tutor.
      */
     @PostMapping("/chat")
     public ResponseEntity<ChatResponse> chat(@Valid @RequestBody ChatRequest request) {
-        return ResponseEntity.ok(aiService.chat(request.getMessage()));
+        return ResponseEntity.ok(aiTutorService.ask(request.getMessage()));
     }
 
     /**
@@ -36,7 +37,8 @@ public class AiController {
                 aiService.generateReadingQuestions(
                         request.getPart(),
                         request.getDifficulty(),
-                        request.getCount()
+                        request.getCount(),
+                        request.getTopic()
                 )
         );
     }

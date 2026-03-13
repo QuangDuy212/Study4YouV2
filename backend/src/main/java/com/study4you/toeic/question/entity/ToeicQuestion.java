@@ -45,6 +45,9 @@ public class ToeicQuestion extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Level level;
 
+    @Column(columnDefinition = "TEXT")
+    private String explanation;
+
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ToeicOption> options;
 }

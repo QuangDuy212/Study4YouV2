@@ -282,6 +282,7 @@ export const en = {
   chooseDifficultyLevel: "Choose difficulty level",
   numberOfQuestions: "Number of Questions",
   topicOptional: "Topic (Optional)",
+  topicHint: "Topic Hint",
   topicPlaceholder: "E.g., Climate change, Technology in education, Travel experiences...",
   generateQuestions: "Generate Questions",
   generating: "Generating...",

@@ -1,9 +1,10 @@
 import { useState, useCallback } from "react";
-import { X, Sparkles, Loader2, CheckCircle2, Hash } from "lucide-react";
+import { X, Sparkles, Loader2, CheckCircle2, Hash, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -68,6 +69,7 @@ export default function AIGeneratorPanel({ open, initialPart, onClose, onQuestio
   const [selectedPart, setSelectedPart] = useState<PartType>(initialPart);
 
   const [difficulty, setDifficulty] = useState<Difficulty>("MEDIUM");
+  const [topic, setTopic] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [statusMessage, setStatusMessage] = useState("");
@@ -84,7 +86,7 @@ export default function AIGeneratorPanel({ open, initialPart, onClose, onQuestio
 
     try {
       setProgress(30);
-      const data = await aiService.generateQuestions(selectedPart, difficulty, count);
+      const data = await aiService.generateQuestions(selectedPart, difficulty, count, topic);
 
       setProgress(80);
       setStatusMessage("Processing questions...");
@@ -185,6 +187,17 @@ export default function AIGeneratorPanel({ open, initialPart, onClose, onQuestio
               </Select>
             </div>
 
+            <div className="space-y-2">
+              <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('topicHint')} ({t('optional')})</Label>
+              <Input 
+                value={topic} 
+                onChange={(e) => setTopic(e.target.value)} 
+                placeholder="e.g. Finance, Green Energy, Travel..."
+                disabled={isGenerating}
+                className="h-10"
+              />
+            </div>
+
 
             <div className="rounded-lg bg-muted/40 border border-border/50 p-3.5 text-sm text-muted-foreground">
               Will generate <span className="font-semibold text-foreground">{count}</span> questions for{" "}
@@ -237,10 +250,48 @@ export default function AIGeneratorPanel({ open, initialPart, onClose, onQuestio
 
 
                 {/* Question Cards */}
-                <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1">
-                  {previewQuestions.map((q, i) => (
-                    <QuestionCard key={q.id} question={q} index={i} />
-                  ))}
+                <div className="space-y-6 max-h-[500px] overflow-y-auto pr-1">
+                  {(() => {
+                    const isPart6 = selectedPart === "PART_6";
+                    const isPart7 = selectedPart === "PART_7";
+                    
+                    if (isPart6 || isPart7) {
+                      const setSize = isPart6 ? 4 : 2;
+                      const groups: TestQuestion[][] = [];
+                      for (let i = 0; i < previewQuestions.length; i += setSize) {
+                        groups.push(previewQuestions.slice(i, i + setSize));
+                      }
+
+                      return groups.map((group, gIdx) => (
+                        <div key={gIdx} className="space-y-4 p-4 rounded-2xl border-2 border-dashed border-primary/20 bg-primary/5">
+                           <div className="flex items-center gap-2 mb-1">
+                              <Badge variant="outline" className="bg-primary/20 text-primary border-primary/30 font-bold px-2 py-0.5">
+                                {t('set')} {gIdx + 1}
+                              </Badge>
+                           </div>
+                           
+                           {group[0]?.passage && (
+                             <div className="rounded-xl bg-card p-4 text-[13px] text-foreground leading-relaxed border border-border/50 font-serif italic shadow-sm">
+                               <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest mb-2 flex items-center gap-1.5 opacity-60">
+                                 <BookOpen className="w-3 h-3" /> {t('readingPassage')}
+                               </p>
+                               {group[0].passage}
+                             </div>
+                           )}
+
+                           <div className="space-y-4">
+                              {group.map((q, qIdx) => (
+                                <QuestionCard key={q.id} question={{ ...q, passage: null }} index={gIdx * setSize + qIdx} />
+                              ))}
+                           </div>
+                        </div>
+                      ));
+                    }
+
+                    return previewQuestions.map((q, i) => (
+                      <QuestionCard key={q.id} question={q} index={i} />
+                    ));
+                  })()}
                 </div>
               </div>
             </>

@@ -42,11 +42,12 @@ export const aiService = {
   async generateQuestions(
     part: string,
     difficulty: string,
-    count: number
+    count: number,
+    topic?: string
   ): Promise<GeneratedQuestionResponse[]> {
     const { data } = await apiClient.post<GeneratedQuestionResponse[]>(
       "/ai/generate-questions",
-      { part, difficulty, count }
+      { part, difficulty, count, topic }
     );
     return data;
   },

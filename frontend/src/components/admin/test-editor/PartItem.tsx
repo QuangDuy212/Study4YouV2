@@ -4,6 +4,7 @@ import { ChevronDown, Plus, Trash2, Headphones, BookOpen, Sparkles } from "lucid
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 import type { TestPart, PartType } from "./types";
 import { PART_LABELS, READING_PARTS, LISTENING_PARTS, createEmptyQuestion } from "./types";
 import QuestionEditor from "./QuestionEditor";
@@ -17,13 +18,24 @@ interface PartItemProps {
 }
 
 export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: PartItemProps) {
+  const { t } = useLanguage();
   const [expanded, setExpanded] = useState(false);
   const info = PART_LABELS[part.type];
   const isReading = READING_PARTS.includes(part.type);
   const isListening = LISTENING_PARTS.includes(part.type);
 
   const addQuestion = () => {
-    onChange({ ...part, questions: [...part.questions, createEmptyQuestion()] });
+    const isPart6 = part.type === "PART_6";
+    const isPart7 = part.type === "PART_7";
+    
+    if (isPart6 || isPart7) {
+      const setSize = isPart6 ? 4 : 2;
+      const newQuestions = Array.from({ length: setSize }, () => createEmptyQuestion(part.type));
+      onChange({ ...part, questions: [...part.questions, ...newQuestions] });
+    } else {
+      onChange({ ...part, questions: [...part.questions, createEmptyQuestion(part.type)] });
+    }
+    
     if (!expanded) setExpanded(true);
   };
 
@@ -115,20 +127,100 @@ export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: Pa
               {/* Questions */}
               {part.questions.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground text-sm">
-                  No questions yet. Click "Add Question" to get started.
+                  {t('noQuestionsYet')}
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {part.questions.map((q, qi) => (
-                    <QuestionEditor
-                      key={q.id}
-                      question={q}
-                      index={qi}
-                      partType={part.type}
-                      onChange={(updated) => updateQuestion(qi, updated)}
-                      onDelete={() => deleteQuestion(qi)}
-                    />
-                  ))}
+                <div className="space-y-6">
+                  {(() => {
+                    const isPart6 = part.type === "PART_6";
+                    const isPart7 = part.type === "PART_7";
+                    
+                    if (isPart6 || isPart7) {
+                      const setSize = isPart6 ? 4 : 2;
+                      const groups: typeof part.questions[] = [];
+                      for (let i = 0; i < part.questions.length; i += setSize) {
+                        groups.push(part.questions.slice(i, i + setSize));
+                      }
+
+                      return groups.map((group, gIdx) => (
+                        <div key={gIdx} className="p-4 rounded-xl border-2 border-dashed border-primary/20 bg-primary/5 space-y-4">
+                          <div className="flex items-center justify-between border-b border-primary/10 pb-2">
+                             <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 font-bold">
+                                {t('set')} {gIdx + 1} ({group.length} {t('questions')})
+                             </Badge>
+                             <div className="flex items-center gap-2">
+                               <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-7 text-[10px] text-destructive hover:bg-destructive/10"
+                                onClick={() => {
+                                  const startIndex = gIdx * setSize;
+                                  onChange({ ...part, questions: part.questions.filter((_, i) => i < startIndex || i >= startIndex + setSize) });
+                                }}
+                              >
+                                <Trash2 className="w-3 h-3 mr-1" /> {t('removeSet')}
+                              </Button>
+                             </div>
+                          </div>
+                          
+                          {/* Shared Passage Editor for the Set */}
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-primary">
+                              <BookOpen className="w-4 h-4" />
+                              <span className="text-xs font-bold uppercase tracking-wider">{t('sharedPassage')}</span>
+                            </div>
+                            <textarea
+                              className="w-full min-h-[100px] p-3 rounded-lg border border-primary/20 bg-background text-sm font-serif italic focus:ring-1 focus:ring-primary outline-none"
+                              placeholder={t('enterSharedPassage')}
+                              value={group[0]?.passage || ""}
+                              onChange={(e) => {
+                                const newPassage = e.target.value;
+                                const startIndex = gIdx * setSize;
+                                const updatedQuestions = [...part.questions];
+                                for (let i = startIndex; i < startIndex + group.length; i++) {
+                                  updatedQuestions[i] = { ...updatedQuestions[i], passage: newPassage };
+                                }
+                                onChange({ ...part, questions: updatedQuestions });
+                              }}
+                            />
+                          </div>
+
+                          <div className="space-y-3">
+                            {group.map((q, qi) => {
+                              const absoluteIdx = gIdx * setSize + qi;
+                              return (
+                                <QuestionEditor
+                                  key={q.id}
+                                  question={q}
+                                  index={absoluteIdx}
+                                  partType={part.type}
+                                  onChange={(updated) => updateQuestion(absoluteIdx, updated)}
+                                  onDelete={() => deleteQuestion(absoluteIdx)}
+                                  hidePassageField // Hide the redundant passage field inside QuestionEditor
+                                />
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ));
+                    }
+
+                    // Default view for other parts
+                    return (
+                      <div className="space-y-3">
+                        {part.questions.map((q, qi) => (
+                          <QuestionEditor
+                            key={q.id}
+                            question={q}
+                            index={qi}
+                            partType={part.type}
+                            onChange={(updated) => updateQuestion(qi, updated)}
+                            onDelete={() => deleteQuestion(qi)}
+                          />
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
             </div>
