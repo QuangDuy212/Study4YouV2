@@ -27,6 +27,8 @@ public class UserRequest {
     @NotBlank(message = "Full name is required")
     private String fullName;
 
+    private String phone;
+
     private UserStatus status;
 
     private Set<UUID> roleIds;

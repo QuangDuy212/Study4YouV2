@@ -29,6 +29,8 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String fullName;
 
+    private String phone;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserStatus status = UserStatus.ACTIVE;

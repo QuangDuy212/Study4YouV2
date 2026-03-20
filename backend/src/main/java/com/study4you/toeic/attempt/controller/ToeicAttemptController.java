@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -25,6 +26,7 @@ public class ToeicAttemptController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<ToeicAttemptResponse>>> getAllAttempts(
+            @RequestParam(required = false) UUID userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
@@ -34,7 +36,7 @@ public class ToeicAttemptController {
                     Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
         
-        PageResponse<ToeicAttemptResponse> attempts = toeicAttemptService.getAllAttempts(pageable);
+        PageResponse<ToeicAttemptResponse> attempts = toeicAttemptService.getAllAttempts(userId, pageable);
         return ResponseEntity.ok(ApiResponse.success(attempts));
     }
 
@@ -44,6 +46,7 @@ public class ToeicAttemptController {
         return ResponseEntity.ok(ApiResponse.success(attempt));
     }
 
+    @PreAuthorize("hasAuthority('TAKE_TOEIC_TEST')")
     @PostMapping
     public ResponseEntity<ApiResponse<ToeicAttemptResponse>> createAttempt(@Valid @RequestBody ToeicAttemptRequest request) {
         ToeicAttemptResponse attempt = toeicAttemptService.createAttempt(request);

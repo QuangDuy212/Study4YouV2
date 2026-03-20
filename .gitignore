@@ -39,11 +39,30 @@ Thumbs.db
 backend/logs/
 
 # Application
+backend/.env
+backend/src/main/resources/application.yml
 backend/application-local.yml
 backend/application-dev.yml
 backend/application-prod.yml
+backend/uploads/*
 
 # Database
 *.db
 *.sqlite
 backend/postgres_data/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+frontend/coverage/
+frontend/.vercel/
+frontend/.output/
+frontend/.nuxt/
+frontend/.next/
+frontend/.cache/
+frontend/bun.lockb
+

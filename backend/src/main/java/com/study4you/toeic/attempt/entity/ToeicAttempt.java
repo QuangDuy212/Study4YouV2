@@ -10,7 +10,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
+import com.study4you.toeic.answer.entity.ToeicAnswer;
 
 @Entity
 @Table(name = "toeic_attempts")
@@ -42,4 +44,7 @@ public class ToeicAttempt extends BaseEntity {
     private Integer rawScore;
 
     private Integer toeicScore;
+
+    @OneToMany(mappedBy = "attempt", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ToeicAnswer> answers;
 }

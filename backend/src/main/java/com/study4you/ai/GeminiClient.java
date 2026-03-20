@@ -21,7 +21,7 @@ public class GeminiClient {
     @Value("${gemini.api-key:}")
     private String apiKey;
 
-    @Value("${gemini.model:gemini-2.0-flash}")
+    @Value("${gemini.model:gemini-1.5-flash}")
     private String model;
 
     private Client client;
@@ -29,11 +29,15 @@ public class GeminiClient {
     @PostConstruct
     public void init() {
         if (apiKey != null && !apiKey.isBlank()) {
+            String maskedKey = apiKey.length() > 5 ? apiKey.substring(0, 5) + "..." : "ShortKey";
+            log.info("GeminiClient initialised — model: {}, Key: {}, API: v1beta", model, maskedKey);
             // The SDK reads GOOGLE_API_KEY by default; we pass it explicitly via builder.
             client = Client.builder()
                     .apiKey(apiKey)
+                    .httpOptions(com.google.genai.types.HttpOptions.builder()
+                            .apiVersion("v1beta")
+                            .build())
                     .build();
-            log.info("GeminiClient initialised — model: {}", model);
         } else {
             log.warn("GeminiClient: GEMINI_API_KEY is not set. AI endpoints will use mock data.");
         }
@@ -54,12 +58,49 @@ public class GeminiClient {
             throw new IllegalStateException("Gemini API key is not configured");
         }
 
-        GenerateContentConfig config = GenerateContentConfig.builder()
-                .candidateCount(1)
-                .maxOutputTokens(4096)
-                .build();
+        try {
+            GenerateContentConfig config = GenerateContentConfig.builder()
+                    .candidateCount(1)
+                    .maxOutputTokens(4096)
+                    .temperature(1.0f)
+                    .build();
 
-        GenerateContentResponse response = client.models.generateContent(model, prompt, config);
-        return response.text();
+            GenerateContentResponse response = client.models.generateContent(model, prompt, config);
+            return response.text();
+        } catch (Exception e) {
+            log.error("Gemini API Error Detail: {}", e.getMessage());
+            if (e.getMessage() != null && e.getMessage().contains("429")) {
+                throw new com.study4you.ai.exception.AiQuotaException("Gemini API Quota Exceeded: " + e.getMessage());
+            }
+            throw e;
+        }
+    }
+
+    /**
+     * Generate embeddings for the given text.
+     */
+    public java.util.List<Double> embed(String text) {
+        if (!isAvailable()) {
+            throw new IllegalStateException("Gemini API key is not configured");
+        }
+
+        try {
+            com.google.genai.types.EmbedContentResponse response = client.models.embedContent(
+                    "models/gemini-embedding-001", // Verified model name
+                    text,
+                    com.google.genai.types.EmbedContentConfig.builder().build()
+            );
+
+            return response.embeddings()
+                    .flatMap(list -> list.stream().findFirst())
+                    .flatMap(com.google.genai.types.ContentEmbedding::values)
+                    .map(values -> values.stream().map(Float::doubleValue).collect(java.util.stream.Collectors.toList()))
+                    .orElse(new java.util.ArrayList<>());
+        } catch (Exception e) {
+            if (e.getMessage() != null && e.getMessage().contains("429")) {
+                throw new com.study4you.ai.exception.AiQuotaException("Gemini API Embedding Quota Exceeded");
+            }
+            throw e;
+        }
     }
 }

@@ -2,19 +2,21 @@ spring:
   application:
     name: study4you-backend
   
-  # Global API versioning prefix
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
   mvc:
     servlet:
       path: /api/v1
   
-  # PostgreSQL Database Configuration
   datasource:
-    url: jdbc:postgresql://localhost:5432/study4you?TimeZone=Asia/Ho_Chi_Minh
-    username: study4you_user
-    password: 1012004
+    url: jdbc:postgresql://localhost:5432/study4you
+    username: your_username
+    password: your_password
     driver-class-name: org.postgresql.Driver
   
-  # JPA Configuration
   jpa:
     hibernate:
       ddl-auto: update
@@ -25,26 +27,22 @@ spring:
         format_sql: true
     open-in-view: false
   
-  # Jackson Configuration
   jackson:
     serialization:
       write-dates-as-timestamps: false
     time-zone: Asia/Ho_Chi_Minh
 
-# Server Configuration
 server:
   port: 8080
   error:
     include-message: always
     include-binding-errors: always
 
-# JWT Configuration
 jwt:
-  secret: Study4YouSecretKeyForJWTTokenGenerationMustBeLongEnough2024
-  access-token-expiration: 3600000      # 1 hour in milliseconds
-  refresh-token-expiration: 86400000    # 24 hours in milliseconds
+  secret: YOUR_JWT_SECRET_HERE
+  access-token-expiration: 3600000
+  refresh-token-expiration: 86400000
 
-# Logging Configuration
 logging:
   level:
     com.study4you: DEBUG
@@ -52,10 +50,6 @@ logging:
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
-# Gemini AI Configuration
-# Set env var GEMINI_API_KEY to enable real AI generation.
-# If empty, AiService falls back to built-in mock data.
 gemini:
-  api-key: AIzaSyDDf9ivIRl-vxSGQrnj_sn3zJvTWpEUT68
+  api-key: YOUR_GEMINI_API_KEY_HERE
   model: gemini-2.0-flash
-

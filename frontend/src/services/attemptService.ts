@@ -1,0 +1,85 @@
+import apiClient from "./apiClient";
+
+export interface ToeicAttemptResponse {
+  id: string;
+  userId: string;
+  testId: string;
+  testTitle?: string;
+  startedAt: string;
+  submittedAt: string | null;
+  rawScore: number | null;
+  toeicScore: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ToeicAttemptRequest {
+  userId: string;
+  testId: string;
+  startedAt: string;
+  submittedAt?: string | null;
+  rawScore?: number | null;
+  toeicScore?: number | null;
+}
+
+export interface PageResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+}
+
+export interface ApiWrapped<T> {
+  success: boolean;
+  message: string;
+  data: T;
+}
+
+export const attemptService = {
+  async getAttempts(
+    userId?: string,
+    page = 0,
+    size = 10,
+    sortBy = "createdAt",
+    sortDir = "DESC"
+  ): Promise<PageResponse<ToeicAttemptResponse>> {
+    const url = `/toeic/attempts?page=${page}&size=${size}&sortBy=${sortBy}&sortDir=${sortDir}${
+      userId ? `&userId=${userId}` : ""
+    }`;
+    const { data } = await apiClient.get<ApiWrapped<PageResponse<ToeicAttemptResponse>>>(url);
+    return data.data;
+  },
+
+  async getAttemptById(id: string): Promise<ToeicAttemptResponse> {
+    const { data } = await apiClient.get<ApiWrapped<ToeicAttemptResponse>>(
+      `/toeic/attempts/${id}`
+    );
+    return data.data;
+  },
+
+  async createAttempt(req: ToeicAttemptRequest): Promise<ToeicAttemptResponse> {
+    const { data } = await apiClient.post<ApiWrapped<ToeicAttemptResponse>>(
+      "/toeic/attempts",
+      req
+    );
+    return data.data;
+  },
+
+  async updateAttempt(
+    id: string,
+    req: ToeicAttemptRequest
+  ): Promise<ToeicAttemptResponse> {
+    const { data } = await apiClient.put<ApiWrapped<ToeicAttemptResponse>>(
+      `/toeic/attempts/${id}`,
+      req
+    );
+    return data.data;
+  },
+
+  async deleteAttempt(id: string): Promise<void> {
+    await apiClient.delete(`/toeic/attempts/${id}`);
+  },
+};
+
+export default attemptService;

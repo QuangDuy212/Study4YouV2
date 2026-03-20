@@ -2,7 +2,9 @@ package com.study4you.toeic.test.service;
 
 import com.study4you.common.activity.UserActivityService;
 import com.study4you.common.dto.PageResponse;
+import com.study4you.common.enums.Level;
 import com.study4you.common.enums.PartNumber;
+import com.study4you.common.enums.Skill;
 import com.study4you.common.exception.ResourceNotFoundException;
 import com.study4you.toeic.option.dto.ToeicOptionResponse;
 import com.study4you.toeic.option.entity.ToeicOption;
@@ -76,6 +78,9 @@ public class ToeicTestService {
         test.setTitle(request.getTitle());
         test.setDurationMinutes(120);
         test.setActive(request.getActive() != null ? request.getActive() : true);
+        
+        if (request.getSkill() != null) test.setSkill(Skill.valueOf(request.getSkill().toUpperCase()));
+        if (request.getLevel() != null) test.setLevel(Level.valueOf(request.getLevel().toUpperCase()));
 
         ToeicTest savedTest = toeicTestRepository.save(test);
 
@@ -107,6 +112,12 @@ public class ToeicTestService {
         test.setTitle(request.getTitle());
         if (request.getActive() != null) {
             test.setActive(request.getActive());
+        }
+        if (request.getSkill() != null) {
+            test.setSkill(Skill.valueOf(request.getSkill().toUpperCase()));
+        }
+        if (request.getLevel() != null) {
+            test.setLevel(Level.valueOf(request.getLevel().toUpperCase()));
         }
 
         ToeicTest updatedTest = toeicTestRepository.save(test);
@@ -160,6 +171,8 @@ public class ToeicTestService {
         response.setTitle(test.getTitle());
         response.setDurationMinutes(test.getDurationMinutes());
         response.setActive(test.getActive());
+        response.setSkill(test.getSkill().name());
+        response.setLevel(test.getLevel().name());
         response.setCreatedAt(test.getCreatedAt());
         response.setUpdatedAt(test.getUpdatedAt());
         return response;
@@ -177,6 +190,7 @@ public class ToeicTestService {
                     partResponse.setTestId(part.getTestId());
                     partResponse.setPart(part.getPart());
                     partResponse.setOrderIndex(part.getOrderIndex());
+                    partResponse.setAudioUrl(part.getAudioUrl());
                     partResponse.setCreatedAt(part.getCreatedAt());
                     partResponse.setUpdatedAt(part.getUpdatedAt());
 

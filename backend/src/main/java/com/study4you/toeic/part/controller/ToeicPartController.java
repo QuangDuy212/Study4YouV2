@@ -13,6 +13,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import com.study4you.common.storage.FileStorageService;
 
 import java.util.UUID;
 
@@ -22,6 +24,7 @@ import java.util.UUID;
 public class ToeicPartController {
 
     private final ToeicPartService toeicPartService;
+    private final FileStorageService fileStorageService;
 
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<ToeicPartResponse>>> getAllParts(
@@ -64,5 +67,15 @@ public class ToeicPartController {
     public ResponseEntity<ApiResponse<Void>> deletePart(@PathVariable @org.springframework.lang.NonNull UUID id) {
         toeicPartService.deletePart(id);
         return ResponseEntity.ok(ApiResponse.success("Part deleted successfully", null));
+    }
+
+    @PostMapping(value = "/{id}/upload-audio", consumes = "multipart/form-data")
+    public ResponseEntity<ApiResponse<ToeicPartResponse>> uploadAudio(
+            @PathVariable @org.springframework.lang.NonNull UUID id,
+            @RequestParam("file") MultipartFile file
+    ) {
+        String audioUrl = fileStorageService.saveAudio(file);
+        ToeicPartResponse updatedPart = toeicPartService.updateAudioUrl(id, audioUrl);
+        return ResponseEntity.ok(ApiResponse.success("Audio uploaded successfully", updatedPart));
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -23,6 +24,7 @@ public class ToeicTestController {
 
     private final ToeicTestService toeicTestService;
 
+    @PreAuthorize("hasAuthority('MANAGE_TESTS')")
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<ToeicTestResponse>>> getAllTests(
             @RequestParam(defaultValue = "0") int page,
@@ -44,6 +46,7 @@ public class ToeicTestController {
         return ResponseEntity.ok(ApiResponse.success(test));
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_TESTS')")
     @PostMapping
     public ResponseEntity<ApiResponse<ToeicTestResponse>> createTest(@Valid @RequestBody ToeicTestRequest request) {
         ToeicTestResponse test = toeicTestService.createTest(request);
@@ -51,6 +54,7 @@ public class ToeicTestController {
                 .body(ApiResponse.success("Test created successfully", test));
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_TESTS')")
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<ToeicTestResponse>> updateTest(
             @PathVariable @org.springframework.lang.NonNull UUID id,
@@ -60,6 +64,7 @@ public class ToeicTestController {
         return ResponseEntity.ok(ApiResponse.success("Test updated successfully", test));
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_TESTS')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteTest(@PathVariable @org.springframework.lang.NonNull UUID id) {
         toeicTestService.deleteTest(id);

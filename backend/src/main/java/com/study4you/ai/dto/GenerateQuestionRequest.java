@@ -17,4 +17,6 @@ public class GenerateQuestionRequest {
     @Min(value = 1, message = "Count must be at least 1")
     @Max(value = 60, message = "Count must not exceed 60")
     private int count;
+
+    private String topic; // Optional: "Travel", "Environment", "Technology", etc.
 }

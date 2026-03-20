@@ -17,6 +17,8 @@ public class ToeicTestResponse {
     private String title;
     private Integer durationMinutes;
     private Boolean active;
+    private String skill;
+    private String level;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<ToeicPartResponse> parts;
