@@ -48,16 +48,6 @@ interface TestData {
   parts: TestPart[];
 }
 
-const PART_LABELS: Record<string, { label: string; description: string }> = {
-  PART_1: { label: "Part 1", description: "Photographs" },
-  PART_2: { label: "Part 2", description: "Question-Response" },
-  PART_3: { label: "Part 3", description: "Conversations" },
-  PART_4: { label: "Part 4", description: "Talks" },
-  PART_5: { label: "Part 5", description: "Incomplete Sentences" },
-  PART_6: { label: "Part 6", description: "Text Completion" },
-  PART_7: { label: "Part 7", description: "Reading Comprehension" },
-};
-
 export default function TestViewPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -65,6 +55,16 @@ export default function TestViewPage() {
   const [testData, setTestData] = useState<TestData | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedPart, setSelectedPart] = useState<string>("PART_1");
+
+  const PART_LABELS: Record<string, { label: string; description: string }> = {
+    PART_1: { label: t("part1"), description: t("photographs") },
+    PART_2: { label: t("part2"), description: t("questionResponse") },
+    PART_3: { label: t("part3"), description: t("conversations") },
+    PART_4: { label: t("part4"), description: t("talks") },
+    PART_5: { label: t("part5"), description: t("incompleteSentences") },
+    PART_6: { label: t("part6"), description: t("textCompletion") },
+    PART_7: { label: t("part7"), description: t("readingComprehension") },
+  };
 
   useEffect(() => {
     if (id) fetchTestData(id);
@@ -195,7 +195,14 @@ export default function TestViewPage() {
             ) : (
               <div className="space-y-4">
                 {part.questions.map((question, index) => (
-                  <QuestionCard key={question.id} question={question} questionNumber={index + 1} partType={part.partType} t={t} />
+                  <QuestionCard 
+                    key={question.id} 
+                    question={question} 
+                    questionNumber={index + 1} 
+                    partType={part.partType} 
+                    t={t} 
+                    partLabel={PART_LABELS[part.partType]?.label}
+                  />
                 ))}
               </div>
             )}
@@ -216,7 +223,19 @@ function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string
   );
 }
 
-function QuestionCard({ question, questionNumber, partType, t }: { question: any; questionNumber: number; partType: string; t: (key: string) => string }) {
+function QuestionCard({ 
+  question, 
+  questionNumber, 
+  partType, 
+  t,
+  partLabel
+}: { 
+  question: any; 
+  questionNumber: number; 
+  partType: string; 
+  t: (key: string) => string;
+  partLabel?: string;
+}) {
   const showPassage = partType === "PART_6" || partType === "PART_7";
   const isPart1 = partType === "PART_1";
   const showQuestionAudio = !["PART_1", "PART_2", "PART_3"].includes(partType);
@@ -226,7 +245,7 @@ function QuestionCard({ question, questionNumber, partType, t }: { question: any
       <CardHeader>
         <CardTitle className="text-base flex items-center justify-between">
           <span>{t("question")} {questionNumber}</span>
-          <Badge variant="outline" className="text-xs">{PART_LABELS[partType]?.label}</Badge>
+          <Badge variant="outline" className="text-xs">{partLabel || partType}</Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">

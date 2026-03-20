@@ -22,13 +22,13 @@ export default function TestsPage() {
         setTests(data.content.filter(test => test.active));
       } catch (error) {
         console.error("Failed to fetch tests:", error);
-        toast.error("Failed to load tests");
+        toast.error(t('failedToLoadTests'));
       } finally {
         setIsLoading(false);
       }
     };
     fetchTests();
-  }, []);
+  }, [t]);
 
   return (
     <DashboardLayout>
@@ -84,13 +84,13 @@ export default function TestsPage() {
                 transition={{ duration: 0.3, delay: 0.05 * index }}
               >
                 <div className="flex items-start justify-between mb-3">
-                  <Badge variant="outline" className="text-xs">{t('fullTest')}</Badge>
+                  <Badge variant="outline" className="text-xs">{t('test')}</Badge>
                 </div>
 
                 <h3 className="font-display font-semibold text-lg text-foreground mb-3">{test.title}</h3>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
-                  <div className="flex items-center gap-1.5"><Headphones className="w-4 h-4 text-purple-500" />Part 1–4</div>
-                  <div className="flex items-center gap-1.5"><BookOpen className="w-4 h-4 text-blue-500" />Part 5–7</div>
+                  <div className="flex items-center gap-1.5"><Headphones className="w-4 h-4 text-purple-500" />{t('listeningPart14')}</div>
+                  <div className="flex items-center gap-1.5"><BookOpen className="w-4 h-4 text-blue-500" />{t('readingPart57')}</div>
                 </div>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground mb-5">
                   <div className="flex items-center gap-1.5"><FileText className="w-4 h-4" />200 {t('questions').toLowerCase()}</div>

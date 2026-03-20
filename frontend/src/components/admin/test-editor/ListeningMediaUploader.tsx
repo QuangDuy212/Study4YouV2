@@ -6,6 +6,7 @@ import { Upload, message } from 'antd';
 import type { UploadProps } from 'antd';
 import { uploadAudio, uploadImage } from "@/services/fileService";
 import { cn, getMediaUrl } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ListeningMediaUploaderProps {
   audioUrl?: string | null;
@@ -28,6 +29,7 @@ export default function ListeningMediaUploader({
   uploadAudioFn,
   uploadImageFn,
 }: ListeningMediaUploaderProps) {
+  const { t } = useLanguage();
   const audioPlayerRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -49,20 +51,20 @@ export default function ListeningMediaUploader({
         const response = await uploader(file as File);
         onAudioChange?.(response.url);
         onSuccess?.("ok");
-        message.success(`${(file as File).name} file uploaded successfully`);
+        message.success(t("uploadSuccess", { name: (file as File).name }));
       } catch (error: any) {
         onError?.(error);
-        message.error(`${(file as File).name} file upload failed.`);
+        message.error(t("uploadFailed", { name: (file as File).name }));
       }
     },
     beforeUpload: (file) => {
       const isValidFormat = file.type === 'audio/mpeg' || file.type === 'audio/wav';
       if (!isValidFormat) {
-        message.error('You can only upload MP3 or WAV file!');
+        message.error(t("invalidAudioFormat"));
       }
       const isLt10M = file.size / 1024 / 1024 < 10;
       if (!isLt10M) {
-        message.error('Audio must smaller than 10MB!');
+        message.error(t("audioSizeLimit"));
       }
       return isValidFormat && isLt10M;
     },
@@ -78,20 +80,20 @@ export default function ListeningMediaUploader({
         const response = await uploader(file as File);
         onImageChange?.(response.url);
         onSuccess?.("ok");
-        message.success(`${(file as File).name} file uploaded successfully`);
+        message.success(t("uploadSuccess", { name: (file as File).name }));
       } catch (error: any) {
         onError?.(error);
-        message.error(`${(file as File).name} file upload failed.`);
+        message.error(t("uploadFailed", { name: (file as File).name }));
       }
     },
     beforeUpload: (file) => {
       const isValidFormat = ['image/jpeg', 'image/png', 'image/webp'].includes(file.type);
       if (!isValidFormat) {
-        message.error('You can only upload JPG/PNG/WEBP file!');
+        message.error(t("invalidImageFormat"));
       }
       const isLt10M = file.size / 1024 / 1024 < 10;
       if (!isLt10M) {
-        message.error('Image must smaller than 10MB!');
+        message.error(t("imageSizeLimit"));
       }
       return isValidFormat && isLt10M;
     },
@@ -109,21 +111,21 @@ export default function ListeningMediaUploader({
       {!hideAudio && (
         <div className="space-y-2">
           <Label className="flex items-center gap-1.5 mb-2">
-            <Music className="w-3.5 h-3.5 text-primary" /> Audio File
+            <Music className="w-3.5 h-3.5 text-primary" /> {t("audioFile")}
           </Label>
           
           <div className="flex flex-col gap-2">
             <Upload {...audioUploadProps}>
               <Button variant="outline" type="button" className="w-full">
                 <UploadIcon className="w-4 h-4 mr-2" />
-                Upload Audio
+                {t("uploadAudio")}
               </Button>
             </Upload>
 
             {audioUrl && (
               <div className="rounded-lg border border-border bg-muted/50 p-3 space-y-2 mt-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground truncate">Audio Preview</span>
+                  <span className="text-xs text-muted-foreground truncate">{t("audioPreview")}</span>
                   <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onAudioChange?.(null)}>
                     <X className="w-3 h-3" />
                   </Button>
@@ -141,20 +143,20 @@ export default function ListeningMediaUploader({
       {!hideImage && (
         <div className="space-y-2">
           <Label className="flex items-center gap-1.5 mb-2">
-            <ImageIcon className="w-3.5 h-3.5 text-primary" /> Image
+            <ImageIcon className="w-3.5 h-3.5 text-primary" /> {t("image")}
           </Label>
           
           <div className="flex flex-col gap-2">
             <Upload {...imageUploadProps}>
               <Button variant="outline" type="button" className="w-full">
                 <UploadIcon className="w-4 h-4 mr-2" />
-                Upload Image
+                {t("uploadImage")}
               </Button>
             </Upload>
 
             {imageUrl && (
               <div className="rounded-lg border border-border bg-muted/50 p-2 relative group mt-2">
-                <img src={getMediaUrl(imageUrl)} alt="Question Preview" className="w-full h-auto object-contain max-h-[150px] rounded" />
+                <img src={getMediaUrl(imageUrl)} alt={t("questionPreviewAlt")} className="w-full h-auto object-contain max-h-[150px] rounded" />
                 <Button
                   variant="destructive"
                   size="icon"

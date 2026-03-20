@@ -30,6 +30,9 @@ import AnalyticsPage from "./pages/admin/AnalyticsPage";
 import TestEditorPage from "./pages/admin/TestEditorPage";
 import TestViewPage from "./pages/admin/TestViewPage";
 import NotFound from "./pages/NotFound";
+import ForbiddenPage from "./pages/ForbiddenPage";
+import ProfilePage from "./pages/admin/ProfilePage";
+import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
 
 const queryClient = new QueryClient();
 
@@ -47,29 +50,32 @@ const App = () => (
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
+                <Route path="/403" element={<ForbiddenPage />} />
                 <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
                 <Route path="/tests" element={<ProtectedRoute><TestsPage /></ProtectedRoute>} />
                 <Route path="/tests/:id/attempt" element={<ProtectedRoute><TestTakingPage /></ProtectedRoute>} />
                 <Route path="/result/:id" element={<ProtectedRoute><ResultPage /></ProtectedRoute>} />
                 <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
                 {/* Admin Routes */}
-                <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminDashboardPage /></ProtectedRoute>} />
-                <Route path="/admin/tests" element={<ProtectedRoute requireAdmin><AdminPage /></ProtectedRoute>} />
+                <Route path="/admin" element={<ProtectedRoute requireAdmin requiredPermission="VIEW_ADMIN_DASHBOARD"><AdminDashboardPage /></ProtectedRoute>} />
+                <Route path="/admin/tests" element={<ProtectedRoute requireAdmin requiredPermission="MANAGE_TESTS"><AdminPage /></ProtectedRoute>} />
                 <Route path="/admin/tests/create" element={<ProtectedRoute requireAdmin><TestEditorPage /></ProtectedRoute>} />
                 <Route path="/admin/tests/:id/edit" element={<ProtectedRoute requireAdmin><TestEditorPage /></ProtectedRoute>} />
-                <Route path="/admin/tests/:id/view" element={<ProtectedRoute requireAdmin><TestViewPage /></ProtectedRoute>} />
-                <Route path="/admin/questions" element={<ProtectedRoute requireAdmin><QuestionBankPage /></ProtectedRoute>} />
+                <Route path="/admin/tests/:id/view" element={<ProtectedRoute requireAdmin requiredPermission="MANAGE_TESTS"><TestViewPage /></ProtectedRoute>} />
+                <Route path="/admin/questions" element={<ProtectedRoute requireAdmin requiredPermission="MANAGE_QUESTIONS"><QuestionBankPage /></ProtectedRoute>} />
                 <Route path="/admin/questions/create" element={<ProtectedRoute requireAdmin><QuestionEditorPage /></ProtectedRoute>} />
                 <Route path="/admin/questions/:id/edit" element={<ProtectedRoute requireAdmin><QuestionEditorPage /></ProtectedRoute>} />
-                <Route path="/admin/questions/ai-generate" element={<ProtectedRoute requireAdmin><AIGeneratePage /></ProtectedRoute>} />
-                <Route path="/admin/users" element={<ProtectedRoute requireAdmin><UsersPage /></ProtectedRoute>} />
+                <Route path="/admin/questions/ai-generate" element={<ProtectedRoute requireAdmin requiredPermission="MANAGE_QUESTIONS"><AIGeneratePage /></ProtectedRoute>} />
+                <Route path="/admin/users" element={<ProtectedRoute requireAdmin requiredPermission="MANAGE_USERS"><UsersPage /></ProtectedRoute>} />
                 <Route path="/admin/users/ai-generate" element={<ProtectedRoute requireAdmin><AIGenerateUsersPage /></ProtectedRoute>} />
                 <Route path="/admin/users/create" element={<ProtectedRoute requireAdmin><UserEditorPage /></ProtectedRoute>} />
                 <Route path="/admin/users/:id/edit" element={<ProtectedRoute requireAdmin><UserEditorPage /></ProtectedRoute>} />
                 <Route path="/admin/roles" element={<ProtectedRoute requireAdmin><RolesPage /></ProtectedRoute>} />
                 <Route path="/admin/roles/create" element={<ProtectedRoute requireAdmin><RoleEditorPage /></ProtectedRoute>} />
-                <Route path="/admin/roles/:id/edit" element={<ProtectedRoute requireAdmin><RoleEditorPage /></ProtectedRoute>} />
-                <Route path="/admin/analytics" element={<ProtectedRoute requireAdmin><AnalyticsPage /></ProtectedRoute>} />
+                <Route path="/admin/roles/:id/edit" element={<ProtectedRoute requireAdmin requiredPermission="MANAGE_USERS"><RoleEditorPage /></ProtectedRoute>} />
+                <Route path="/admin/analytics" element={<ProtectedRoute requireAdmin requiredPermission="VIEW_ANALYTICS"><AnalyticsPage /></ProtectedRoute>} />
+                <Route path="/admin/profile" element={<ProtectedRoute requireAdmin><ProfilePage /></ProtectedRoute>} />
+                <Route path="/admin/settings" element={<ProtectedRoute requireAdmin><AdminSettingsPage /></ProtectedRoute>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

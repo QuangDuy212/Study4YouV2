@@ -68,13 +68,13 @@ export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: Pa
             )}
           </div>
           <div className="text-left">
-            <p className="font-semibold text-sm text-foreground">{info.label}</p>
-            <p className="text-xs text-muted-foreground">{info.description}</p>
+            <p className="font-semibold text-sm text-foreground">{t(info.labelKey)}</p>
+            <p className="text-xs text-muted-foreground">{t(info.descriptionKey)}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="secondary" className="text-xs">
-            {part.questions.length} questions
+            {part.questions.length} {t("questions")}
           </Badge>
           <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform", expanded && "rotate-180")} />
         </div>
@@ -94,7 +94,7 @@ export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: Pa
               {/* Action buttons */}
               <div className="flex items-center gap-2 pt-3">
                 <Button variant="outline" size="sm" onClick={addQuestion}>
-                  <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Question
+                  <Plus className="w-3.5 h-3.5 mr-1.5" /> {t("addQuestion")}
                 </Button>
                 {isReading && (
                   <Button
@@ -103,12 +103,12 @@ export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: Pa
                     className="border-primary/30 text-primary hover:bg-primary/5"
                     onClick={() => onOpenAIPanel(part.type)}
                   >
-                    <Sparkles className="w-3.5 h-3.5 mr-1.5" /> Generate with AI
+                    <Sparkles className="w-3.5 h-3.5 mr-1.5" /> {t("generateWithAI")}
                   </Button>
                 )}
                 <div className="ml-auto">
                   <Button variant="ghost" size="sm" className="text-destructive" onClick={onDelete}>
-                    <Trash2 className="w-3.5 h-3.5 mr-1.5" /> Remove Part
+                    <Trash2 className="w-3.5 h-3.5 mr-1.5" /> {t("removePart")}
                   </Button>
                 </div>
               </div>
@@ -116,6 +116,12 @@ export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: Pa
               {/* Part Level Audio */}
               {isListening && (
                 <div className="pt-2 pb-1 border-b border-border/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Headphones className="w-3.5 h-3.5 text-primary" />
+                    <span className="text-xs font-semibold uppercase tracking-wider">
+                      {t("partAudioFor", { part: t(info.labelKey) })}
+                    </span>
+                  </div>
                   <ListeningMediaUploader
                     hideImage
                     audioUrl={part.audioUrl || null}
@@ -127,7 +133,7 @@ export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: Pa
               {/* Questions */}
               {part.questions.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground text-sm">
-                  {t('noQuestionsYet')}
+                  {t('noQuestionsFound')}
                 </div>
               ) : (
                 <div className="space-y-6">

@@ -7,6 +7,7 @@ export interface AuthResponse {
   email: string;
   fullName: string;
   roles: string[];
+  permissions: string[];
   /** refreshToken is set as httpOnly cookie by the server */
   refreshToken?: string;
 }

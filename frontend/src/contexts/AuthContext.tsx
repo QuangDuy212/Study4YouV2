@@ -7,6 +7,7 @@ export interface UserProfile {
   fullName: string;
   avatarUrl: string | null;
   roles: string[];
+  permissions: string[];
 }
 
 interface AuthContextType {
@@ -19,6 +20,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => void;
+  hasPermission: (permission: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,6 +35,7 @@ function saveSession(auth: AuthResponse) {
       fullName: auth.fullName,
       avatarUrl: null,
       roles: auth.roles ?? [],
+      permissions: auth.permissions ?? [],
     } satisfies UserProfile)
   );
 }
@@ -75,6 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           fullName: auth.fullName,
           avatarUrl: null,
           roles: auth.roles ?? [],
+          permissions: auth.permissions ?? [],
         };
         setProfile(p);
         setAccessToken(auth.accessToken);
@@ -106,6 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           fullName: auth.fullName,
           avatarUrl: null,
           roles: auth.roles ?? [],
+          permissions: auth.permissions ?? [],
         };
         setProfile(p);
         setAccessToken(auth.accessToken);
@@ -132,6 +137,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAccessToken(null);
     }
   }, []);
+
+  const hasPermission = useCallback((permission: string) => {
+    return profile?.permissions?.includes(permission) ?? false;
+  }, [profile]);
 
   // If access token disappears (e.g. cleared by interceptor), sync state
   useEffect(() => {
@@ -161,6 +170,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signUp,
         signOut,
         refreshProfile,
+        hasPermission,
       }}
     >
       {children}

@@ -55,7 +55,7 @@ export default function TestSidebar({ data, onSave, onPublish, isSaving }: TestS
           <div className="space-y-1.5">
             {data.parts.map((part) => (
               <div key={part.id} className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">{PART_LABELS[part.type].label}</span>
+                <span className="text-muted-foreground">{t(PART_LABELS[part.type].labelKey)}</span>
                 <span className="text-foreground font-medium">{part.questions.length}</span>
               </div>
             ))}

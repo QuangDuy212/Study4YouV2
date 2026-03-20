@@ -52,13 +52,13 @@ export default function DashboardPage() {
       icon: TrendingUp, 
       label: t('averageScore'), 
       value: avgScore.toString(), 
-      trend: "Overall average" 
+      trend: t('overallAverageLabel')
     },
     { 
       icon: Trophy, 
       label: t('bestScore'), 
       value: bestAttempt ? `${bestAttempt.toeicScore}/990` : "0/990", 
-      trend: bestAttempt?.testTitle || "No tests yet" 
+      trend: bestAttempt?.testTitle || t('noTestsYet')
     },
   ];
 
@@ -96,7 +96,7 @@ export default function DashboardPage() {
         {/* Quick Start */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
           <h2 className="font-display text-xl font-semibold text-foreground mb-4">
-            Luyện thi TOEIC
+            {t('practiceToeic')}
           </h2>
           <Link to="/tests">
             <div className="bg-card rounded-2xl p-6 border border-border hover:shadow-md transition-shadow">
@@ -106,12 +106,12 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-display font-semibold text-lg text-foreground mb-1">
-                    TOEIC Full Test (Part 1–7)
+                    {t('toeicFullTestPart17')}
                   </h3>
-                  <p className="text-muted-foreground text-sm">200 câu hỏi · 120 phút · Listening & Reading</p>
+                  <p className="text-muted-foreground text-sm">{t('toeicFullTestDetail')}</p>
                 </div>
                 <Button className="gap-2">
-                  Bắt đầu <ArrowRight className="w-4 h-4" />
+                  {t('start')} <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
             </div>
@@ -130,7 +130,7 @@ export default function DashboardPage() {
               </div>
             ) : attempts.length === 0 ? (
               <div className="p-8 text-center text-muted-foreground">
-                No recent activity found. Start a test to see history.
+                {t('noRecentActivityHistory')}
               </div>
             ) : (
               attempts.map((activity) => (
@@ -140,7 +140,7 @@ export default function DashboardPage() {
                       <FileText className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <p className="font-medium text-foreground">{activity.testTitle || 'Untitled Test'}</p>
+                      <p className="font-medium text-foreground">{activity.testTitle || t('untitledTest')}</p>
                       <p className="text-sm text-muted-foreground">
                         {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true, locale: dateLocale })}
                       </p>

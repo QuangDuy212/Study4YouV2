@@ -30,6 +30,7 @@ import {
 import { cn } from "@/lib/utils";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import NotificationDropdown from "@/components/admin/NotificationDropdown";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -42,19 +43,23 @@ export default function AdminLayout({ children, pageTitle, pageDescription }: Ad
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const { profile, signOut } = useAuth();
+  const { profile, signOut, hasPermission } = useAuth();
+  const { isAdmin } = useAuth();
 
   const navigationItems = [
-    { icon: LayoutDashboard, label: t("dashboard"), href: "/admin" },
-    { icon: FileText, label: t("manageTests"), href: "/admin/tests" },
-    { icon: Database, label: t("questionBank"), href: "/admin/questions" },
-    { icon: Users, label: t("users"), href: "/admin/users" },
-    { icon: Shield, label: t("roles"), href: "/admin/roles" },
-    { icon: Sparkles, label: t("aiQuestions"), href: "/admin/questions/ai-generate" },
-    { icon: Sparkles, label: t("aiUsers"), href: "/admin/users/ai-generate" },
-
-    { icon: BarChart3, label: t("analytics"), href: "/admin/analytics" },
+    { icon: LayoutDashboard, label: t("dashboard"), href: "/admin", permission: "VIEW_ADMIN_DASHBOARD" },
+    { icon: FileText, label: t("manageTests"), href: "/admin/tests", permission: "MANAGE_TESTS" },
+    { icon: Database, label: t("questionBank"), href: "/admin/questions", permission: "MANAGE_QUESTIONS" },
+    { icon: Users, label: t("users"), href: "/admin/users", permission: "MANAGE_USERS" },
+    { icon: Shield, label: t("roles"), href: "/admin/roles", permission: "MANAGE_USERS" },
+    { icon: Sparkles, label: t("aiQuestions"), href: "/admin/questions/ai-generate", permission: "MANAGE_QUESTIONS" },
+    { icon: Sparkles, label: t("aiUsers"), href: "/admin/users/ai-generate", permission: "MANAGE_USERS" },
+    { icon: BarChart3, label: t("analytics"), href: "/admin/analytics", permission: "VIEW_ANALYTICS" },
   ];
+
+  const filteredItems = navigationItems.filter(item => 
+    !item.permission || hasPermission(item.permission)
+  );
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -95,7 +100,7 @@ export default function AdminLayout({ children, pageTitle, pageDescription }: Ad
         {/* Navigation */}
         <nav className="flex-1 py-6 px-3 overflow-y-auto">
           <ul className="space-y-1">
-            {navigationItems.map((item) => {
+            {filteredItems.map((item) => {
               const isActive = location.pathname === item.href || 
                 (item.href !== "/admin" && location.pathname.startsWith(item.href));
               return (
@@ -171,10 +176,7 @@ export default function AdminLayout({ children, pageTitle, pageDescription }: Ad
           <div className="flex items-center gap-4">
             <ThemeSwitcher />
             <LanguageSwitcher />
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="w-5 h-5 text-muted-foreground" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />
-            </Button>
+            <NotificationDropdown />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-3 h-auto py-2 px-3">
@@ -191,11 +193,11 @@ export default function AdminLayout({ children, pageTitle, pageDescription }: Ad
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 bg-card border border-border">
-                <DropdownMenuItem className="gap-2">
+                <DropdownMenuItem className="gap-2" onClick={() => navigate("/admin/profile")}>
                   <User className="w-4 h-4" />
                   {t("profile")}
                 </DropdownMenuItem>
-                <DropdownMenuItem className="gap-2">
+                <DropdownMenuItem className="gap-2" onClick={() => navigate("/admin/settings")}>
                   <Settings className="w-4 h-4" />
                   {t("settings")}
                 </DropdownMenuItem>

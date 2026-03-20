@@ -69,7 +69,8 @@ public class DataSeeder implements CommandLineRunner {
         Map<String, Permission> permissionMap = new HashMap<>();
 
         String[] permissionNames = {
-                "MANAGE_USERS", "MANAGE_TESTS", "VIEW_ADMIN_DASHBOARD", "TAKE_TOEIC_TEST"
+                "MANAGE_USERS", "MANAGE_TESTS", "VIEW_ADMIN_DASHBOARD", "TAKE_TOEIC_TEST",
+                "MANAGE_QUESTIONS", "VIEW_ANALYTICS"
         };
 
         for (String name : permissionNames) {
@@ -81,6 +82,8 @@ public class DataSeeder implements CommandLineRunner {
                 routes.add("/admin/**");
             } else if (name.equals("VIEW_ADMIN_DASHBOARD")) {
                 routes.add("/admin/dashboard");
+            } else if (name.equals("VIEW_ANALYTICS")) {
+                routes.add("/admin/analytics");
             } else {
                 routes.add("/student/**");
             }

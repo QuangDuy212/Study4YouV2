@@ -4,6 +4,7 @@ export interface UserResponse {
   id: string;
   email: string;
   fullName: string;
+  phone?: string;
   status: string;
   avatarUrl: string | null;
   roles: Array<{ id: string; name: string }>;
@@ -15,15 +16,14 @@ export interface UserRequest {
   email: string;
   password: string;
   fullName: string;
+  phone?: string;
   status?: string;
   roleIds?: string[];
 }
 
 export interface UpdateProfileRequest {
   fullName: string;
-  avatarUrl?: string | null;
-  status?: string;
-  roleIds?: string[];
+  phone?: string;
 }
 
 export interface ChangePasswordRequest {
@@ -63,12 +63,26 @@ export const userService = {
     return data.data;
   },
 
+  async getMe(): Promise<UserResponse> {
+    const { data } = await apiClient.get<ApiWrapped<UserResponse>>("/users/me");
+    return data.data;
+  },
+
+  async updateMe(req: UpdateProfileRequest): Promise<UserResponse> {
+    const { data } = await apiClient.put<ApiWrapped<UserResponse>>("/users/me", req);
+    return data.data;
+  },
+
+  async changeMyPassword(req: ChangePasswordRequest): Promise<void> {
+    await apiClient.put("/users/change-password", req);
+  },
+
   async createUser(req: UserRequest): Promise<UserResponse> {
     const { data } = await apiClient.post<ApiWrapped<UserResponse>>("/users", req);
     return data.data;
   },
 
-  async updateUser(id: string, req: UpdateProfileRequest): Promise<UserResponse> {
+  async updateUser(id: string, req: UserRequest): Promise<UserResponse> {
     const { data } = await apiClient.put<ApiWrapped<UserResponse>>(`/users/${id}`, req);
     return data.data;
   },

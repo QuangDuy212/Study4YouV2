@@ -17,6 +17,7 @@ public class UserResponse {
     private UUID id;
     private String email;
     private String fullName;
+    private String phone;
     private UserStatus status;
     private Set<RoleResponse> roles;
     private LocalDateTime createdAt;

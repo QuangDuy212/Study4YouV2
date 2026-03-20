@@ -35,19 +35,10 @@ public class VectorStoreService {
             return List.of();
         }
 
-        // 1. Try vector search if embeddings are available
-        final List<Double> queryVector = getQueryVector(question);
-
-        if (!queryVector.isEmpty()) {
-            return index.stream()
-                    .filter(doc -> doc.getEmbedding() != null && !doc.getEmbedding().isEmpty())
-                    .map(doc -> new java.util.AbstractMap.SimpleEntry<>(doc, cosineSimilarity(queryVector, doc.getEmbedding())))
-                    .sorted((e1, e2) -> Double.compare(e2.getValue(), e1.getValue()))
-                    .limit(topK)
-                    .map(java.util.AbstractMap.SimpleEntry::getKey)
-                    .collect(Collectors.toList());
-        }
-
+        // --- DISABLE VECTOR SEARCH TO SAVE QUOTA ---
+        // Chúng ta tạm thời dùng Keyword search thuần túy để dành toàn bộ quota cho việc Chat.
+        // ---
+        
         // 2. Fallback to keyword search (resilient)
         String query = question.toLowerCase();
         if (query.length() < 3) return List.of();
@@ -76,12 +67,25 @@ public class VectorStoreService {
     }
 
     private double calculateBasicScore(KnowledgeDocument doc, String query) {
+        String content = doc.getContent().toLowerCase();
+        String title = doc.getTitle() != null ? doc.getTitle().toLowerCase() : "";
+        String[] words = query.split("\\s+");
+        
         double score = 0;
-        if (doc.getTitle() != null && doc.getTitle().toLowerCase().contains(query)) score += 10;
-        if (doc.getContent().toLowerCase().contains(query)) score += 5;
+        for (String word : words) {
+            if (word.length() < 2) continue; // Skip tiny stop-words
+            if (title.contains(word)) score += 10;
+            if (content.contains(word)) score += 2;
+        }
+
+        // Exact phrase match bonus
+        if (title.contains(query)) score += 20;
+        if (content.contains(query)) score += 10;
+        
         // Boost project-specific docs over generic ones
-        if (doc.getType().equals("QUESTION")) score += 2;
-        if (doc.getTitle() != null && (doc.getTitle().contains("TOEIC") || doc.getTitle().contains("FAQ"))) score += 3;
+        if ("QUESTION".equals(doc.getType())) score += 5;
+        if (title.contains("toeic") || title.contains("faq") || title.contains("study4you")) score += 5;
+
         return score;
     }
 

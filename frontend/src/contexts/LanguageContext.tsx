@@ -6,7 +6,7 @@ export type Language = 'en' | 'vi' | 'zh' | 'ko' | 'ja';
 interface LanguageContextType {
   lang: Language;
   setLang: (lang: Language) => void;
-  t: (key: string) => string;
+  t: (key: string, variables?: Record<string, string | number>) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -48,18 +48,31 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const t = (key: string): string => {
+  const t = (key: string, variables?: Record<string, string | number>): string => {
     const langTranslations = translations[lang];
+    let template = "";
+
     if (langTranslations && key in langTranslations) {
-      return langTranslations[key as keyof typeof langTranslations];
+      const val = langTranslations[key as keyof typeof langTranslations];
+      if (typeof val === 'string') template = val;
+    } else {
+      // Fallback to English
+      const enTranslations = translations['en'];
+      if (enTranslations && key in enTranslations) {
+        const val = enTranslations[key as keyof typeof enTranslations];
+        if (typeof val === 'string') template = val;
+      } else {
+        // Return key if no translation found
+        return key;
+      }
     }
-    // Fallback to English
-    const enTranslations = translations['en'];
-    if (enTranslations && key in enTranslations) {
-      return enTranslations[key as keyof typeof enTranslations];
-    }
-    // Return key if no translation found
-    return key;
+
+    if (!variables) return template;
+
+    // Replace {variable} with value
+    return Object.entries(variables).reduce((acc, [key, value]) => {
+      return acc.replace(new RegExp(`{${key}}`, 'g'), String(value));
+    }, template);
   };
 
   return (

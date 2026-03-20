@@ -34,14 +34,14 @@ export interface TestData {
   parts: TestPart[];
 }
 
-export const PART_LABELS: Record<PartType, { label: string; description: string; skill: "listening" | "reading" }> = {
-  PART_1: { label: "Part 1", description: "Photographs", skill: "listening" },
-  PART_2: { label: "Part 2", description: "Question-Response", skill: "listening" },
-  PART_3: { label: "Part 3", description: "Conversations", skill: "listening" },
-  PART_4: { label: "Part 4", description: "Talks", skill: "listening" },
-  PART_5: { label: "Part 5", description: "Incomplete Sentences", skill: "reading" },
-  PART_6: { label: "Part 6", description: "Text Completion", skill: "reading" },
-  PART_7: { label: "Part 7", description: "Reading Comprehension", skill: "reading" },
+export const PART_LABELS: Record<PartType, { labelKey: string; descriptionKey: string; skill: "listening" | "reading" }> = {
+  PART_1: { labelKey: "part1", descriptionKey: "photographs", skill: "listening" },
+  PART_2: { labelKey: "part2", descriptionKey: "questionResponse", skill: "listening" },
+  PART_3: { labelKey: "part3", descriptionKey: "conversations", skill: "listening" },
+  PART_4: { labelKey: "part4", descriptionKey: "talks", skill: "listening" },
+  PART_5: { labelKey: "part5", descriptionKey: "incompleteSentences", skill: "reading" },
+  PART_6: { labelKey: "part6", descriptionKey: "textCompletion", skill: "reading" },
+  PART_7: { labelKey: "part7", descriptionKey: "readingComprehension", skill: "reading" },
 };
 
 export const READING_PARTS: PartType[] = ["PART_5", "PART_6", "PART_7"];

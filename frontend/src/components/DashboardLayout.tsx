@@ -22,7 +22,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const navItems = [
     { icon: LayoutDashboard, label: t("dashboard"), href: "/dashboard" },
-    { icon: BookOpen, label: "TOEIC Tests", href: "/tests" },
+    { icon: BookOpen, label: t("toeicTests"), href: "/tests" },
   ];
 
   return (

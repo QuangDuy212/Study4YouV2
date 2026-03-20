@@ -17,7 +17,7 @@ public class AnalyticsController {
     private final AnalyticsService analyticsService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('VIEW_ANALYTICS')")
     public ResponseEntity<AnalyticsResponse> getAnalyticsStats() {
         return ResponseEntity.ok(analyticsService.getAnalyticsStats());
     }

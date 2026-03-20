@@ -129,7 +129,7 @@ export default function LandingPage() {
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
               <Sparkles className="w-4 h-4" />
-              TOEIC Practice Platform
+              {t("platformSubtitle")}
             </div>
             <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 leading-tight">
               {t("heroTitle")}{" "}
@@ -138,7 +138,7 @@ export default function LandingPage() {
               {t("heroTitleSuffix")}
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-              Master TOEIC Reading and Listening skills with comprehensive practice tests and detailed score analysis.
+              {t("heroDescription")}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link to="/register">

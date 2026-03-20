@@ -21,7 +21,7 @@ public class GeminiClient {
     @Value("${gemini.api-key:}")
     private String apiKey;
 
-    @Value("${gemini.model:gemini-2.0-flash}")
+    @Value("${gemini.model:gemini-1.5-flash}")
     private String model;
 
     private Client client;
@@ -29,6 +29,8 @@ public class GeminiClient {
     @PostConstruct
     public void init() {
         if (apiKey != null && !apiKey.isBlank()) {
+            String maskedKey = apiKey.length() > 5 ? apiKey.substring(0, 5) + "..." : "ShortKey";
+            log.info("GeminiClient initialised — model: {}, Key: {}, API: v1beta", model, maskedKey);
             // The SDK reads GOOGLE_API_KEY by default; we pass it explicitly via builder.
             client = Client.builder()
                     .apiKey(apiKey)
@@ -36,7 +38,6 @@ public class GeminiClient {
                             .apiVersion("v1beta")
                             .build())
                     .build();
-            log.info("GeminiClient initialised — model: {}, API: v1beta", model);
         } else {
             log.warn("GeminiClient: GEMINI_API_KEY is not set. AI endpoints will use mock data.");
         }
@@ -67,8 +68,9 @@ public class GeminiClient {
             GenerateContentResponse response = client.models.generateContent(model, prompt, config);
             return response.text();
         } catch (Exception e) {
+            log.error("Gemini API Error Detail: {}", e.getMessage());
             if (e.getMessage() != null && e.getMessage().contains("429")) {
-                throw new com.study4you.ai.exception.AiQuotaException("Gemini API Quota Exceeded");
+                throw new com.study4you.ai.exception.AiQuotaException("Gemini API Quota Exceeded: " + e.getMessage());
             }
             throw e;
         }

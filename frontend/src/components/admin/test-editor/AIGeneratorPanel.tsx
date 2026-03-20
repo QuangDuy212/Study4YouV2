@@ -79,17 +79,14 @@ export default function AIGeneratorPanel({ open, initialPart, onClose, onQuestio
   const info = PART_LABELS[selectedPart];
 
   const handleGenerate = useCallback(async () => {
-    setIsGenerating(true);
-    setProgress(15);
-    setPreviewQuestions([]);
-    setStatusMessage(`Generating ${count} questions for ${info.label}...`);
+    setStatusMessage(t('generatingQuestionsForPart', { part: t(info.labelKey), count: count }));
 
     try {
       setProgress(30);
       const data = await aiService.generateQuestions(selectedPart, difficulty, count, topic);
 
       setProgress(80);
-      setStatusMessage("Processing questions...");
+      setStatusMessage(t('processingQuestions'));
 
       const questions: TestQuestion[] = (data || [])
         .filter((q: any) => q.content && q.correctAnswer && q.options?.length === 4)
@@ -105,26 +102,26 @@ export default function AIGeneratorPanel({ open, initialPart, onClose, onQuestio
 
       setPreviewQuestions(questions);
       setProgress(100);
-      setStatusMessage(`Generated ${questions.length} questions`);
-      toast.success(`Generated ${questions.length} questions for ${info.label}`);
+      setStatusMessage(t('generatedCountQuestions', { count: questions.length }));
+      toast.success(t('generationSuccessForPart', { part: t(info.labelKey), count: questions.length }));
     } catch (err: any) {
       console.error("Generation error:", err);
       setStatusMessage("");
       setProgress(0);
-      toast.error("Generation failed", { 
+      toast.error(t('generationFailed'), { 
         description: err?.response?.data?.message || err.message 
       });
     } finally {
       setIsGenerating(false);
     }
-  }, [selectedPart, difficulty, count, info.label]);
+  }, [selectedPart, difficulty, count, info.labelKey, t]);
 
   const handleInsert = () => {
     onQuestionsGenerated(selectedPart, previewQuestions);
     setPreviewQuestions([]);
     setProgress(0);
     setStatusMessage("");
-    toast.success(`Inserted ${previewQuestions.length} questions into ${info.label}`);
+    toast.success(t('insertedQuestionsIntoPart', { part: t(info.labelKey), count: previewQuestions.length }));
     onClose();
   };
 
@@ -188,11 +185,11 @@ export default function AIGeneratorPanel({ open, initialPart, onClose, onQuestio
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('topicHint')} ({t('optional')})</Label>
+              <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('topicOptional')}</Label>
               <Input 
                 value={topic} 
                 onChange={(e) => setTopic(e.target.value)} 
-                placeholder="e.g. Finance, Green Energy, Travel..."
+                placeholder={t('topicPlaceholder')}
                 disabled={isGenerating}
                 className="h-10"
               />
@@ -200,9 +197,8 @@ export default function AIGeneratorPanel({ open, initialPart, onClose, onQuestio
 
 
             <div className="rounded-lg bg-muted/40 border border-border/50 p-3.5 text-sm text-muted-foreground">
-              Will generate <span className="font-semibold text-foreground">{count}</span> questions for{" "}
-              <span className="font-semibold text-foreground">{info.label}</span>
-              <span className="text-xs block mt-1 text-muted-foreground/80">{info.description}</span>
+              {t('willGenerateCountQuestionsForPart', { count, part: t(info.labelKey) })}
+              <span className="text-xs block mt-1 text-muted-foreground/80">{t(info.descriptionKey)}</span>
             </div>
           </div>
 

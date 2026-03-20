@@ -5,10 +5,15 @@ import { Loader2 } from "lucide-react";
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAdmin?: boolean;
+  requiredPermission?: string;
 }
 
-export default function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
-  const { user, isLoading, isAdmin } = useAuth();
+export default function ProtectedRoute({ 
+  children, 
+  requireAdmin = false,
+  requiredPermission
+}: ProtectedRouteProps) {
+  const { user, isLoading, isAdmin, hasPermission } = useAuth();
 
   if (isLoading) {
     return (
@@ -19,15 +24,13 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
   }
 
   if (!user) return <Navigate to="/login" replace />;
+
   if (requireAdmin && !isAdmin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-2">Access Denied</h1>
-          <p className="text-muted-foreground">You don't have permission to access this page.</p>
-        </div>
-      </div>
-    );
+    return <Navigate to="/403" replace />;
+  }
+
+  if (requiredPermission && !hasPermission(requiredPermission)) {
+    return <Navigate to="/403" replace />;
   }
 
   return <>{children}</>;

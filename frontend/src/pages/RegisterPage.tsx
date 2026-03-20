@@ -22,16 +22,16 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
+      toast.error(t('passwordsDoNotMatch'));
       return;
     }
     setIsLoading(true);
     const { error } = await signUp(email, password, fullName);
     setIsLoading(false);
     if (error) {
-      toast.error("Registration failed", { description: error });
+      toast.error(t('registrationFailed'), { description: error });
     } else {
-      toast.success("Account created! Please check your email to verify your account.");
+      toast.success(t('success'), { description: t('accountCreatedBody') });
       navigate("/login");
     }
   };

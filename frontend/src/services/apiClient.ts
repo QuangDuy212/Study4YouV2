@@ -31,11 +31,24 @@ function processPendingQueue(err: unknown, token: string | null) {
   pendingQueue = [];
 }
 
+import { toast } from "sonner";
+
 // On 401: attempt token refresh once, then retry original request
 apiClient.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    // Check for success flag in our standard response wrapper
+    if (res.data && res.data.success === false) {
+      const message = res.data.message || "Something went wrong";
+      toast.error(message);
+      return Promise.reject(new Error(message));
+    }
+    return res;
+  },
   async (error) => {
     const original = error.config as AxiosRequestConfig & { _retry?: boolean };
+
+    // Handle standard error responses from the server if they were not caught by the success: false check above
+    const message = error.response?.data?.message || error.message || "An unexpected error occurred";
 
     if (error.response?.status === 401 && !original._retry) {
       if (isRefreshing) {
@@ -75,6 +88,11 @@ apiClient.interceptors.response.use(
       } finally {
         isRefreshing = false;
       }
+    }
+
+    // Don't show toast for 401 since it's handled by redirect
+    if (error.response?.status !== 401) {
+      toast.error(message);
     }
 
     return Promise.reject(error);

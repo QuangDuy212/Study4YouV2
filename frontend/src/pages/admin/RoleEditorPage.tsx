@@ -13,15 +13,6 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 
-function groupPermissions(permissions: PermissionResponse[]): Record<string, PermissionResponse[]> {
-  return permissions.reduce((acc, p) => {
-    const group = (p.pageAllow && p.pageAllow.length > 0) ? p.pageAllow[0] : "Common";
-    if (!acc[group]) acc[group] = [];
-    acc[group].push(p);
-    return acc;
-  }, {} as Record<string, PermissionResponse[]>);
-}
-
 export default function RoleEditorPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -33,6 +24,36 @@ export default function RoleEditorPage() {
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  const groupPermissions = useCallback((permissions: PermissionResponse[]): Record<string, PermissionResponse[]> => {
+    const groups: Record<string, PermissionResponse[]> = {
+      [t("roleUsersAccess")]: [],
+      [t("roleToeicManagement")]: [],
+      [t("roleDashboardAnalytics")]: [],
+      [t("roleStudentFeatures")]: [],
+      [t("roleOthers")]: [],
+    };
+
+    permissions.forEach((p) => {
+      const name = p.name.toUpperCase();
+      if (name.includes("USER") || name.includes("ROLE")) {
+        groups[t("roleUsersAccess")].push(p);
+      } else if (name.includes("TEST") || name.includes("QUESTION")) {
+        if (name.includes("TAKE")) {
+          groups[t("roleStudentFeatures")].push(p);
+        } else {
+          groups[t("roleToeicManagement")].push(p);
+        }
+      } else if (name.includes("DASHBOARD") || name.includes("ANALYTICS")) {
+        groups[t("roleDashboardAnalytics")].push(p);
+      } else {
+        groups[t("roleOthers")].push(p);
+      }
+    });
+
+    // Remove empty groups
+    return Object.fromEntries(Object.entries(groups).filter(([_, perms]) => perms.length > 0));
+  }, [t]);
 
   useEffect(() => {
     const loadData = async () => {

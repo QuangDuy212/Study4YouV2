@@ -65,9 +65,9 @@ export default function PartManager({ parts, onChange, onOpenAIPanel }: PartMana
               </SelectTrigger>
               <SelectContent>
 
-                {availableTypes.map((t) => (
-                  <SelectItem key={t} value={t}>
-                    {PART_LABELS[t].label} — {PART_LABELS[t].description}
+                {availableTypes.map((pt) => (
+                  <SelectItem key={pt} value={pt}>
+                    {t(PART_LABELS[pt].labelKey)} — {t(PART_LABELS[pt].descriptionKey)}
                   </SelectItem>
                 ))}
               </SelectContent>

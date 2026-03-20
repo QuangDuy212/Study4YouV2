@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Trash2, GripVertical, Check } from "lucide-react";
+import { Trash2, GripVertical, Check, Image as ImageIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import type { TestQuestion, PartType } from "./types";
 import { LISTENING_PARTS } from "./types";
 import ListeningMediaUploader from "./ListeningMediaUploader";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface QuestionEditorProps {
   question: TestQuestion;
@@ -28,7 +29,9 @@ export default function QuestionEditor({
   onDelete,
   hidePassageField = false 
 }: QuestionEditorProps) {
+  const { t } = useLanguage();
   const [collapsed, setCollapsed] = useState(false);
+  const [isImageUploaderVisible, setIsImageUploaderVisible] = useState(!!question.imageUrl);
   const isListening = LISTENING_PARTS.includes(partType);
   const isPart1 = partType === "PART_1";
   const needsPassage = partType === "PART_6" || partType === "PART_7";
@@ -53,7 +56,7 @@ export default function QuestionEditor({
           <GripVertical className="w-4 h-4 text-muted-foreground" />
           <Badge variant="outline" className="shrink-0">Q{index + 1}</Badge>
           <span className="text-sm text-muted-foreground truncate">
-            {question.content || "New question..."}
+            {question.content || t("newQuestion")}
           </span>
           {question.correctAnswer && (
             <Badge className="bg-success/10 text-success border-success/20 ml-auto shrink-0">
@@ -70,22 +73,51 @@ export default function QuestionEditor({
         <div className="space-y-4 pt-2 border-t border-border">
           {/* Listening media (Audio for all listening parts, Image for Part 1) */}
           {isListening && (
-            <ListeningMediaUploader
-              hideAudio={["PART_1", "PART_2", "PART_3"].includes(partType)}
-              hideImage={!isPart1}
-              audioUrl={question.audioUrl}
-              imageUrl={isPart1 ? question.imageUrl : null}
-              onAudioChange={(audioUrl) => onChange({ ...question, audioUrl })}
-              onImageChange={(imageUrl) => onChange({ ...question, imageUrl })}
-            />
+            <div className="space-y-4">
+              <ListeningMediaUploader
+                hideAudio={true} // All listening parts now use part-level audio
+                hideImage={true} // We handle image uploader separately below for more control
+                audioUrl={question.audioUrl}
+                onAudioChange={(audioUrl) => onChange({ ...question, audioUrl })}
+              />
+
+              {/* Image Uploader Logic */}
+              {(isPart1 || partType === "PART_3" || partType === "PART_4") && (
+                <div className="space-y-2">
+                  {!isImageUploaderVisible ? (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      type="button"
+                      className="w-full border-dashed border-2 hover:border-primary hover:bg-primary/5 transition-all text-muted-foreground"
+                      onClick={() => setIsImageUploaderVisible(true)}
+                    >
+                      <ImageIcon className="w-4 h-4 mr-2" />
+                      {t("addImageOptional")}
+                    </Button>
+                  ) : (
+                    <ListeningMediaUploader
+                      hideAudio={true}
+                      imageUrl={question.imageUrl}
+                      onImageChange={(imageUrl) => {
+                        onChange({ ...question, imageUrl });
+                        if (!imageUrl && (partType === "PART_3" || partType === "PART_4")) {
+                          setIsImageUploaderVisible(false);
+                        }
+                      }}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
           )}
 
           {/* Passage for Part 6, 7 */}
           {needsPassage && !hidePassageField && (
             <div className="space-y-2">
-              <Label>Passage</Label>
+              <Label>{t("passage")}</Label>
               <Textarea
-                placeholder="Enter the passage text..."
+                placeholder={t("passagePlaceholder")}
                 className="min-h-[120px] font-mono text-sm"
                 value={question.passage || ""}
                 onChange={(e) => onChange({ ...question, passage: e.target.value })}
@@ -95,9 +127,9 @@ export default function QuestionEditor({
 
           {/* Question content */}
           <div className="space-y-2">
-            <Label>Question</Label>
+            <Label>{t("questionLabel")}</Label>
             <Textarea
-              placeholder={isListening ? "Enter the question or transcript..." : "Enter the sentence with ____ blank..."}
+              placeholder={isListening ? t("questionPlaceholderListening") : t("questionPlaceholderReading")}
               className="min-h-[60px]"
               value={question.content}
               onChange={(e) => onChange({ ...question, content: e.target.value })}
@@ -106,7 +138,7 @@ export default function QuestionEditor({
 
           {/* Options */}
           <div className="space-y-3">
-            <Label>Answer Options</Label>
+            <Label>{t("answerOptions")}</Label>
             <RadioGroup
               value={question.correctAnswer}
               onValueChange={(v) => onChange({ ...question, correctAnswer: v as "A" | "B" | "C" | "D" })}
@@ -131,7 +163,7 @@ export default function QuestionEditor({
                       </Label>
                       <Input
                         className="h-8 text-sm border-0 bg-transparent focus-visible:ring-0 p-0"
-                        placeholder={`Option ${label}`}
+                        placeholder={t("optionPlaceholder", { label })}
                         value={opt?.content || ""}
                         onChange={(e) => updateOption(label as any, e.target.value)}
                       />
