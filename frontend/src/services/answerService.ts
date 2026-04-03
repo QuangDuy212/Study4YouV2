@@ -5,7 +5,7 @@ export interface ToeicAnswerResponse {
   attemptId: string;
   questionId: string;
   selectedOption: string;
-  isCorrect: boolean;
+  correct: boolean;
   createdAt: string;
 }
 
@@ -13,6 +13,7 @@ export interface ToeicAnswerRequest {
   attemptId: string;
   questionId: string;
   selectedOption: string;
+  correct: boolean;
 }
 
 export interface PageResponse<T> {

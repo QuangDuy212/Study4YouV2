@@ -21,6 +21,4 @@ public class ToeicPartRequest {
 
     @NotNull(message = "Order index is required")
     private Integer orderIndex;
-
-    private String audioUrl;
 }

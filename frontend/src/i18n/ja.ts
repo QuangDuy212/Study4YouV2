@@ -379,6 +379,7 @@ export const ja = {
   generateWithAI: "AIで生成",
   removePart: "パートを削除",
   partAudioFor: "{part} の全音声",
+  fullTestAudio: "テスト全体の音声（全パート共通）",
   addImageOptional: "画像を追加 (任意)",
   passagePlaceholder: "文章を入力してください...",
   questionPlaceholderListening: "問題またはスクリプトを入力...",
@@ -608,21 +609,6 @@ export const ja = {
   forbidden: "アクセス禁止",
   forbiddenDesc: "このページにアクセスする権限がありません。",
 
-  // Test Editor - New additions
-  generateWithAI: "AIで生成",
-  removePart: "パートを削除",
-  partAudioFor: "{part} の全オーディオ",
-  addImageOptional: "画像を追加（任意）",
-  passagePlaceholder: "文章を入力してください...",
-  questionPlaceholderListening: "問題または書き起こしを入力してください...",
-  questionPlaceholderReading: "____ の空欄がある文章を入力してください...",
-  optionPlaceholder: "オプション {label}",
-  sharedPassage: "共通の文章",
-  enterSharedPassage: "この問題セットの共通の文章を入力してください...",
-  removeSet: "セットを削除",
-  set: "セット",
-  setQuestions: "問題",
-  removePartConfirm: "このパートを削除してもよろしいですか？この操作は取り消せません。",
 
   // RBAC Groups
   roleUsersAccess: "ユーザーとアクセス",
@@ -644,8 +630,8 @@ export const ja = {
   uploadSuccess: "{name} を正常にアップロードしました",
   uploadFailed: "{name} のアップロードに失敗しました",
   invalidAudioFormat: "MP3またはWAVファイルのみアップロード可能です！",
-  audioSizeLimit: "オーディオは10MB以下である必要があります！",
-  invalidImageFormat: "JPG/PNG/WEBPファイルのみアップロード可能です！",
-  imageSizeLimit: "画像は10MB以下である必要があります！",
+  audioSizeLimit: "オーディオは100MB以下である必要があります！",
+  invalidImageFormat: "JPG/PNG/WebPファイルのみアップロードできます！",
+  imageSizeLimit: "画像は100MB以下である必要があります！",
   questionPreviewAlt: "質問プレビュー",
 } as const;

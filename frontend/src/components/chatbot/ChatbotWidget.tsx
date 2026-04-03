@@ -14,16 +14,17 @@ interface Message {
 }
 
 const SUGGESTED_QUESTIONS = [
-  "What is Study4You?",
-  "How do I create a TOEIC test?",
-  "Explain TOEIC Part 5 grammar",
+  "TOEIC Part 5 tips?",
+  "How to improve listening score?",
   "Give me a practice question",
+  "What is Study4You?",
 ];
 
 export function ChatbotWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const handleSend = useCallback(async (content: string) => {
     const userMessage: Message = {
@@ -41,18 +42,28 @@ export function ChatbotWidget() {
 
       const botMessage: Message = {
         id: crypto.randomUUID(),
-        content: data.reply,
+        content: data.reply || "Sorry, I didn't get a response. Please try again.",
         isBot: true,
         timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, botMessage]);
-    } catch (error) {
-      console.error('Chat error:', error);
-      
+
+      // Increment unread if window is closed
+      if (!isOpen) {
+        setUnreadCount((c) => c + 1);
+      }
+    } catch (error: any) {
+      console.error("Chat error:", error);
+
+      const errMsg =
+        error?.response?.status === 503 || error?.response?.status === 429
+          ? "The AI is a little overloaded right now. Please try again in a moment! 🙏"
+          : "I'm having trouble connecting right now. Please try again later!";
+
       const botMessage: Message = {
         id: crypto.randomUUID(),
-        content: "I'm sorry, I'm having trouble connecting to my brain right now. Please try again later!",
+        content: errMsg,
         isBot: true,
         timestamp: new Date(),
       };
@@ -62,10 +73,15 @@ export function ChatbotWidget() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [isOpen]);
 
-  const handleSuggestedClick = (question: string) => {
-    handleSend(question);
+  const handleOpen = () => {
+    setIsOpen(true);
+    setUnreadCount(0);
+  };
+
+  const handleClear = () => {
+    setMessages([]);
   };
 
   return (
@@ -77,8 +93,9 @@ export function ChatbotWidget() {
             isLoading={isLoading}
             onSend={handleSend}
             onClose={() => setIsOpen(false)}
+            onClear={handleClear}
             suggestedQuestions={SUGGESTED_QUESTIONS}
-            onSuggestedClick={handleSuggestedClick}
+            onSuggestedClick={handleSend}
           />
         )}
       </AnimatePresence>
@@ -86,15 +103,15 @@ export function ChatbotWidget() {
       {/* Floating Button */}
       <motion.div
         className="fixed bottom-4 right-4 z-50"
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 0.5, type: "spring", stiffness: 260, damping: 20 }}
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.6, type: "spring", stiffness: 300, damping: 22 }}
       >
         <Button
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={isOpen ? () => setIsOpen(false) : handleOpen}
           size="lg"
-          className="rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-shadow"
-          title="Need help?"
+          className="relative rounded-full w-14 h-14 shadow-xl hover:shadow-2xl transition-all hover:scale-110 active:scale-95 bg-gradient-to-br from-primary to-primary/80"
+          title="Chat with AI"
         >
           <AnimatePresence mode="wait">
             {isOpen ? (
@@ -119,7 +136,23 @@ export function ChatbotWidget() {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Unread badge */}
+          {unreadCount > 0 && !isOpen && (
+            <motion.span
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center shadow-md"
+            >
+              {unreadCount}
+            </motion.span>
+          )}
         </Button>
+
+        {/* Pulse ring when closed */}
+        {!isOpen && (
+          <span className="absolute inset-0 rounded-full bg-primary/30 animate-ping pointer-events-none" />
+        )}
       </motion.div>
     </>
   );

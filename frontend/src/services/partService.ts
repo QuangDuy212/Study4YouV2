@@ -5,7 +5,6 @@ export interface ToeicPartResponse {
   testId: string;
   part: string;
   orderIndex: number;
-  audioUrl?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -14,7 +13,6 @@ export interface ToeicPartRequest {
   testId: string;
   part: string;
   orderIndex?: number;
-  audioUrl?: string | null;
 }
 
 export interface PageResponse<T> {

@@ -35,8 +35,6 @@ public class ToeicPart extends BaseEntity {
     @Column(nullable = false)
     private Integer orderIndex;
 
-    private String audioUrl;
-
     @OneToMany(mappedBy = "part", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ToeicQuestion> questions;
 }

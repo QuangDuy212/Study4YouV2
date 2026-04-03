@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Trash2, GripVertical, Check, Image as ImageIcon } from "lucide-react";
+import { Trash2, GripVertical, Check, Image as ImageIcon, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,6 +11,9 @@ import type { TestQuestion, PartType } from "./types";
 import { LISTENING_PARTS } from "./types";
 import ListeningMediaUploader from "./ListeningMediaUploader";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Upload, message } from "antd";
+import type { UploadProps } from "antd";
+import { uploadImage } from "@/services/fileService";
 
 interface QuestionEditorProps {
   question: TestQuestion;
@@ -32,6 +35,7 @@ export default function QuestionEditor({
   const { t } = useLanguage();
   const [collapsed, setCollapsed] = useState(false);
   const [isImageUploaderVisible, setIsImageUploaderVisible] = useState(!!question.imageUrl);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const isListening = LISTENING_PARTS.includes(partType);
   const isPart1 = partType === "PART_1";
   const needsPassage = partType === "PART_6" || partType === "PART_7";
@@ -85,16 +89,48 @@ export default function QuestionEditor({
               {(isPart1 || partType === "PART_3" || partType === "PART_4") && (
                 <div className="space-y-2">
                   {!isImageUploaderVisible ? (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      type="button"
-                      className="w-full border-dashed border-2 hover:border-primary hover:bg-primary/5 transition-all text-muted-foreground"
-                      onClick={() => setIsImageUploaderVisible(true)}
+                    <Upload
+                      accept="image/jpeg, image/png, image/webp"
+                      showUploadList={false}
+                      customRequest={async (options) => {
+                        const { file, onSuccess, onError } = options;
+                        setIsUploadingImage(true);
+                        try {
+                          const response = await uploadImage(file as File);
+                          onChange({ ...question, imageUrl: response.url });
+                          setIsImageUploaderVisible(true);
+                          onSuccess?.("ok");
+                          message.success(t("uploadSuccess", { name: (file as File).name }));
+                        } catch (error: any) {
+                          onError?.(error);
+                          message.error(t("uploadFailed", { name: (file as File).name }));
+                        } finally {
+                          setIsUploadingImage(false);
+                        }
+                      }}
+                      beforeUpload={(file) => {
+                        const isValidFormat = ['image/jpeg', 'image/png', 'image/webp'].includes(file.type);
+                        if (!isValidFormat) message.error(t("invalidImageFormat"));
+                        const isLt10M = file.size / 1024 / 1024 < 10;
+                        if (!isLt10M) message.error(t("imageSizeLimit"));
+                        return isValidFormat && isLt10M;
+                      }}
                     >
-                      <ImageIcon className="w-4 h-4 mr-2" />
-                      {t("addImageOptional")}
-                    </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        type="button"
+                        className="w-full border-dashed border-2 hover:border-primary hover:bg-primary/5 transition-all text-muted-foreground"
+                        disabled={isUploadingImage}
+                      >
+                        {isUploadingImage ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <ImageIcon className="w-4 h-4 mr-2" />
+                        )}
+                        {isUploadingImage ? t("loading") : t("addImageOptional")}
+                      </Button>
+                    </Upload>
                   ) : (
                     <ListeningMediaUploader
                       hideAudio={true}

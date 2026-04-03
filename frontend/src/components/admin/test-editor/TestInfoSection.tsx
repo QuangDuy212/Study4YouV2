@@ -2,8 +2,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText } from "lucide-react";
+import { FileText, Headphones } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import ListeningMediaUploader from "./ListeningMediaUploader";
 import type { TestData, Skill, Difficulty, TestStatus } from "./types";
 
 interface TestInfoSectionProps {
@@ -67,6 +68,20 @@ export default function TestInfoSection({ data, onChange }: TestInfoSectionProps
             </Select>
           </div>
         </div>
+
+        {(data.skill === "LISTENING" || data.skill === "FULL") && (
+          <div className="space-y-3 pt-2 border-t border-border/50">
+            <div className="flex items-center gap-2">
+              <Headphones className="w-4 h-4 text-primary" />
+              <Label className="text-sm font-semibold uppercase tracking-wider">{t("fullTestAudio")}</Label>
+            </div>
+            <ListeningMediaUploader
+              hideImage
+              audioUrl={data.audioUrl}
+              onAudioChange={(url) => onChange({ audioUrl: url })}
+            />
+          </div>
+        )}
       </CardContent>
     </Card>
   );

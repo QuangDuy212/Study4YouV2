@@ -81,6 +81,7 @@ public class ToeicTestService {
         
         if (request.getSkill() != null) test.setSkill(Skill.valueOf(request.getSkill().toUpperCase()));
         if (request.getLevel() != null) test.setLevel(Level.valueOf(request.getLevel().toUpperCase()));
+        test.setAudioUrl(request.getAudioUrl());
 
         ToeicTest savedTest = toeicTestRepository.save(test);
 
@@ -119,6 +120,9 @@ public class ToeicTestService {
         if (request.getLevel() != null) {
             test.setLevel(Level.valueOf(request.getLevel().toUpperCase()));
         }
+        if (request.getAudioUrl() != null || test.getAudioUrl() != null) {
+            test.setAudioUrl(request.getAudioUrl());
+        }
 
         ToeicTest updatedTest = toeicTestRepository.save(test);
 
@@ -130,6 +134,15 @@ public class ToeicTestService {
                 updatedTest.getId()
         );
 
+        return mapToFlatResponse(updatedTest);
+    }
+
+    @Transactional
+    public ToeicTestResponse updateAudioUrl(@org.springframework.lang.NonNull UUID id, String audioUrl) {
+        ToeicTest test = toeicTestRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ToeicTest", "id", id));
+        test.setAudioUrl(audioUrl);
+        ToeicTest updatedTest = toeicTestRepository.save(test);
         return mapToFlatResponse(updatedTest);
     }
 
@@ -173,6 +186,7 @@ public class ToeicTestService {
         response.setActive(test.getActive());
         response.setSkill(test.getSkill().name());
         response.setLevel(test.getLevel().name());
+        response.setAudioUrl(test.getAudioUrl());
         response.setCreatedAt(test.getCreatedAt());
         response.setUpdatedAt(test.getUpdatedAt());
         return response;
@@ -190,7 +204,6 @@ public class ToeicTestService {
                     partResponse.setTestId(part.getTestId());
                     partResponse.setPart(part.getPart());
                     partResponse.setOrderIndex(part.getOrderIndex());
-                    partResponse.setAudioUrl(part.getAudioUrl());
                     partResponse.setCreatedAt(part.getCreatedAt());
                     partResponse.setUpdatedAt(part.getUpdatedAt());
 

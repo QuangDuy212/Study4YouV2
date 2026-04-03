@@ -29,7 +29,6 @@ export default function PartManager({ parts, onChange, onOpenAIPanel }: PartMana
       id: crypto.randomUUID(),
       type: addPartType as PartType,
       questions: [],
-      audioUrl: null,
     };
 
     // Insert in correct order

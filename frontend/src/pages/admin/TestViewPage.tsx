@@ -33,7 +33,6 @@ interface TestPart {
   id: string;
   partType: string;
   sortOrder: number;
-  audioUrl: string | null;
   questions: TestQuestion[];
 }
 
@@ -44,6 +43,7 @@ interface TestData {
   level: string;
   duration: number;
   status: string;
+  audioUrl: string | null;
   createdAt: string;
   parts: TestPart[];
 }
@@ -79,7 +79,6 @@ export default function TestViewPage() {
         id: part.id,
         partType: part.part,
         sortOrder: part.orderIndex,
-        audioUrl: part.audioUrl || null,
         questions: (part.questions || []).map((q) => ({
           id: q.id,
           content: q.content,
@@ -102,6 +101,7 @@ export default function TestViewPage() {
         level: "intermediate", 
         duration: fullTest.durationMinutes,
         status: fullTest.active ? "active" : "draft",
+        audioUrl: fullTest.audioUrl || null,
         createdAt: fullTest.createdAt,
         parts: structuredParts
       });
@@ -161,6 +161,23 @@ export default function TestViewPage() {
         </CardContent>
       </Card>
 
+      {testData.audioUrl && (
+        <Card className="mb-6">
+          <CardContent className="py-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Headphones className="w-4 h-4 text-primary" />
+              <p className="text-sm font-semibold">{t("fullTestAudio")}</p>
+            </div>
+            <audio 
+              controls 
+              src={getMediaUrl(testData.audioUrl)} 
+              className="w-full" 
+              controlsList="nodownload" 
+            />
+          </CardContent>
+        </Card>
+      )}
+
       <Tabs value={selectedPart} onValueChange={setSelectedPart} className="space-y-6">
         <TabsList className="w-full justify-start overflow-x-auto flex-nowrap">
           {testData.parts.map((part) => (
@@ -178,17 +195,6 @@ export default function TestViewPage() {
               <p className="text-sm text-muted-foreground">{part.questions.length} {t("questions")}</p>
             </div>
 
-            {part.audioUrl && (
-              <div className="bg-card px-6 py-4 border-b border-border flex flex-col items-center shadow-sm rounded-lg mb-4">
-                <p className="text-xs font-semibold text-muted-foreground self-start mb-2">{t("testTaking.audioSection")}</p>
-                <audio 
-                  controls 
-                  src={getMediaUrl(part.audioUrl)} 
-                  className="w-full" 
-                  controlsList="nodownload" 
-                />
-              </div>
-            )}
 
             {part.questions.length === 0 ? (
               <Card><CardContent className="py-12 text-center text-muted-foreground">{t("noQuestionsInPart")}</CardContent></Card>

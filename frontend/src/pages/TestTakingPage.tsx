@@ -30,7 +30,6 @@ interface Part {
   title: string;
   section: "listening" | "reading";
   description: string;
-  audio?: string | null;
   questions: Question[];
 }
 
@@ -44,6 +43,7 @@ export default function TestTakingPage() {
 
   const [testTitle, setTestTitle] = useState("TOEIC Test");
   const [parts, setParts] = useState<Part[]>([]);
+  const [fullAudio, setFullAudio] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPart, setCurrentPart] = useState(0);
   const [currentQuestionInPart, setCurrentQuestionInPart] = useState(0);
@@ -65,6 +65,7 @@ export default function TestTakingPage() {
       try {
         const testData = await testService.getTestById(id);
         setTestTitle(testData.title);
+        setFullAudio(testData.audioUrl || null);
 
         if (!testData.parts) throw new Error("Test has no parts");
 
@@ -76,7 +77,6 @@ export default function TestTakingPage() {
             title: p.part.replace("_", " "),
             section: ["PART_1", "PART_2", "PART_3", "PART_4"].includes(p.part) ? "listening" : "reading",
             description: p.part,
-            audio: p.audioUrl || null,
             questions: (p.questions || [])
               .map((q, idx) => ({
                 id: q.id,
@@ -210,15 +210,16 @@ export default function TestTakingPage() {
       // 1. Calculate scores
       let correct = 0;
       let globalIdx = 0;
-      const answerRequests: { questionId: string; selected: string }[] = [];
+      const answerRequests: { questionId: string; selected: string; correct: boolean }[] = [];
 
       parts.forEach((p) => {
         p.questions.forEach((q) => {
           const selectedIdx = answers[globalIdx];
           if (selectedIdx !== undefined) {
             const label = String.fromCharCode(65 + selectedIdx);
-            if (selectedIdx === q.correct) correct++;
-            answerRequests.push({ questionId: q.id, selected: label });
+            const isCorrect = (selectedIdx === q.correct);
+            if (isCorrect) correct++;
+            answerRequests.push({ questionId: q.id, selected: label, correct: isCorrect });
           }
           globalIdx++;
         });
@@ -243,7 +244,8 @@ export default function TestTakingPage() {
           answerService.createAnswer({
             attemptId: attempt.id,
             questionId: req.questionId,
-            selectedOption: req.selected
+            selectedOption: req.selected,
+            correct: req.correct
           })
         )
       );
@@ -339,12 +341,18 @@ export default function TestTakingPage() {
             </div>
           </div>
 
-          {/* Part Level Audio */}
-          {part?.audio && (
-            <div className="bg-card px-6 py-4 border-b border-border flex justify-center shadow-sm">
+          {/* Full Test Audio (Shared for all listening parts) */}
+          {part?.section === "listening" && fullAudio && (
+            <div className="bg-card px-6 py-4 border-b border-border flex flex-col items-center shadow-sm">
+              <div className="w-full max-w-lg mb-2 flex items-center justify-between">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                  <Volume2 className="w-3 h-3 text-primary" /> {t('fullTestAudio')}
+                </span>
+                <Badge variant="outline" className="text-[9px] font-bold h-4">MP3</Badge>
+              </div>
               <audio 
                 controls 
-                src={getMediaUrl(part.audio)} 
+                src={getMediaUrl(fullAudio)} 
                 className="w-full max-w-lg" 
                 controlsList="nodownload" 
               />

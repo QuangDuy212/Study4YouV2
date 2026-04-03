@@ -21,7 +21,6 @@ export interface TestQuestion {
 export interface TestPart {
   id: string;
   type: PartType;
-  audioUrl: string | null;
   questions: TestQuestion[];
 }
 
@@ -31,6 +30,7 @@ export interface TestData {
   level: Difficulty;
   duration: number;
   status: TestStatus;
+  audioUrl: string | null;
   parts: TestPart[];
 }
 
@@ -72,7 +72,6 @@ export function createEmptyPart(type: PartType): TestPart {
   return {
     id: crypto.randomUUID(),
     type,
-    audioUrl: null,
     questions: [],
   };
 }

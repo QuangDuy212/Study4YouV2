@@ -24,7 +24,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: admin
       TZ: "Asia/Ho_Chi_Minh" # Thêm dòng này
     ports:
-      - "8888:80"
+      - "1234:80"
     depends_on:
       - db
 

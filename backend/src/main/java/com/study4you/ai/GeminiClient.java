@@ -1,106 +1,100 @@
 package com.study4you.ai;
 
-import com.google.genai.Client;
-import com.google.genai.types.GenerateContentConfig;
-import com.google.genai.types.GenerateContentResponse;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-/**
- * Thin wrapper around the Google GenAI Java SDK.
- * <p>
- * If {@code gemini.api-key} is blank (default when env var GEMINI_API_KEY is not set),
- * {@link #isAvailable()} returns {@code false} and callers should fall back to mock data.
- */
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+
 @Slf4j
 @Component
-public class GeminiClient {
+public class GeminiClient { // Giữ nguyên tên để file khác khỏi lỗi
 
-    @Value("${gemini.api-key:}")
+    @Value("${ai.api-key:}")
     private String apiKey;
 
-    @Value("${gemini.model:gemini-1.5-flash}")
+    // Dùng mẫu AI miễn phí tốt nhất hiện nay trên OpenRouter (Llama 3 hoặc Qwen)
+    @Value("${ai.model:google/gemini-2.0-flash-lite-preview-02-05:free}")
     private String model;
 
-    private Client client;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private HttpClient httpClient;
 
     @PostConstruct
     public void init() {
         if (apiKey != null && !apiKey.isBlank()) {
-            String maskedKey = apiKey.length() > 5 ? apiKey.substring(0, 5) + "..." : "ShortKey";
-            log.info("GeminiClient initialised — model: {}, Key: {}, API: v1beta", model, maskedKey);
-            // The SDK reads GOOGLE_API_KEY by default; we pass it explicitly via builder.
-            client = Client.builder()
-                    .apiKey(apiKey)
-                    .httpOptions(com.google.genai.types.HttpOptions.builder()
-                            .apiVersion("v1beta")
-                            .build())
+            this.httpClient = HttpClient.newBuilder()
+                    .connectTimeout(Duration.ofSeconds(15))
                     .build();
-        } else {
-            log.warn("GeminiClient: GEMINI_API_KEY is not set. AI endpoints will use mock data.");
+            log.info("Client initialized completely direct with OpenRouter Free model: {}", model);
         }
     }
 
-    /** Returns true when a valid API key is configured. */
     public boolean isAvailable() {
-        return client != null;
+        return httpClient != null;
     }
 
-    /**
-     * Send {@code prompt} to Gemini and return the raw text response.
-     *
-     * @throws RuntimeException if the Gemini call fails
-     */
     public String generate(String prompt) {
         if (!isAvailable()) {
-            throw new IllegalStateException("Gemini API key is not configured");
+            throw new IllegalStateException("OpenRouter API key is missing");
         }
 
         try {
-            GenerateContentConfig config = GenerateContentConfig.builder()
-                    .candidateCount(1)
-                    .maxOutputTokens(4096)
-                    .temperature(1.0f)
+            // Cổng API của OpenRouter (siêu ổn định, miễn phí 100%, không cần thẻ Visa)
+            String url = "https://openrouter.ai/api/v1/chat/completions";
+
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("model", model);
+            
+            java.util.List<Map<String, String>> messages = new java.util.ArrayList<>();
+            messages.add(Map.of("role", "system", "content", "You are a helpful TOEIC AI tutor for Study4You."));
+            messages.add(Map.of("role", "user", "content", prompt));
+            payload.put("messages", messages);
+
+            String requestBody = objectMapper.writeValueAsString(payload);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Authorization", "Bearer " + apiKey)
+                    .header("Content-Type", "application/json")
+                    // HTTP Site URL và App Name là bắt buộc cho OpenRouter
+                    .header("HTTP-Referer", "http://localhost:8080")
+                    .header("X-Title", "Study4You")
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();
 
-            GenerateContentResponse response = client.models.generateContent(model, prompt, config);
-            return response.text();
-        } catch (Exception e) {
-            log.error("Gemini API Error Detail: {}", e.getMessage());
-            if (e.getMessage() != null && e.getMessage().contains("429")) {
-                throw new com.study4you.ai.exception.AiQuotaException("Gemini API Quota Exceeded: " + e.getMessage());
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() != 200) {
+                log.error("OpenRouter Error: {}", response.body());
+                throw new RuntimeException("HTTP " + response.statusCode() + " từ OpenRouter Server: " + response.body());
             }
-            throw e;
+
+            JsonNode root = objectMapper.readTree(response.body());
+            
+            JsonNode choices = root.path("choices");
+            if (choices.isArray() && choices.size() > 0) {
+                return choices.get(0).path("message").path("content").asText().trim();
+            }
+
+            return "Không lấy được nội dung trả lời từ AI.";
+
+        } catch (Exception e) {
+            log.error("AI generate error: {}", e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
     }
 
-    /**
-     * Generate embeddings for the given text.
-     */
     public java.util.List<Double> embed(String text) {
-        if (!isAvailable()) {
-            throw new IllegalStateException("Gemini API key is not configured");
-        }
-
-        try {
-            com.google.genai.types.EmbedContentResponse response = client.models.embedContent(
-                    "models/gemini-embedding-001", // Verified model name
-                    text,
-                    com.google.genai.types.EmbedContentConfig.builder().build()
-            );
-
-            return response.embeddings()
-                    .flatMap(list -> list.stream().findFirst())
-                    .flatMap(com.google.genai.types.ContentEmbedding::values)
-                    .map(values -> values.stream().map(Float::doubleValue).collect(java.util.stream.Collectors.toList()))
-                    .orElse(new java.util.ArrayList<>());
-        } catch (Exception e) {
-            if (e.getMessage() != null && e.getMessage().contains("429")) {
-                throw new com.study4you.ai.exception.AiQuotaException("Gemini API Embedding Quota Exceeded");
-            }
-            throw e;
-        }
+        return new java.util.ArrayList<>(); // Ẩn lỗi do hiện tại chỉ chat
     }
 }

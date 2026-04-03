@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import com.study4you.common.storage.FileStorageService;
 
 import java.util.UUID;
 
@@ -23,6 +25,7 @@ import java.util.UUID;
 public class ToeicTestController {
 
     private final ToeicTestService toeicTestService;
+    private final FileStorageService fileStorageService;
 
     @PreAuthorize("hasAuthority('MANAGE_TESTS')")
     @GetMapping
@@ -69,5 +72,16 @@ public class ToeicTestController {
     public ResponseEntity<ApiResponse<Void>> deleteTest(@PathVariable @org.springframework.lang.NonNull UUID id) {
         toeicTestService.deleteTest(id);
         return ResponseEntity.ok(ApiResponse.success("Test deleted successfully", null));
+    }
+
+    @PreAuthorize("hasAuthority('MANAGE_TESTS')")
+    @PostMapping(value = "/{id}/upload-audio", consumes = "multipart/form-data")
+    public ResponseEntity<ApiResponse<ToeicTestResponse>> uploadAudio(
+            @PathVariable @org.springframework.lang.NonNull UUID id,
+            @RequestParam("file") MultipartFile file
+    ) {
+        String audioUrl = fileStorageService.saveAudio(file);
+        ToeicTestResponse updatedTest = toeicTestService.updateAudioUrl(id, audioUrl);
+        return ResponseEntity.ok(ApiResponse.success("Audio uploaded successfully", updatedTest));
     }
 }

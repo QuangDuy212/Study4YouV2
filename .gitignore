@@ -65,4 +65,5 @@ frontend/.nuxt/
 frontend/.next/
 frontend/.cache/
 frontend/bun.lockb
+frontend/.vite/deps
 

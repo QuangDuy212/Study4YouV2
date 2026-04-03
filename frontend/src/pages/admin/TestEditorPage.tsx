@@ -24,6 +24,7 @@ export default function TestEditorPage() {
 
   const [testData, setTestData] = useState<TestData>({
     name: "", skill: "FULL", level: "MEDIUM", duration: 120, status: "draft",
+    audioUrl: null,
     parts: getDefaultParts("FULL"),
   });
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
@@ -42,10 +43,10 @@ export default function TestEditorPage() {
           level: (fullTest.level as Difficulty) || "MEDIUM",
           duration: fullTest.durationMinutes,
           status: fullTest.active ? "active" : "draft",
+          audioUrl: fullTest.audioUrl || null,
           parts: (fullTest.parts || []).map(p => ({
             id: p.id,
             type: p.part as PartType,
-            audioUrl: p.audioUrl || null,
             questions: (p.questions || []).map(q => ({
               id: q.id,
               content: q.content,
@@ -94,7 +95,8 @@ export default function TestEditorPage() {
           title: testData.name,
           active: testData.status === "active",
           skill: testData.skill,
-          level: testData.level
+          level: testData.level,
+          audioUrl: testData.audioUrl
         });
         testId = newTest.id;
       } else {
@@ -102,7 +104,8 @@ export default function TestEditorPage() {
           title: testData.name,
           active: testData.status === "active",
           skill: testData.skill,
-          level: testData.level
+          level: testData.level,
+          audioUrl: testData.audioUrl
         });
       }
 
@@ -114,15 +117,6 @@ export default function TestEditorPage() {
       for (const frontendPart of testData.parts) {
         const matchingPart = backendParts.find(p => p.part === frontendPart.type);
         if (matchingPart) {
-          // Update part info (like audioUrl if changed)
-          if (frontendPart.audioUrl !== matchingPart.audioUrl) {
-            await partService.updatePart(matchingPart.id, {
-              testId: testId!,
-              part: frontendPart.type,
-              orderIndex: matchingPart.orderIndex,
-              audioUrl: frontendPart.audioUrl
-            });
-          }
 
           // For each question in frontendPart, save it to matchingPart.id
           for (const q of frontendPart.questions) {

@@ -62,11 +62,11 @@ export default function ListeningMediaUploader({
       if (!isValidFormat) {
         message.error(t("invalidAudioFormat"));
       }
-      const isLt10M = file.size / 1024 / 1024 < 10;
-      if (!isLt10M) {
+      const isLt100M = file.size / 1024 / 1024 < 100;
+      if (!isLt100M) {
         message.error(t("audioSizeLimit"));
       }
-      return isValidFormat && isLt10M;
+      return isValidFormat && isLt100M;
     },
     showUploadList: false,
     accept: 'audio/mpeg, audio/wav'
@@ -91,11 +91,11 @@ export default function ListeningMediaUploader({
       if (!isValidFormat) {
         message.error(t("invalidImageFormat"));
       }
-      const isLt10M = file.size / 1024 / 1024 < 10;
-      if (!isLt10M) {
+      const isLt100M = file.size / 1024 / 1024 < 100;
+      if (!isLt100M) {
         message.error(t("imageSizeLimit"));
       }
-      return isValidFormat && isLt10M;
+      return isValidFormat && isLt100M;
     },
     showUploadList: false,
     accept: 'image/jpeg, image/png, image/webp'

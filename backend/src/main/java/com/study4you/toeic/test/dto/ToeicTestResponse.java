@@ -19,6 +19,7 @@ public class ToeicTestResponse {
     private Boolean active;
     private String skill;
     private String level;
+    private String audioUrl;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<ToeicPartResponse> parts;
