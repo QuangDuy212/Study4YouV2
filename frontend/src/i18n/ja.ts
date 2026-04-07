@@ -391,6 +391,7 @@ export const ja = {
   set: "セット",
   setQuestions: "問題",
   removePartConfirm: "このパートを削除してもよろしいですか？この操作は元に戻せません。",
+  maxQuestionsReached: "完璧です！このパートに必要な {count} 問に達しました。",
 
   // Admin Test View
   viewTest: "テストを表示",

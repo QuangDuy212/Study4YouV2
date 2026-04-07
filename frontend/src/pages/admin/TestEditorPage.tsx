@@ -176,19 +176,25 @@ export default function TestEditorPage() {
         </Button>
       </div>
 
-      <div className="flex gap-6">
-        <div className="flex-1 min-w-0 space-y-6">
+      <div className="flex flex-col xl:flex-row gap-6 items-start">
+        <div className="flex-1 min-w-0 w-full space-y-6">
           <TestInfoSection data={testData} onChange={updateTestData} />
           <PartManager parts={testData.parts} onChange={(parts) => updateTestData({ parts })} onOpenAIPanel={openAIPanel} />
         </div>
-        <div className="w-[320px] shrink-0 hidden lg:block">
+        <div className="w-full xl:w-[320px] xl:sticky xl:top-20 shrink-0">
           <TestSidebar data={testData} onSave={handleSave} onPublish={handlePublish} isSaving={isSaving} />
         </div>
       </div>
 
       <AnimatePresence>
         {aiPanelOpen && (
-          <AIGeneratorPanel open={aiPanelOpen} initialPart={aiPanelPart} onClose={() => setAiPanelOpen(false)} onQuestionsGenerated={handleAIQuestionsGenerated} />
+          <AIGeneratorPanel 
+            open={aiPanelOpen} 
+            initialPart={aiPanelPart} 
+            currentParts={testData.parts}
+            onClose={() => setAiPanelOpen(false)} 
+            onQuestionsGenerated={handleAIQuestionsGenerated} 
+          />
         )}
       </AnimatePresence>
     </AdminLayout>

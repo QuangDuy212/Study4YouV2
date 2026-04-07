@@ -54,6 +54,7 @@ const App = () => (
                 <Route path="/tests/:id/attempt" element={<ProtectedRoute><TestTakingPage /></ProtectedRoute>} />
                 <Route path="/result/:id" element={<ProtectedRoute><ResultPage /></ProtectedRoute>} />
                 <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+                <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
                 {/* Admin Routes */}
                 <Route path="/admin" element={<ProtectedRoute requireAdmin requiredPermission="VIEW_ADMIN_DASHBOARD"><AdminDashboardPage /></ProtectedRoute>} />
                 <Route path="/admin/tests" element={<ProtectedRoute requireAdmin requiredPermission="MANAGE_TESTS"><AdminPage /></ProtectedRoute>} />

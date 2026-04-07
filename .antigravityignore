@@ -1,0 +1,35 @@
+# Antigravity ignore file
+# Ignore media and binary files to speed up searching and indexing
+
+**/*.mp3
+**/*.wav
+**/*.mp4
+**/*.mov
+**/*.avi
+**/*.png
+**/*.jpg
+**/*.jpeg
+**/*.gif
+**/*.webp
+**/*.svg
+**/*.ico
+**/*.zip
+**/*.rar
+**/*.7z
+**/*.pdf
+**/*.docx
+**/*.xlsx
+**/*.pptx
+
+# Build artifacts and dependencies
+**/node_modules/
+**/target/
+**/build/
+**/.next/
+**/.nuxt/
+**/.vercel/
+**/.output/
+**/.turbo/
+**/.cache/
+**/dist/
+**/dist-ssr/

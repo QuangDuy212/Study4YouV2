@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { X, Sparkles, Loader2, CheckCircle2, Hash, BookOpen } from "lucide-react";
+import { X, Sparkles, Loader2, CheckCircle2, Hash, BookOpen, Headphones } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -10,8 +10,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import aiService from "@/services/aiService";
-import type { PartType, Difficulty, TestQuestion } from "./types";
-import { AI_QUESTION_COUNTS, PART_LABELS } from "./types";
+import type { PartType, Difficulty, TestQuestion, TestPart } from "./types";
+import { PART_QUESTION_LIMITS, PART_LABELS, PART_START_INDEX } from "./types";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -19,17 +19,18 @@ import { useLanguage } from "@/contexts/LanguageContext";
 interface AIGeneratorPanelProps {
   open: boolean;
   initialPart: PartType;
+  currentParts: TestPart[];
   onClose: () => void;
   onQuestionsGenerated: (partType: PartType, questions: TestQuestion[]) => void;
 }
 
-function QuestionCard({ question, index }: { question: TestQuestion; index: number }) {
+function QuestionCard({ question, index, partType }: { question: TestQuestion; index: number; partType: PartType }) {
   return (
     <div className="rounded-xl border border-border bg-card p-5 shadow-sm space-y-3">
       {/* Question number badge + text */}
       <div className="space-y-2">
         <Badge variant="secondary" className="text-[11px] font-mono px-2.5 py-0.5">
-          Q{index + 1}
+          Q{PART_START_INDEX[partType] + index}
         </Badge>
         {question.passage && (
           <div className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground leading-relaxed border border-border/50">
@@ -64,7 +65,7 @@ function QuestionCard({ question, index }: { question: TestQuestion; index: numb
   );
 }
 
-export default function AIGeneratorPanel({ open, initialPart, onClose, onQuestionsGenerated }: AIGeneratorPanelProps) {
+export default function AIGeneratorPanel({ open, initialPart, currentParts, onClose, onQuestionsGenerated }: AIGeneratorPanelProps) {
   const { t } = useLanguage();
   const [selectedPart, setSelectedPart] = useState<PartType>(initialPart);
 
@@ -75,8 +76,10 @@ export default function AIGeneratorPanel({ open, initialPart, onClose, onQuestio
   const [statusMessage, setStatusMessage] = useState("");
   const [previewQuestions, setPreviewQuestions] = useState<TestQuestion[]>([]);
 
-  const count = AI_QUESTION_COUNTS[selectedPart] || 0;
   const info = PART_LABELS[selectedPart];
+  const maxLimit = PART_QUESTION_LIMITS[selectedPart] || 0;
+  const currentCount = currentParts.find(p => p.type === selectedPart)?.questions.length || 0;
+  const count = Math.max(0, maxLimit - currentCount);
 
   const handleGenerate = useCallback(async () => {
     setStatusMessage(t('generatingQuestionsForPart', { part: t(info.labelKey), count: count }));
@@ -89,7 +92,7 @@ export default function AIGeneratorPanel({ open, initialPart, onClose, onQuestio
       setStatusMessage(t('processingQuestions'));
 
       const questions: TestQuestion[] = (data || [])
-        .filter((q: any) => q.content && q.correctAnswer && q.options?.length === 4)
+        .filter((q: any) => q.content && q.correctAnswer && (q.options?.length === 4 || (selectedPart === "PART_2" && q.options?.length === 3)))
         .map((q: any) => ({
           id: crypto.randomUUID(),
           content: q.content,
@@ -98,7 +101,8 @@ export default function AIGeneratorPanel({ open, initialPart, onClose, onQuestio
           passage: q.passage || null,
           correctAnswer: q.correctAnswer,
           options: q.options,
-        }));
+        }))
+        .slice(0, count);
 
       setPreviewQuestions(questions);
       setProgress(100);
@@ -164,6 +168,9 @@ export default function AIGeneratorPanel({ open, initialPart, onClose, onQuestio
               <Select value={selectedPart} onValueChange={(v) => setSelectedPart(v as PartType)} disabled={isGenerating}>
                 <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="PART_2">{t('part2Desc')} (25)</SelectItem>
+                  <SelectItem value="PART_3">{t('part3Desc')} (39)</SelectItem>
+                  <SelectItem value="PART_4">{t('part4Desc')} (30)</SelectItem>
                   <SelectItem value="PART_5">{t('part5Desc')} (30)</SelectItem>
                   <SelectItem value="PART_6">{t('part6Desc')} (16)</SelectItem>
                   <SelectItem value="PART_7">{t('part7Desc')} (54)</SelectItem>
@@ -197,13 +204,16 @@ export default function AIGeneratorPanel({ open, initialPart, onClose, onQuestio
 
 
             <div className="rounded-lg bg-muted/40 border border-border/50 p-3.5 text-sm text-muted-foreground">
-              {t('willGenerateCountQuestionsForPart', { count, part: t(info.labelKey) })}
+              {count > 0 
+                ? t('willGenerateCountQuestionsForPart', { count, part: t(info.labelKey) })
+                : "This part already has the maximum number of questions."
+              }
               <span className="text-xs block mt-1 text-muted-foreground/80">{t(info.descriptionKey)}</span>
             </div>
           </div>
 
           {/* Generate Button */}
-          <Button onClick={handleGenerate} disabled={isGenerating} className="w-full h-11" size="lg">
+          <Button onClick={handleGenerate} disabled={isGenerating || count <= 0} className="w-full h-11" size="lg">
             {isGenerating ? (
               <><Loader2 className="w-4 h-4 animate-spin mr-2" /> {t('aiIsGenerating')}</>
             ) : (
@@ -248,11 +258,11 @@ export default function AIGeneratorPanel({ open, initialPart, onClose, onQuestio
                 {/* Question Cards */}
                 <div className="space-y-6 max-h-[500px] overflow-y-auto pr-1">
                   {(() => {
-                    const isPart6 = selectedPart === "PART_6";
-                    const isPart7 = selectedPart === "PART_7";
+                    const isGrouped = ["PART_3", "PART_4", "PART_6", "PART_7"].includes(selectedPart);
+                    const getSetSize = (type: PartType) => type === "PART_6" ? 4 : (type === "PART_7" ? 2 : 3);
                     
-                    if (isPart6 || isPart7) {
-                      const setSize = isPart6 ? 4 : 2;
+                    if (isGrouped) {
+                      const setSize = getSetSize(selectedPart);
                       const groups: TestQuestion[][] = [];
                       for (let i = 0; i < previewQuestions.length; i += setSize) {
                         groups.push(previewQuestions.slice(i, i + setSize));
@@ -266,10 +276,11 @@ export default function AIGeneratorPanel({ open, initialPart, onClose, onQuestio
                               </Badge>
                            </div>
                            
-                           {group[0]?.passage && (
+                           {["PART_3", "PART_4", "PART_6", "PART_7"].includes(selectedPart) && group[0]?.passage && (
                              <div className="rounded-xl bg-card p-4 text-[13px] text-foreground leading-relaxed border border-border/50 font-serif italic shadow-sm">
                                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest mb-2 flex items-center gap-1.5 opacity-60">
-                                 <BookOpen className="w-3 h-3" /> {t('readingPassage')}
+                                 {["PART_3", "PART_4"].includes(selectedPart) ? <Headphones className="w-3 h-3" /> : <BookOpen className="w-3 h-3" />}
+                                 {["PART_3", "PART_4"].includes(selectedPart) ? t('sharedTranscript') : t('readingPassage')}
                                </p>
                                {group[0].passage}
                              </div>
@@ -277,7 +288,7 @@ export default function AIGeneratorPanel({ open, initialPart, onClose, onQuestio
 
                            <div className="space-y-4">
                               {group.map((q, qIdx) => (
-                                <QuestionCard key={q.id} question={{ ...q, passage: null }} index={gIdx * setSize + qIdx} />
+                               <QuestionCard key={q.id} question={{ ...q, passage: null }} index={currentCount + gIdx * setSize + qIdx} partType={selectedPart} />
                               ))}
                            </div>
                         </div>
@@ -285,7 +296,7 @@ export default function AIGeneratorPanel({ open, initialPart, onClose, onQuestio
                     }
 
                     return previewQuestions.map((q, i) => (
-                      <QuestionCard key={q.id} question={q} index={i} />
+                      <QuestionCard key={q.id} question={q} index={currentCount + i} partType={selectedPart} />
                     ));
                   })()}
                 </div>

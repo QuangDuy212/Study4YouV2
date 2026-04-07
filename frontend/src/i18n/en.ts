@@ -134,11 +134,14 @@ export const en = {
   goodEffort: "Good effort!",
   keepPracticing: "Keep practicing!",
   backToDashboard: "Back to Dashboard",
+  takeAnotherTest: "Take Another Test",
   performanceSummary: "Performance Summary",
   questionsAnswered: "Questions Answered",
   accuracyRate: "Accuracy Rate",
   timeTaken: "Time Taken",
   viewAllTests: "View All {type} Tests",
+  finishTest: "Finish Test",
+  attentionRequired: "Attention Required",
 
   // Not Found
   pageNotFound: "Oops! Page not found",
@@ -422,6 +425,7 @@ export const en = {
   set: "Set",
   setQuestions: "Questions",
   removePartConfirm: "Are you sure you want to remove this part? This action cannot be undone.",
+  maxQuestionsReached: "Perfect! You've reached the required {count} questions for this part.",
 
   // Admin Test View
   viewTest: "View Test",

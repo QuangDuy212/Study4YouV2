@@ -6,29 +6,44 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import testService, { type ToeicTestResponse } from "@/services/testService";
+import attemptService from "@/services/attemptService";
 import { toast } from "sonner";
 
 export default function TestsPage() {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [tests, setTests] = useState<ToeicTestResponse[]>([]);
+  const [stats, setStats] = useState({ completed: 0, bestScore: 0 });
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchTests = async () => {
+    const fetchData = async () => {
       try {
-        const data = await testService.getTests(0, 20);
+        const [testsData, attemptsData] = await Promise.all([
+          testService.getTests(0, 20),
+          user ? attemptService.getAttempts(user.id, 0, 1, "toeicScore", "DESC") : Promise.resolve(null)
+        ]);
+        
         // Only show active tests for public listing
-        setTests(data.content.filter(test => test.active));
+        setTests(testsData.content.filter(test => test.active));
+        
+        if (attemptsData) {
+          setStats({
+            completed: attemptsData.totalElements,
+            bestScore: attemptsData.content[0]?.toeicScore ?? 0
+          });
+        }
       } catch (error) {
-        console.error("Failed to fetch tests:", error);
+        console.error("Failed to fetch data:", error);
         toast.error(t('failedToLoadTests'));
       } finally {
         setIsLoading(false);
       }
     };
-    fetchTests();
-  }, [t]);
+    fetchData();
+  }, [t, user]);
 
   return (
     <DashboardLayout>
@@ -51,13 +66,13 @@ export default function TestsPage() {
               <p className="text-sm text-muted-foreground mb-1">{t('totalTests')}</p>
               <p className="font-display text-2xl font-bold text-foreground">{tests.length}</p>
             </div>
-            <div className="bg-card rounded-xl p-4 border border-border opacity-50 cursor-not-allowed">
+            <div className="bg-card rounded-xl p-4 border border-border">
               <p className="text-sm text-muted-foreground mb-1">{t('completed')}</p>
-              <p className="font-display text-2xl font-bold text-foreground">-</p>
+              <p className="font-display text-2xl font-bold text-foreground">{stats.completed}</p>
             </div>
-            <div className="bg-card rounded-xl p-4 border border-border opacity-50 cursor-not-allowed">
+            <div className="bg-card rounded-xl p-4 border border-border">
               <p className="text-sm text-muted-foreground mb-1">{t('bestScore')}</p>
-              <p className="font-display text-2xl font-bold text-success">-</p>
+              <p className="font-display text-2xl font-bold text-success">{stats.bestScore}</p>
             </div>
           </motion.div>
         )}

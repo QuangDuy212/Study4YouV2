@@ -67,3 +67,12 @@ frontend/.cache/
 frontend/bun.lockb
 frontend/.vite/deps
 
+# Media
+*.mp3
+*.wav
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.zip
+*.pdf

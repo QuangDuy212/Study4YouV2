@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import userService, { UserResponse } from "@/services/userService";
 import AdminLayout from "@/components/admin/AdminLayout";
+import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -12,10 +13,16 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { User, Mail, Shield, Calendar, Lock, Save, Phone } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 export default function ProfilePage() {
   const { refreshProfile } = useAuth();
   const { t } = useLanguage();
+  const location = useLocation();
+  
+  // Choose layout based on route
+  const isAdminRoute = location.pathname.startsWith("/admin");
+  const Layout = isAdminRoute ? AdminLayout : DashboardLayout;
 
   const [profile, setProfile] = useState<UserResponse | null>(null);
   const [fullName, setFullName] = useState("");
@@ -82,16 +89,16 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <AdminLayout pageTitle={t("userProfilePage")} pageDescription={t("userProfilePageDesc")}>
+      <Layout pageTitle={t("userProfilePage")} pageDescription={t("userProfilePageDesc")}>
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
-      </AdminLayout>
+      </Layout>
     );
   }
 
   return (
-    <AdminLayout pageTitle={t("userProfilePage")} pageDescription={t("userProfilePageDesc")}>
+    <Layout pageTitle={t("userProfilePage")} pageDescription={t("userProfilePageDesc")}>
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Profile Header Card */}
         <Card>
@@ -192,6 +199,6 @@ export default function ProfilePage() {
           </Button>
         </div>
       </div>
-    </AdminLayout>
+    </Layout>
   );
 }

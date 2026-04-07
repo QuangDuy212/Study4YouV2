@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TestPart, PartType } from "./types";
-import { PART_LABELS, READING_PARTS, LISTENING_PARTS, createEmptyQuestion } from "./types";
+import { PART_LABELS, READING_PARTS, LISTENING_PARTS, createEmptyQuestion, PART_QUESTION_LIMITS } from "./types";
 import QuestionEditor from "./QuestionEditor";
 import ListeningMediaUploader from "./ListeningMediaUploader";
 
@@ -23,19 +23,41 @@ export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: Pa
   const info = PART_LABELS[part.type];
   const isReading = READING_PARTS.includes(part.type);
   const isListening = LISTENING_PARTS.includes(part.type);
+  const limit = PART_QUESTION_LIMITS[part.type];
+  const isLimitReached = part.questions.length >= limit;
 
   const addQuestion = () => {
-    const isPart6 = part.type === "PART_6";
-    const isPart7 = part.type === "PART_7";
+    if (isLimitReached) return;
+    const isGrouped = ["PART_3", "PART_4", "PART_6", "PART_7"].includes(part.type);
+    const getSetSize = (type: PartType) => type === "PART_6" ? 4 : (type === "PART_7" ? 2 : 3);
     
-    if (isPart6 || isPart7) {
-      const setSize = isPart6 ? 4 : 2;
+    if (isGrouped) {
+      const setSize = getSetSize(part.type);
       const newQuestions = Array.from({ length: setSize }, () => createEmptyQuestion(part.type));
       onChange({ ...part, questions: [...part.questions, ...newQuestions] });
     } else {
       onChange({ ...part, questions: [...part.questions, createEmptyQuestion(part.type)] });
     }
     
+    if (!expanded) setExpanded(true);
+  };
+
+  const autoFillMissing = () => {
+    if (isLimitReached) return;
+    const remaining = limit - part.questions.length;
+    let newQuestions: typeof part.questions = [];
+    
+    const isGrouped = ["PART_3", "PART_4", "PART_6", "PART_7"].includes(part.type);
+    const getSetSize = (type: PartType) => type === "PART_6" ? 4 : (type === "PART_7" ? 2 : 3);
+
+    if (isGrouped) {
+      const setSize = getSetSize(part.type);
+      const setsToGenerate = Math.floor(remaining / setSize);
+      newQuestions = Array.from({ length: setsToGenerate * setSize }, () => createEmptyQuestion(part.type));
+    } else {
+      newQuestions = Array.from({ length: remaining }, () => createEmptyQuestion(part.type));
+    }
+    onChange({ ...part, questions: [...part.questions, ...newQuestions] });
     if (!expanded) setExpanded(true);
   };
 
@@ -73,8 +95,11 @@ export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: Pa
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="secondary" className="text-xs">
-            {part.questions.length} {t("questions")}
+          <Badge 
+            variant={isLimitReached ? "default" : "secondary"} 
+            className={cn("text-xs", isLimitReached && "bg-emerald-500 hover:bg-emerald-600")}
+          >
+            {part.questions.length} / {limit} {t("questions")}
           </Badge>
           <button
             onClick={(e) => { e.stopPropagation(); onDelete(); }}
@@ -108,11 +133,11 @@ export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: Pa
               ) : (
                 <div className="space-y-6">
                   {(() => {
-                    const isPart6 = part.type === "PART_6";
-                    const isPart7 = part.type === "PART_7";
+                    const isGrouped = ["PART_3", "PART_4", "PART_6", "PART_7"].includes(part.type);
+                    const getSetSize = (type: PartType) => type === "PART_6" ? 4 : (type === "PART_7" ? 2 : 3);
                     
-                    if (isPart6 || isPart7) {
-                      const setSize = isPart6 ? 4 : 2;
+                    if (isGrouped) {
+                      const setSize = getSetSize(part.type);
                       const groups: typeof part.questions[] = [];
                       for (let i = 0; i < part.questions.length; i += setSize) {
                         groups.push(part.questions.slice(i, i + setSize));
@@ -139,27 +164,34 @@ export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: Pa
                              </div>
                           </div>
                           
-                          {/* Shared Passage Editor for the Set */}
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2 text-primary">
-                              <BookOpen className="w-4 h-4" />
-                              <span className="text-xs font-bold uppercase tracking-wider">{t('sharedPassage')}</span>
+                          {/* Shared Passage/Transcript Editor for the Set */}
+                          {["PART_3", "PART_4", "PART_6", "PART_7"].includes(part.type) && (
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2 text-primary">
+                                {isListening ? <Headphones className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}
+                                <span className="text-xs font-bold uppercase tracking-wider">
+                                  {isListening ? t('sharedTranscript') : t('sharedPassage')}
+                                </span>
+                              </div>
+                              <textarea
+                                className={cn(
+                                  "w-full min-h-[120px] p-4 rounded-xl border border-primary/20 bg-background text-sm leading-relaxed shadow-inner outline-none focus:ring-1 focus:ring-primary transition-all",
+                                  isListening ? "font-sans" : "font-serif italic"
+                                )}
+                                placeholder={isListening ? t('enterSharedTranscript') : t('enterSharedPassage')}
+                                value={group[0]?.passage || ""}
+                                onChange={(e) => {
+                                  const newPassage = e.target.value;
+                                  const startIndex = gIdx * setSize;
+                                  const updatedQuestions = [...part.questions];
+                                  for (let i = startIndex; i < startIndex + group.length; i++) {
+                                    updatedQuestions[i] = { ...updatedQuestions[i], passage: newPassage };
+                                  }
+                                  onChange({ ...part, questions: updatedQuestions });
+                                }}
+                              />
                             </div>
-                            <textarea
-                              className="w-full min-h-[100px] p-3 rounded-lg border border-primary/20 bg-background text-sm font-serif italic focus:ring-1 focus:ring-primary outline-none"
-                              placeholder={t('enterSharedPassage')}
-                              value={group[0]?.passage || ""}
-                              onChange={(e) => {
-                                const newPassage = e.target.value;
-                                const startIndex = gIdx * setSize;
-                                const updatedQuestions = [...part.questions];
-                                for (let i = startIndex; i < startIndex + group.length; i++) {
-                                  updatedQuestions[i] = { ...updatedQuestions[i], passage: newPassage };
-                                }
-                                onChange({ ...part, questions: updatedQuestions });
-                              }}
-                            />
-                          </div>
+                          )}
 
                           <div className="space-y-3">
                             {group.map((q, qi) => {
@@ -201,25 +233,44 @@ export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: Pa
               )}
 
               {/* Bottom Action buttons */}
-              <div className="flex items-center gap-2 pt-4 pb-2 border-t border-border/50 mt-4">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={addQuestion}
-                  className="bg-primary/5 border-primary/20 hover:bg-primary/10 text-primary"
-                >
-                  <Plus className="w-3.5 h-3.5 mr-1.5" /> {t("addQuestion")}
-                </Button>
-                {isReading && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-primary/30 text-primary hover:bg-primary/5"
-                    onClick={() => onOpenAIPanel(part.type)}
-                  >
-                    <Sparkles className="w-3.5 h-3.5 mr-1.5" /> {t("generateWithAI")}
-                  </Button>
+              <div className="flex flex-col gap-3 pt-4 pb-2 border-t border-border/50 mt-4">
+                {isLimitReached && (
+                  <div className="bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 text-xs py-2 px-3 rounded-lg border border-emerald-200 dark:border-emerald-500/20 flex items-center gap-2">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    {t('maxQuestionsReached', { count: limit })}
+                  </div>
                 )}
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={addQuestion}
+                    disabled={isLimitReached}
+                    className="bg-primary/5 border-primary/20 hover:bg-primary/10 text-primary disabled:opacity-50"
+                  >
+                    <Plus className="w-3.5 h-3.5 mr-1.5" /> {t("addQuestion")}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={autoFillMissing}
+                    disabled={isLimitReached}
+                    className="border-primary/20 text-primary hover:bg-primary/5 disabled:opacity-50"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 mr-1.5" /> Quick Fill ({limit - part.questions.length})
+                  </Button>
+                  {part.type !== "PART_1" && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={isLimitReached}
+                      className="border-primary/30 text-primary hover:bg-primary/5 disabled:opacity-50"
+                      onClick={() => onOpenAIPanel(part.type)}
+                    >
+                      <Sparkles className="w-3.5 h-3.5 mr-1.5" /> {t("generateWithAI")}
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
           </motion.div>

@@ -47,24 +47,44 @@ export const PART_LABELS: Record<PartType, { labelKey: string; descriptionKey: s
 export const READING_PARTS: PartType[] = ["PART_5", "PART_6", "PART_7"];
 export const LISTENING_PARTS: PartType[] = ["PART_1", "PART_2", "PART_3", "PART_4"];
 
-export const AI_QUESTION_COUNTS: Partial<Record<PartType, number>> = {
+export const PART_QUESTION_LIMITS: Record<PartType, number> = {
+  PART_1: 6,
+  PART_2: 25,
+  PART_3: 39,
+  PART_4: 30,
   PART_5: 30,
   PART_6: 16,
   PART_7: 54,
 };
 
+export const PART_START_INDEX: Record<PartType, number> = {
+  PART_1: 1,
+  PART_2: 7,
+  PART_3: 32,
+  PART_4: 71,
+  PART_5: 101,
+  PART_6: 131,
+  PART_7: 147,
+};
+
+export const AI_QUESTION_COUNTS: Partial<Record<PartType, number>> = PART_QUESTION_LIMITS;
+
 export function createEmptyQuestion(partType?: PartType): TestQuestion {
+  const isPart1 = partType === "PART_1";
   const isPart2 = partType === "PART_2";
   const labels: ("A" | "B" | "C" | "D")[] = isPart2 ? ["A", "B", "C"] : ["A", "B", "C", "D"];
   
   return {
     id: crypto.randomUUID(),
-    content: "",
+    content: isPart2 ? "Mark your answer on your answer sheet." : "",
     audioUrl: null,
     imageUrl: null,
     passage: null,
     correctAnswer: "A",
-    options: labels.map(label => ({ label, content: "" })),
+    options: labels.map(label => ({ 
+      label, 
+      content: (isPart1 || isPart2) ? label : "" 
+    })),
   };
 }
 

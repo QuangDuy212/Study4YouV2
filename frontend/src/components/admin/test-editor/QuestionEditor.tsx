@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
 import type { TestQuestion, PartType } from "./types";
-import { LISTENING_PARTS } from "./types";
+import { LISTENING_PARTS, PART_START_INDEX } from "./types";
 import ListeningMediaUploader from "./ListeningMediaUploader";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Upload, message } from "antd";
@@ -52,14 +52,14 @@ export default function QuestionEditor({
   return (
     <div className="rounded-lg border border-border bg-card p-4 space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-2">
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="flex items-center gap-2 text-left flex-1"
+          className="flex items-start gap-2 text-left flex-1 min-w-0"
         >
-          <GripVertical className="w-4 h-4 text-muted-foreground" />
-          <Badge variant="outline" className="shrink-0">Q{index + 1}</Badge>
-          <span className="text-sm text-muted-foreground truncate">
+          <div className="pt-0.5 shrink-0"><GripVertical className="w-4 h-4 text-muted-foreground" /></div>
+          <Badge variant="outline" className="shrink-0">Q{PART_START_INDEX[partType] + index}</Badge>
+          <span className="text-sm text-muted-foreground break-words whitespace-normal flex-1">
             {question.content || t("newQuestion")}
           </span>
           {question.correctAnswer && (
@@ -68,7 +68,7 @@ export default function QuestionEditor({
             </Badge>
           )}
         </button>
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive shrink-0" onClick={onDelete}>
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive shrink-0 -mt-1" onClick={onDelete}>
           <Trash2 className="w-4 h-4" />
         </Button>
       </div>
@@ -120,7 +120,7 @@ export default function QuestionEditor({
                         variant="outline" 
                         size="sm" 
                         type="button"
-                        className="w-full border-dashed border-2 hover:border-primary hover:bg-primary/5 transition-all text-muted-foreground"
+                        className="w-full border-dashed border-2 hover:border-primary hover:bg-primary/5 hover:text-primary transition-all text-muted-foreground"
                         disabled={isUploadingImage}
                       >
                         {isUploadingImage ? (
@@ -165,7 +165,11 @@ export default function QuestionEditor({
           <div className="space-y-2">
             <Label>{t("questionLabel")}</Label>
             <Textarea
-              placeholder={isListening ? t("questionPlaceholderListening") : t("questionPlaceholderReading")}
+              placeholder={
+                isListening 
+                  ? t("questionPlaceholderListening") 
+                  : t("questionPlaceholderReading")
+              }
               className="min-h-[60px]"
               value={question.content}
               onChange={(e) => onChange({ ...question, content: e.target.value })}
@@ -179,7 +183,7 @@ export default function QuestionEditor({
               value={question.correctAnswer}
               onValueChange={(v) => onChange({ ...question, correctAnswer: v as "A" | "B" | "C" | "D" })}
             >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 {(partType === "PART_2" ? ["A", "B", "C"] : ["A", "B", "C", "D"] as const).map((label) => {
                   const opt = question.options?.find((o) => o.label === label);
                   const isCorrect = question.correctAnswer === label;
@@ -198,7 +202,7 @@ export default function QuestionEditor({
                         {label}.
                       </Label>
                       <Input
-                        className="h-8 text-sm border-0 bg-transparent focus-visible:ring-0 p-0"
+                        className="h-8 text-sm border-0 bg-transparent focus-visible:ring-0 p-0 flex-1 min-w-0"
                         placeholder={t("optionPlaceholder", { label })}
                         value={opt?.content || ""}
                         onChange={(e) => updateOption(label as any, e.target.value)}

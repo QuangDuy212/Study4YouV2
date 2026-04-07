@@ -27,7 +27,6 @@ public class ToeicTestController {
     private final ToeicTestService toeicTestService;
     private final FileStorageService fileStorageService;
 
-    @PreAuthorize("hasAuthority('MANAGE_TESTS')")
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<ToeicTestResponse>>> getAllTests(
             @RequestParam(defaultValue = "0") int page,

@@ -1,4 +1,4 @@
-import { BookOpen, Headphones, ArrowRight, CheckCircle, Sparkles, Menu, X } from "lucide-react";
+import { BookOpen, Headphones, ArrowRight, CheckCircle, Sparkles, Menu, X, LogOut, LayoutDashboard, Shield, User, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -6,6 +6,15 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -23,7 +32,10 @@ const staggerContainer = {
 
 export default function LandingPage() {
   const { t } = useLanguage();
+  const { profile, isAdmin, signOut } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  const dashboardUrl = isAdmin ? "/admin" : "/dashboard";
 
   const features = [
     {
@@ -72,12 +84,50 @@ export default function LandingPage() {
             <div className="hidden sm:flex items-center gap-2">
               <ThemeSwitcher />
               <LanguageSwitcher />
-              <Link to="/login">
-                <Button variant="ghost">{t("login")}</Button>
-              </Link>
-              <Link to="/register">
-                <Button variant="default">{t("getStartedFree")}</Button>
-              </Link>
+              {profile ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="flex items-center gap-3 h-auto py-1 px-2 rounded-full hover:bg-muted transition-colors">
+                      <Avatar className="w-8 h-8 border border-border">
+                        <AvatarImage src={profile.avatarUrl || ""} />
+                        <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs">
+                          {profile.fullName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="text-left hidden lg:block">
+                        <p className="text-sm font-semibold text-foreground leading-tight">{profile.fullName}</p>
+                        <p className="text-[10px] text-muted-foreground leading-tight">{isAdmin ? "Administrator" : "Student"}</p>
+                      </div>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56 mt-2 p-2">
+                    <DropdownMenuItem className="gap-2 rounded-lg cursor-pointer" onClick={() => window.location.href = "/dashboard"}>
+                      <LayoutDashboard className="w-4 h-4" />
+                      {t("dashboard")}
+                    </DropdownMenuItem>
+                    {isAdmin && (
+                      <DropdownMenuItem className="gap-2 rounded-lg cursor-pointer" onClick={() => window.location.href = "/admin"}>
+                        <Shield className="w-4 h-4" />
+                        {t("adminPanel")}
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="gap-2 rounded-lg text-destructive focus:text-destructive cursor-pointer" onClick={() => signOut()}>
+                      <LogOut className="w-4 h-4" />
+                      {t("logout")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <>
+                  <Link to="/login">
+                    <Button variant="ghost">{t("login")}</Button>
+                  </Link>
+                  <Link to="/register">
+                    <Button variant="default">{t("getStartedFree")}</Button>
+                  </Link>
+                </>
+              )}
             </div>
             {/* Mobile hamburger */}
             <Button
@@ -106,12 +156,49 @@ export default function LandingPage() {
                   <ThemeSwitcher />
                   <LanguageSwitcher />
                 </div>
-                <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start">{t("login")}</Button>
-                </Link>
-                <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="default" className="w-full">{t("getStartedFree")}</Button>
-                </Link>
+                {profile ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3 p-2 mb-2 bg-muted/50 rounded-xl">
+                      <Avatar className="w-10 h-10 border border-border">
+                        <AvatarImage src={profile.avatarUrl || ""} />
+                        <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                          {profile.fullName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-bold text-foreground leading-tight">{profile.fullName}</p>
+                        <p className="text-xs text-muted-foreground leading-tight">{isAdmin ? "Administrator" : "Student"}</p>
+                      </div>
+                    </div>
+                    <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start gap-3">
+                        <LayoutDashboard className="w-4 h-4" />
+                        {t("dashboard")}
+                      </Button>
+                    </Link>
+                    {isAdmin && (
+                      <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>
+                        <Button variant="ghost" className="w-full justify-start gap-3">
+                          <Shield className="w-4 h-4" />
+                          {t("adminPanel")}
+                        </Button>
+                      </Link>
+                    )}
+                    <Button variant="ghost" className="w-full justify-start gap-3 text-destructive" onClick={() => { signOut(); setMobileMenuOpen(false); }}>
+                      <LogOut className="w-4 h-4" />
+                      {t("logout")}
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start">{t("login")}</Button>
+                    </Link>
+                    <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="default" className="w-full">{t("getStartedFree")}</Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </motion.div>
           )}
@@ -141,17 +228,28 @@ export default function LandingPage() {
               {t("heroDescription")}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link to="/register">
-                <Button variant="hero" size="xl">
-                  {t("getStartedFree")}
-                  <ArrowRight className="w-5 h-5" />
-                </Button>
-              </Link>
-              <Link to="/login">
-                <Button variant="heroOutline" size="xl">
-                  {t("loginToDashboard")}
-                </Button>
-              </Link>
+              {profile ? (
+                <Link to={dashboardUrl}>
+                  <Button variant="hero" size="xl">
+                    {t("dashboard")}
+                    <ArrowRight className="w-5 h-5" />
+                  </Button>
+                </Link>
+              ) : (
+                <>
+                  <Link to="/register">
+                    <Button variant="hero" size="xl">
+                      {t("getStartedFree")}
+                      <ArrowRight className="w-5 h-5" />
+                    </Button>
+                  </Link>
+                  <Link to="/login">
+                    <Button variant="heroOutline" size="xl">
+                      {t("loginToDashboard")}
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </motion.div>
 
@@ -303,13 +401,13 @@ export default function LandingPage() {
             <p className="text-lg text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
               {t("readyToTransformDesc")}
             </p>
-            <Link to="/register">
+            <Link to={profile ? dashboardUrl : "/register"}>
               <Button 
                 variant="secondary" 
                 size="xl"
                 className="bg-background text-foreground hover:bg-background/90"
               >
-                {t("getStartedFree")}
+                {profile ? t("dashboard") : t("getStartedFree")}
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </Link>

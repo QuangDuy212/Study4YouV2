@@ -38,7 +38,6 @@ export const ko = {
   noResultsFound: "결과를 찾을 수 없습니다",
   updateStatus: "상태 업데이트",
 
-
   // Skills
   reading: "읽기",
   listening: "듣기",
@@ -116,7 +115,6 @@ export const ko = {
   preparingTest: "테스트 환경을 준비 중입니다...",
   audioPlayerListening: "오디오 플레이어 (리스닝 섹션)",
 
-
   // Result Page
   excellentWork: "훌륭합니다!",
   goodEffort: "잘했습니다!",
@@ -193,7 +191,6 @@ export const ko = {
   system: "시스템",
   activity: "활동",
 
-
   // Admin Question Bank
   questionBankDesc: "모든 기술과 난이도의 문제 관리",
   searchByContent: "문제 내용으로 검색...",
@@ -248,7 +245,7 @@ export const ko = {
   allStatus: "모든 상태",
   student: "학생",
   role: "역할",
-  status: "상태",
+  status: "状态",
   tests: "테스트",
   avgScore: "평균 점수",
   registered: "등록일",
@@ -263,7 +260,6 @@ export const ko = {
   speakingAttempts: "말하기 시도",
   aiQuestions: "AI 문제",
   aiUsers: "AI 사용자",
-
 
   // Admin Analytics
   analyticsTitle: "분석",
@@ -343,7 +339,22 @@ export const ko = {
   // Admin User Editor
   createUser: "사용자 만들기",
   editUser: "사용자 편집",
-  registerNewUser: "�� 업데이트되었습니다",
+  registerNewUser: "새 사용자 계정 등록",
+  editingUser: "편집 중: {name}",
+  basicInformation: "기본 정보",
+  enterFullNamePlaceholder: "이름 입력",
+  enterEmailPlaceholder: "이메일 주소 입력",
+  resetPassword: "비밀번호 초기화",
+  leaveBlankPassword: "현재 비밀번호를 유지하려면 비워 두십시오.",
+  roleAssignment: "역할 할당",
+  assignRolesDesc: "이 사용자에게 하나 이상의 역할을 할당합니다.",
+  assigned: "할당됨",
+  backToUsers: "사용자로 돌아가기",
+  nameRequired: "이름은 필수입니다",
+  emailRequired: "이메일은 필수입니다",
+  passwordRequired: "비밀번호는 필수입니다",
+  userCreationNote: "사용자 생성에는 관리자 API 통합이 필요합니다. 로컬 프로필이 저장되었습니다.",
+  userUpdated: "사용자 정보가 업데이트되었습니다",
 
   // Admin Test Editor
   createNewTest: "새 테스트 만들기",
@@ -412,7 +423,6 @@ export const ko = {
   part: "파트",
   generatedQuestionsTitle: "생성된 문제",
 
-
   // AI Generate Users Page
   aiGenerateUsers: "AI 사용자 생성",
   aiGenerateUsersDesc: "AI를 사용하여 자연어 프롬프트로 대량 사용자 계정을 생성합니다.",
@@ -427,15 +437,20 @@ export const ko = {
   saveAllUsers: "모든 사용자 저장",
   confirmBulkSave: "대량 저장 확인",
   bulkSaveConfirmDesc: "사용자 {count}명을 저장하려고 합니다. 이 과정은 몇 초 정도 걸릴 수 있습니다. 계속하시겠습니까?",
-  backToUsers: "사용자 목록으로 돌아가기",
-  inactive: "비활성",
-  banned: "차단됨",
-  pleaseSelectRole: "기본 역할을 선택하세요",
-  usersGeneratedSuccess: "사용자 {count}명을 성공적으로 생성했습니다.",
-  failedToGenerateUsers: "사용자 생성에 실패했습니다.",
-  usersCreatedSuccess: "사용자 {success} / {total}명을 성공적으로 생성했습니다.",
-  failedToSaveUsers: "사용자 저장에 실패했습니다.",
-  failedToLoadRoles: "역할 목록을 불러오지 못했습니다.",
+
+  // AI User Generator Modal
+  aiUserGenerator: "AI 사용자 생성기",
+  configureParams: "AI 사용자 생성기를 구성하십시오.",
+  successfullyGenerated: "{count}명의 사용자가 생성되었습니다.",
+  numberOfUsers: "사용자 수",
+  betweenUsers: "1~50명",
+  emailDomain: "이메일 도메인",
+  optional: "선택 사항",
+  generateUsers: "사용자 생성",
+  done: "완료",
+  confirmBulkGeneration: "대량 생성 확인",
+  bulkGenerationConfirmDesc: "{count}명의 사용자를 생성하시겠습니까?",
+
   // Chatbot
   chatbotTitle: "Study4You 어시스턴트",
   chatbotSubtitle: "플랫폼에 대해 무엇이든 물어보세요",
@@ -560,7 +575,7 @@ export const ko = {
   testTaking: {
     audioSection: "이 섹션의 오디오",
   },
-    userProfilePage: "사용자 프로필",
+  userProfilePage: "사용자 프로필",
   userProfilePageDesc: "프로필 정보 보기 및 편집",
   editProfileDesc: "개인 정보 업데이트",
   emailReadonly: "이메일 주소는 변경할 수 없습니다",
@@ -595,6 +610,7 @@ export const ko = {
   forbidden: "접근 권한 없음",
   forbiddenDesc: "이 페이지에 접근할 권한이 없습니다.",
 
+  // Test Editor - New additions
   generateWithAI: "AI로 생성",
   removePart: "파트 삭제",
   partAudioFor: "{part} 전체 오디오",
@@ -610,19 +626,7 @@ export const ko = {
   set: "세트",
   setQuestions: "문제",
   removePartConfirm: "이 파트를 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.",
-  // RBAC Groups
-  roleUsersAccess: "사용자 및 관리",
-  roleToeicManagement: "TOEIC 관리",
-  roleDashboardAnalytics: "대시보드 및 분석",
-  roleStudentFeatures: "학생 기능",
-  roleOthers: "기타",
-
-  // Additional Roles/Missing
-  editingRoleText: "역할 편집 중: {name}",
-
-  // Landing Page
-  platformSubtitle: "TOEIC 연습 플랫폼",
-  heroDescription: "종합적인 모의고사와 상세한 점수 분석을 통해 TOEIC 리딩 및 리스닝 실력을 향상시키세요.",
+  maxQuestionsReached: "완벽합니다! 이 파트에 필요한 {count}개 문항을 모두 채웠습니다.",
 
   // Media Uploader
   uploadAudio: "오디오 업로드",

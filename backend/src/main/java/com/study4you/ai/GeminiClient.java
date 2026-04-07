@@ -22,8 +22,8 @@ public class GeminiClient { // Giữ nguyên tên để file khác khỏi lỗi
     @Value("${ai.api-key:}")
     private String apiKey;
 
-    // Dùng mẫu AI miễn phí tốt nhất hiện nay trên OpenRouter (Llama 3 hoặc Qwen)
-    @Value("${ai.model:google/gemini-2.0-flash-lite-preview-02-05:free}")
+    // Dùng Groq Cloud - Siêu nhanh và miễn phí
+    @Value("${ai.model:llama-3.3-70b-versatile}")
     private String model;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -33,9 +33,9 @@ public class GeminiClient { // Giữ nguyên tên để file khác khỏi lỗi
     public void init() {
         if (apiKey != null && !apiKey.isBlank()) {
             this.httpClient = HttpClient.newBuilder()
-                    .connectTimeout(Duration.ofSeconds(15))
+                    .connectTimeout(Duration.ofSeconds(30)) // Tăng thời gian kết nối
                     .build();
-            log.info("Client initialized completely direct with OpenRouter Free model: {}", model);
+            log.info("Client initialized with stability headers. Model: {}", model);
         }
     }
 
@@ -44,16 +44,25 @@ public class GeminiClient { // Giữ nguyên tên để file khác khỏi lỗi
     }
 
     public String generate(String prompt) {
+        return generate(prompt, false);
+    }
+
+    public String generate(String prompt, boolean requireJson) {
         if (!isAvailable()) {
             throw new IllegalStateException("OpenRouter API key is missing");
         }
 
         try {
-            // Cổng API của OpenRouter (siêu ổn định, miễn phí 100%, không cần thẻ Visa)
-            String url = "https://openrouter.ai/api/v1/chat/completions";
+            // Cổng API của Groq (https://console.groq.com/)
+            String url = "https://api.groq.com/openai/v1/chat/completions";
 
             Map<String, Object> payload = new HashMap<>();
             payload.put("model", model);
+            payload.put("temperature", 0.8);
+            payload.put("max_tokens", 4096); // Giảm xuống để tránh vượt quá giới hạn TPM của Groq Free Tier
+            if (requireJson) {
+                payload.put("response_format", Map.of("type", "json_object"));
+            }
             
             java.util.List<Map<String, String>> messages = new java.util.ArrayList<>();
             messages.add(Map.of("role", "system", "content", "You are a helpful TOEIC AI tutor for Study4You."));
@@ -64,11 +73,9 @@ public class GeminiClient { // Giữ nguyên tên để file khác khỏi lỗi
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
+                    .timeout(Duration.ofSeconds(60)) // Thời gian chờ phản hồi tối đa 60s
                     .header("Authorization", "Bearer " + apiKey)
                     .header("Content-Type", "application/json")
-                    // HTTP Site URL và App Name là bắt buộc cho OpenRouter
-                    .header("HTTP-Referer", "http://localhost:8080")
-                    .header("X-Title", "Study4You")
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();
 

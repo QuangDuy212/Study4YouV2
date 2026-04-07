@@ -68,7 +68,7 @@ export function ChatMessage({ message, isBot, timestamp }: ChatMessageProps) {
       <div className={cn("flex flex-col max-w-[78%]", isBot ? "items-start" : "items-end")}>
         <div
           className={cn(
-            "px-4 py-2.5 rounded-2xl text-sm shadow-sm",
+            "px-4 py-2.5 rounded-2xl text-sm shadow-sm break-words overflow-hidden",
             isBot
               ? "bg-muted/70 text-foreground rounded-tl-sm border border-border/40"
               : "bg-primary text-primary-foreground rounded-tr-sm"

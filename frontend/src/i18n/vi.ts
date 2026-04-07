@@ -133,11 +133,14 @@ export const vi = {
   goodEffort: "Tốt lắm!",
   keepPracticing: "Hãy tiếp tục luyện tập!",
   backToDashboard: "Về bảng điều khiển",
+  takeAnotherTest: "Làm bài thi khác",
   performanceSummary: "Tóm tắt kết quả",
   questionsAnswered: "Câu đã trả lời",
   accuracyRate: "Tỷ lệ chính xác",
   timeTaken: "Thời gian làm bài",
   viewAllTests: "Xem tất cả bài kiểm tra {type}",
+  finishTest: "Hoàn thành bài thi",
+  attentionRequired: "Lưu ý quan trọng",
 
   // Not Found
   pageNotFound: "Không tìm thấy trang!",
@@ -418,6 +421,7 @@ export const vi = {
   set: "Nhóm",
   setQuestions: "Câu hỏi",
   removePartConfirm: "Bạn có chắc chắn muốn xóa phần này? Hành động này không thể hoàn tác.",
+  maxQuestionsReached: "Tuyệt vời! Bạn đã hoàn thành đủ {count} câu hỏi cho phần này.",
 
   // Admin Test View
   viewTest: "Xem bài kiểm tra",
