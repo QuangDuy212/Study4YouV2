@@ -18,4 +18,6 @@ public class ToeicTestRequest {
     private String skill;
 
     private String level;
+
+    private String audioUrl;
 }

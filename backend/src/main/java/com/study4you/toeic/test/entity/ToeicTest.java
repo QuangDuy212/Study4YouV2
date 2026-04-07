@@ -38,6 +38,8 @@ public class ToeicTest extends BaseEntity {
     @Column(nullable = false)
     private Level level = Level.MEDIUM;
 
+    private String audioUrl;
+
     @OneToMany(mappedBy = "test", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ToeicPart> parts;
 

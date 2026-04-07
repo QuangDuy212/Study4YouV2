@@ -58,15 +58,16 @@ export default function ListeningMediaUploader({
       }
     },
     beforeUpload: (file) => {
-      const isValidFormat = file.type === 'audio/mpeg' || file.type === 'audio/wav';
+      const allowedAudioTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/x-wav', 'audio/x-mpeg', 'audio/x-mp3'];
+      const isValidFormat = allowedAudioTypes.includes(file.type);
       if (!isValidFormat) {
         message.error(t("invalidAudioFormat"));
       }
-      const isLt10M = file.size / 1024 / 1024 < 10;
-      if (!isLt10M) {
+      const isLt100M = file.size <= 100 * 1024 * 1024;
+      if (!isLt100M) {
         message.error(t("audioSizeLimit"));
       }
-      return isValidFormat && isLt10M;
+      return isValidFormat && isLt100M;
     },
     showUploadList: false,
     accept: 'audio/mpeg, audio/wav'
@@ -87,15 +88,16 @@ export default function ListeningMediaUploader({
       }
     },
     beforeUpload: (file) => {
-      const isValidFormat = ['image/jpeg', 'image/png', 'image/webp'].includes(file.type);
+      const allowedImageTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+      const isValidFormat = allowedImageTypes.includes(file.type);
       if (!isValidFormat) {
         message.error(t("invalidImageFormat"));
       }
-      const isLt10M = file.size / 1024 / 1024 < 10;
-      if (!isLt10M) {
+      const isLt100M = file.size <= 100 * 1024 * 1024;
+      if (!isLt100M) {
         message.error(t("imageSizeLimit"));
       }
-      return isValidFormat && isLt10M;
+      return isValidFormat && isLt100M;
     },
     showUploadList: false,
     accept: 'image/jpeg, image/png, image/webp'

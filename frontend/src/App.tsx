@@ -1,5 +1,4 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -43,7 +42,6 @@ const App = () => (
         <AuthProvider>
           <TooltipProvider>
             <Toaster />
-            <Sonner />
             <BrowserRouter>
               <ChatbotWidget />
               <Routes>
@@ -56,6 +54,7 @@ const App = () => (
                 <Route path="/tests/:id/attempt" element={<ProtectedRoute><TestTakingPage /></ProtectedRoute>} />
                 <Route path="/result/:id" element={<ProtectedRoute><ResultPage /></ProtectedRoute>} />
                 <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+                <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
                 {/* Admin Routes */}
                 <Route path="/admin" element={<ProtectedRoute requireAdmin requiredPermission="VIEW_ADMIN_DASHBOARD"><AdminDashboardPage /></ProtectedRoute>} />
                 <Route path="/admin/tests" element={<ProtectedRoute requireAdmin requiredPermission="MANAGE_TESTS"><AdminPage /></ProtectedRoute>} />

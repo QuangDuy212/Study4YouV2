@@ -135,6 +135,23 @@ export default function AdminLayout({ children, pageTitle, pageDescription }: Ad
           </ul>
         </nav>
 
+        {/* Student View Link */}
+        <div className="px-3 mb-2">
+          <Link
+            to="/dashboard"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-foreground bg-secondary/50 hover:bg-secondary transition-all duration-200"
+          >
+            {collapsed ? (
+              <LayoutDashboard className="w-5 h-5 mx-auto" />
+            ) : (
+              <>
+                <LayoutDashboard className="w-5 h-5" />
+                <span className="font-medium text-sm">{t("home")}</span>
+              </>
+            )}
+          </Link>
+        </div>
+
         {/* Collapse Toggle */}
         <div className="p-3 border-t border-border">
           <Button
@@ -158,9 +175,9 @@ export default function AdminLayout({ children, pageTitle, pageDescription }: Ad
       {/* Main Content */}
       <motion.div
         initial={false}
-        animate={{ marginLeft: collapsed ? 80 : 280 }}
+        animate={{ paddingLeft: collapsed ? 80 : 280 }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
-        className="flex-1 min-h-screen"
+        className="flex-1 min-h-screen min-w-0"
       >
         {/* Top Header */}
         <header className="h-16 bg-card border-b border-border sticky top-0 z-30 flex items-center justify-between px-6">

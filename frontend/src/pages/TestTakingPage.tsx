@@ -30,7 +30,6 @@ interface Part {
   title: string;
   section: "listening" | "reading";
   description: string;
-  audio?: string | null;
   questions: Question[];
 }
 
@@ -44,6 +43,7 @@ export default function TestTakingPage() {
 
   const [testTitle, setTestTitle] = useState("TOEIC Test");
   const [parts, setParts] = useState<Part[]>([]);
+  const [fullAudio, setFullAudio] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPart, setCurrentPart] = useState(0);
   const [currentQuestionInPart, setCurrentQuestionInPart] = useState(0);
@@ -65,6 +65,7 @@ export default function TestTakingPage() {
       try {
         const testData = await testService.getTestById(id);
         setTestTitle(testData.title);
+        setFullAudio(testData.audioUrl || null);
 
         if (!testData.parts) throw new Error("Test has no parts");
 
@@ -76,7 +77,6 @@ export default function TestTakingPage() {
             title: p.part.replace("_", " "),
             section: ["PART_1", "PART_2", "PART_3", "PART_4"].includes(p.part) ? "listening" : "reading",
             description: p.part,
-            audio: p.audioUrl || null,
             questions: (p.questions || [])
               .map((q, idx) => ({
                 id: q.id,
@@ -210,15 +210,16 @@ export default function TestTakingPage() {
       // 1. Calculate scores
       let correct = 0;
       let globalIdx = 0;
-      const answerRequests: { questionId: string; selected: string }[] = [];
+      const answerRequests: { questionId: string; selected: string; correct: boolean }[] = [];
 
       parts.forEach((p) => {
         p.questions.forEach((q) => {
           const selectedIdx = answers[globalIdx];
           if (selectedIdx !== undefined) {
             const label = String.fromCharCode(65 + selectedIdx);
-            if (selectedIdx === q.correct) correct++;
-            answerRequests.push({ questionId: q.id, selected: label });
+            const isCorrect = (selectedIdx === q.correct);
+            if (isCorrect) correct++;
+            answerRequests.push({ questionId: q.id, selected: label, correct: isCorrect });
           }
           globalIdx++;
         });
@@ -243,7 +244,8 @@ export default function TestTakingPage() {
           answerService.createAnswer({
             attemptId: attempt.id,
             questionId: req.questionId,
-            selectedOption: req.selected
+            selectedOption: req.selected,
+            correct: req.correct
           })
         )
       );
@@ -339,12 +341,18 @@ export default function TestTakingPage() {
             </div>
           </div>
 
-          {/* Part Level Audio */}
-          {part?.audio && (
-            <div className="bg-card px-6 py-4 border-b border-border flex justify-center shadow-sm">
+          {/* Full Test Audio (Shared for all listening parts) */}
+          {part?.section === "listening" && fullAudio && (
+            <div className="bg-card px-6 py-4 border-b border-border flex flex-col items-center shadow-sm">
+              <div className="w-full max-w-lg mb-2 flex items-center justify-between">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                  <Volume2 className="w-3 h-3 text-primary" /> {t('fullTestAudio')}
+                </span>
+                <Badge variant="outline" className="text-[9px] font-bold h-4">MP3</Badge>
+              </div>
               <audio 
                 controls 
-                src={getMediaUrl(part.audio)} 
+                src={getMediaUrl(fullAudio)} 
                 className="w-full max-w-lg" 
                 controlsList="nodownload" 
               />
@@ -362,16 +370,21 @@ export default function TestTakingPage() {
                   const isPart6 = part?.description === "PART_6";
                   const isPart7 = part?.description === "PART_7";
                   
-                  if (isPart6 || isPart7) {
-                    const setSize = isPart6 ? 4 : 2;
+                  const isGrouped = isPart6 || isPart7;
+                  
+                  if (isGrouped) {
+                    let setSize = isPart6 ? 4 : 2; // Baseline for Part 7
+
                     const setIndex = Math.floor(currentQuestionInPart / setSize);
                     const startIndex = setIndex * setSize;
                     const setQuestions = part.questions.slice(startIndex, startIndex + setSize);
                     const firstQuestion = setQuestions[0];
+                    const isListening = part?.section === "listening";
 
                     return (
                       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        {firstQuestion?.passage && (
+                        {/* Only show passage/transcript for reading parts */}
+                        {!isListening && firstQuestion?.passage && (
                           <div className="bg-card rounded-xl border border-border p-6 shadow-sm ring-1 ring-primary/5">
                             <div className="flex items-center justify-between mb-3 border-b border-border/50 pb-2">
                               <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest flex items-center gap-2">
@@ -456,7 +469,7 @@ export default function TestTakingPage() {
                   // Default Single Question View
                   return (
                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                      {question.passage && (
+                      {part?.section === "reading" && question.passage && (
                          <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
                           <p className="text-sm text-muted-foreground font-medium mb-2 border-b pb-1">{t('readingPassage')}</p>
                           <p className="text-foreground whitespace-pre-line leading-relaxed italic">{question.passage}</p>
@@ -532,7 +545,7 @@ export default function TestTakingPage() {
                         const isPart6 = part?.description === "PART_6";
                         const isPart7 = part?.description === "PART_7";
                         if (isPart6 || isPart7) {
-                            const setSize = isPart6 ? 4 : 2;
+                            let setSize = isPart6 ? 4 : 2;
                             const currentSetIdx = Math.floor(currentQuestionInPart / setSize);
                             if (currentSetIdx > 0) {
                                 setCurrentQuestionInPart((currentSetIdx - 1) * setSize);
@@ -561,7 +574,7 @@ export default function TestTakingPage() {
                         const isPart6 = part?.description === "PART_6";
                         const isPart7 = part?.description === "PART_7";
                         if (isPart6 || isPart7) {
-                            const setSize = isPart6 ? 4 : 2;
+                            let setSize = isPart6 ? 4 : 2;
                             const nextSetStart = (Math.floor(currentQuestionInPart / setSize) + 1) * setSize;
                             if (nextSetStart < part.questions.length) {
                                 setCurrentQuestionInPart(nextSetStart);
@@ -584,8 +597,8 @@ export default function TestTakingPage() {
         </div>
 
         {/* Right Sidebar */}
-        <aside className="w-80 bg-card border-l border-border flex flex-col shrink-0 sticky top-14 h-[calc(100vh-3.5rem)] hidden lg:flex shadow-xl z-20">
-          <div className="p-6 space-y-4 bg-muted/20">
+        <aside className="w-80 bg-card border-l border-border flex flex-col shrink-0 sticky top-14 h-[calc(100vh-3.5rem)] hidden lg:flex shadow-xl z-20 overflow-hidden">
+          <div className="px-6 pb-6 pt-4 space-y-4 bg-muted/20 border-b border-border/50">
             <div>
               <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1">{t('timeRemaining')}</p>
               <div className={cn(

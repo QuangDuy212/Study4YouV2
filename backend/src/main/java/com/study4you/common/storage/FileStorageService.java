@@ -21,7 +21,7 @@ public class FileStorageService {
     private final Path audioStorageLocation;
     private final Path imageStorageLocation;
 
-    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    private static final long MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
     private static final List<String> ALLOWED_AUDIO_EXTENSIONS = Arrays.asList("mp3", "wav");
     private static final List<String> ALLOWED_IMAGE_EXTENSIONS = Arrays.asList("jpg", "jpeg", "png", "webp");
 
@@ -51,7 +51,7 @@ public class FileStorageService {
         }
 
         if (file.getSize() > MAX_FILE_SIZE) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File size exceeds the limit of 10MB.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File size exceeds the limit of 100MB.");
         }
 
         String originalFilename = StringUtils.cleanPath(file.getOriginalFilename() != null ? file.getOriginalFilename() : "");

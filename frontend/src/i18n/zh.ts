@@ -38,7 +38,6 @@ export const zh = {
   noResultsFound: "结果未找到",
   updateStatus: "更新状态",
 
-
   // Skills
   reading: "阅读",
   listening: "听力",
@@ -116,7 +115,6 @@ export const zh = {
   preparingTest: "正在准备测试环境...",
   audioPlayerListening: "音频播放器（听力部分）",
 
-
   // Result Page
   excellentWork: "太棒了！",
   goodEffort: "做得不错！",
@@ -193,7 +191,6 @@ export const zh = {
   system: "系统",
   activity: "活动",
 
-
   // Admin Question Bank
   questionBankDesc: "管理所有技能和难度级别的题目",
   searchByContent: "按题目内容搜索...",
@@ -263,7 +260,6 @@ export const zh = {
   speakingAttempts: "口语尝试",
   aiQuestions: "AI 题目",
   aiUsers: "AI 用户",
-
 
   // Admin Analytics
   analyticsTitle: "分析",
@@ -455,8 +451,6 @@ export const zh = {
   confirmBulkGeneration: "确认批量生成",
   bulkGenerationConfirmDesc: "您即将生成{count}个用户。此操作将同时创建多个账户。继续？",
 
-
-
   // Chatbot
   chatbotTitle: "Study4You助手",
   chatbotSubtitle: "有关平台的任何问题都可以问我",
@@ -539,7 +533,7 @@ export const zh = {
 
   // Features
   readingPracticeDesc: "通过精选段落和根据您水平定制的AI生成问题来提高理解能力。",
-  listeningPracticeDesc: "通过多样化的音频内容和互动练习提高听力技能。",
+  listeningPracticeDesc: "通过多样化的音频内容 and 互动练习提高听力技能。",
   speakingPracticeDesc: "录制您的回答并获得关于发音和流利度的即时AI反馈。",
   aiFeedback: "AI驱动反馈",
   aiFeedbackDesc: "获取个性化见解和建议，加速您的英语学习之旅。",
@@ -581,7 +575,7 @@ export const zh = {
   testTaking: {
     audioSection: "此部分的音频",
   },
-    userProfilePage: "用户资料",
+  userProfilePage: "用户资料",
   userProfilePageDesc: "查看和编辑您的个人资料",
   editProfileDesc: "更新您的个人信息",
   emailReadonly: "无法更改电子邮件地址",
@@ -620,6 +614,7 @@ export const zh = {
   generateWithAI: "AI 生成",
   removePart: "删除部分",
   partAudioFor: "{part} 的全部音频",
+  fullTestAudio: "全部测试音频（所有部分共享）",
   addImageOptional: "添加图片（可选）",
   passagePlaceholder: "输入文章内容...",
   questionPlaceholderListening: "输入问题或文本...",
@@ -631,20 +626,7 @@ export const zh = {
   set: "题组",
   setQuestions: "题目",
   removePartConfirm: "您确定要删除此部分吗？此操作无法撤销。",
-
-  // RBAC Groups
-  roleUsersAccess: "用户与权限",
-  roleToeicManagement: "托业管理",
-  roleDashboardAnalytics: "仪表板与分析",
-  roleStudentFeatures: "学员功能",
-  roleOthers: "其他",
-
-  // Additional Roles/Missing
-  editingRoleText: "正在编辑角色：{name}",
-
-  // Landing Page
-  platformSubtitle: "托业练习平台",
-  heroDescription: "通过全面的模拟测试和详细的分数分析，掌握托业阅读和听力技巧。",
+  maxQuestionsReached: "太棒了！您已完成该部分的 {count} 道题目。",
 
   // Media Uploader
   uploadAudio: "上传音频",
@@ -652,8 +634,8 @@ export const zh = {
   uploadSuccess: "{name} 上传成功",
   uploadFailed: "{name} 上传失败",
   invalidAudioFormat: "您只能上传 MP3 或 WAV 文件！",
-  audioSizeLimit: "音频必须小于 10MB！",
-  invalidImageFormat: "您只能上传 JPG/PNG/WEBP 文件！",
-  imageSizeLimit: "图片必须小于 10MB！",
+  audioSizeLimit: "音频必须小于 100MB！",
+  invalidImageFormat: "您只能上传 JPG/PNG/WebP 文件！",
+  imageSizeLimit: "图片必须小于 100MB！",
   questionPreviewAlt: "题目预览",
 } as const;
