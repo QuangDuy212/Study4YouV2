@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: study4you-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-study4you_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-1012004}
+      POSTGRES_DB: ${DB_NAME:-study4you}
+      TZ: "Asia/Ho_Chi_Minh"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    container_name: study4you-backend
+    restart: always
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${DB_NAME:-study4you}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-study4you_user}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-1012004}
+      AI_API_KEY: ${AI_API_KEY}
+      JWT_SECRET: ${JWT_SECRET:-your_super_secret_jwt_key_32_characters_long}
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./uploads:/app/uploads
+
+  frontend:
+    build: ./frontend
+    container_name: study4you-frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: study4you-pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@study4you.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "1234:80"
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
