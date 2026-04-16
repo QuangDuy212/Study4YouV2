@@ -1,10 +1,12 @@
 package com.study4you.common.controller;
 
 import com.study4you.common.dto.ApiResponse;
+import com.study4you.common.dto.NotificationRequest;
 import com.study4you.common.dto.NotificationResponse;
 import com.study4you.common.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,5 +41,16 @@ public class NotificationController {
     public ResponseEntity<ApiResponse<Void>> markAllAsRead() {
         notificationService.markAllAsRead();
         return ResponseEntity.ok(ApiResponse.success("All notifications marked as read", null));
+    }
+
+    @PostMapping("/admin")
+    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    public ResponseEntity<ApiResponse<Void>> createNotification(@RequestBody NotificationRequest request) {
+        if (request.getUserId() != null) {
+            notificationService.createNotification(request.getUserId(), request.getTitle(), request.getContent(), request.getType());
+        } else {
+            notificationService.createNotificationToAll(request.getTitle(), request.getContent(), request.getType());
+        }
+        return ResponseEntity.ok(ApiResponse.success("Notification created successfully", null));
     }
 }

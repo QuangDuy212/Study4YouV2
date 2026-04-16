@@ -89,7 +89,7 @@ export default function QuestionBankPage() {
       setQuestions(data.content);
       setTotalCount(data.totalElements);
     } catch (error: any) {
-      toast.error("Failed to load questions");
+      toast.error(t("failedToLoadQuestions"));
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -113,11 +113,11 @@ export default function QuestionBankPage() {
   const handleBulkDelete = async () => {
     try {
       await Promise.all(selectedQuestions.map(id => questionService.deleteQuestion(id)));
-      toast.success(`Deleted ${selectedQuestions.length} questions`);
+      toast.success(t("deletedCountQuestions").replace("{count}", String(selectedQuestions.length)));
       setSelectedQuestions([]);
       fetchQuestions();
     } catch (error) {
-      toast.error("Failed to delete some questions");
+      toast.error(t("failedToDeleteQuestions"));
     }
   };
 
@@ -127,10 +127,10 @@ export default function QuestionBankPage() {
     if (questionToDelete) {
       try {
         await questionService.deleteQuestion(questionToDelete.id);
-        toast.success(`Deleted question`);
+        toast.success(t("deletedSuccessShort"));
         fetchQuestions();
       } catch (error) {
-        toast.error("Failed to delete question");
+        toast.error(t("failedToDeleteQuestions"));
       }
       setDeleteModalOpen(false);
       setQuestionToDelete(null);
@@ -143,10 +143,10 @@ export default function QuestionBankPage() {
     const now = new Date();
     const diff = now.getTime() - d.getTime();
     const hours = Math.floor(diff / 3600000);
-    if (hours < 1) return "Just now";
-    if (hours < 24) return `${hours}h ago`;
+    if (hours < 1) return t("justNow");
+    if (hours < 24) return t("hoursAgo").replace("{count}", String(hours));
     const days = Math.floor(hours / 24);
-    if (days < 7) return `${days}d ago`;
+    if (days < 7) return t("daysAgo").replace("{count}", String(days));
     return d.toLocaleDateString();
   };
 
@@ -162,7 +162,7 @@ export default function QuestionBankPage() {
               </div>
               <div className="flex flex-wrap gap-2">
                 <Select value={partFilter} onValueChange={(v) => { setPartFilter(v); setCurrentPage(1); }}>
-                  <SelectTrigger className="w-[160px]"><Filter className="w-4 h-4 mr-2" /><SelectValue placeholder="Part" /></SelectTrigger>
+                  <SelectTrigger className="w-[160px]"><Filter className="w-4 h-4 mr-2" /><SelectValue placeholder={t("selectPart")} /></SelectTrigger>
                   <SelectContent>
                      <SelectItem value="all">{t('allParts')}</SelectItem>
                      <SelectItem value="PART_1">{t('part1Desc')}</SelectItem>
@@ -176,7 +176,7 @@ export default function QuestionBankPage() {
                    </SelectContent>
                 </Select>
                 <Select value={levelFilter} onValueChange={(v) => { setLevelFilter(v); setCurrentPage(1); }}>
-                  <SelectTrigger className="w-[140px]"><SelectValue placeholder="Level" /></SelectTrigger>
+                  <SelectTrigger className="w-[140px]"><SelectValue placeholder={t("selectLevel")} /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">{t('allLevels')}</SelectItem>
                     <SelectItem value="EASY">{t('levelEasy')}</SelectItem>
@@ -237,7 +237,7 @@ export default function QuestionBankPage() {
                       return (
                         <TableRow key={question.id} className="hover:bg-muted/30 transition-colors">
                           <TableCell><Checkbox checked={selectedQuestions.includes(question.id)} onCheckedChange={(checked) => handleSelectQuestion(question.id, checked as boolean)} /></TableCell>
-                          <TableCell><p className="text-sm font-medium text-foreground truncate max-w-[300px]">{question.content || "(empty)"}</p></TableCell>
+                          <TableCell><p className="text-sm font-medium text-foreground truncate max-w-[300px]">{question.content || t("empty")}</p></TableCell>
                           <TableCell><Badge variant="outline" className="text-xs font-mono">{partType}</Badge></TableCell>
                           <TableCell><div className="flex items-center gap-2">{getSkillIcon(skill)}<span className="capitalize text-sm">{t(skill as any)}</span></div></TableCell>
                           <TableCell>{getDifficultyBadge(question.level)}</TableCell>

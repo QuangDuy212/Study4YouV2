@@ -6,6 +6,7 @@ import {
   Search, Eye, UserX, UserCheck, User, Mail, Calendar, Award, BookOpen, Filter,
   Plus, Pencil, Trash2, AlertTriangle, ChevronLeft, ChevronRight, Sparkles,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -48,7 +49,7 @@ export default function UsersPage() {
       setUsers(data.content);
     } catch (error: any) {
       console.error("Error fetching users:", error);
-      toast.error("Failed to load users");
+      toast.error(t("failedToLoad") || "Failed to load users");
     } finally {
       setIsLoading(false);
     }
@@ -68,16 +69,17 @@ export default function UsersPage() {
   const paginatedUsers = filteredUsers.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   const handleToggleStatus = async (user: UserResponse) => {
-    const newStatus = user.status.toLowerCase() === "active" ? "DISABLED" : "ACTIVE";
+    const newStatus = user.status.toLowerCase() === "active" ? "INACTIVE" : "ACTIVE";
     try {
       await userService.updateUser(user.id, { 
+        email: user.email,
         fullName: user.fullName,
         status: newStatus 
       });
-      toast.success(`User ${user.fullName} has been ${newStatus.toLowerCase()}`);
+      toast.success(t("userStatusUpdated").replace("{name}", user.fullName).replace("{status}", t(newStatus.toLowerCase() as any)));
       fetchUsers();
     } catch (error) {
-      toast.error("Failed to update status");
+      toast.error(t("error") || "Failed to update status");
     }
   };
 
@@ -90,10 +92,10 @@ export default function UsersPage() {
     if (userToDelete) {
       try {
         await userService.deleteUser(userToDelete.id);
-        toast.success(`User "${userToDelete.fullName}" deleted`);
+        toast.success(t("userDeleted").replace("{name}", userToDelete.fullName));
         fetchUsers();
       } catch (error) {
-        toast.error("Failed to delete user");
+        toast.error(t("failedToDelete") || "Failed to delete user");
       }
       setDeleteOpen(false);
       setUserToDelete(null);
@@ -102,7 +104,7 @@ export default function UsersPage() {
 
   return (
     <AdminLayout pageTitle={t('usersManagement')} pageDescription={t('usersManagementDesc')}>
-      <div className="space-y-6">
+      <div className="space-y-3 sm:space-y-6">
         <Card>
           <CardContent className="p-4">
             <div className="flex flex-col lg:flex-row gap-4">
@@ -111,13 +113,13 @@ export default function UsersPage() {
                 <Input placeholder={t('searchByNameEmail')} value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} className="pl-10" />
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setCurrentPage(1); }}>
-                  <SelectTrigger className="w-[140px]"><SelectValue placeholder="Status" /></SelectTrigger>
+                  <SelectTrigger className="w-[140px]"><SelectValue placeholder={t("status")} /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">{t('allStatus')}</SelectItem>
                     <SelectItem value="active">{t('active')}</SelectItem>
-                    <SelectItem value="disabled">{t('disabled')}</SelectItem>
+                    <SelectItem value="inactive">{t('inactive')}</SelectItem>
                   </SelectContent>
 
                 </Select>
@@ -151,59 +153,88 @@ export default function UsersPage() {
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-muted/50">
-                      <TableHead className="min-w-[200px]">{t('user')}</TableHead>
-                      <TableHead className="w-[160px]">{t('roles')}</TableHead>
-                      <TableHead className="w-[100px]">{t('status')}</TableHead>
-                      <TableHead className="w-[120px]">{t('registered')}</TableHead>
-                      <TableHead className="w-[140px] text-right">{t('actions')}</TableHead>
+                    <TableRow className="bg-zinc-50/50 dark:bg-zinc-900/50 border-b border-border/50">
+                      <TableHead className="h-12 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{t('user')}</TableHead>
+                      <TableHead className="h-12 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{t('roles')}</TableHead>
+                      <TableHead className="h-12 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{t('status')}</TableHead>
+                      <TableHead className="h-12 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{t('registered')}</TableHead>
+                      <TableHead className="h-12 text-[11px] font-bold uppercase tracking-widest text-muted-foreground text-right">{t('actions')}</TableHead>
                     </TableRow>
                   </TableHeader>
 
-                  <TableBody>
-                    {paginatedUsers.map((user) => (
-                      <TableRow key={user.id} className="hover:bg-muted/30 transition-colors">
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar className="w-10 h-10">
-                              <AvatarImage src={user.avatarUrl || ""} />
-                               <AvatarFallback className="bg-primary/10 text-primary font-medium">{user.fullName.split(" ").map((n) => n[0]).join("").slice(0, 2)}</AvatarFallback>
-                             </Avatar>
-                             <div>
-                               <p className="font-medium text-foreground">{user.fullName || "(no name)"}</p>
-                               <p className="text-sm text-muted-foreground">{user.email}</p>
-                             </div>
-                           </div>
-                         </TableCell>
-                         <TableCell>
-                           <div className="flex flex-wrap gap-1">
-                             {user.roles.length > 0 ? user.roles.map((role) => (
-                               <Badge key={role.id} variant="secondary" className="text-xs capitalize">{role.name}</Badge>
-                             )) : <span className="text-xs text-muted-foreground">{t('noRoles')}</span>}
-                           </div>
-
-                         </TableCell>
-                         <TableCell>
-                           <Badge className={user.status.toLowerCase() === "active"
-                             ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
-                             : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
-                           }>{user.status}</Badge>
-                         </TableCell>
-                         <TableCell><span className="text-sm text-muted-foreground">{new Date(user.createdAt).toLocaleDateString()}</span></TableCell>
-                         <TableCell>
-                           <div className="flex items-center justify-end gap-1">
-                             <Button variant="ghost" size="icon" onClick={() => navigate(`/admin/users/${user.id}/edit`)}><Pencil className="w-4 h-4" /></Button>
-                             <Button variant="ghost" size="icon" onClick={() => handleToggleStatus(user)} className={user.status.toLowerCase() === "active" ? "text-destructive hover:text-destructive" : "text-green-600 hover:text-green-600"}>
-                               {user.status.toLowerCase() === "active" ? <UserX className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
-                             </Button>
-                             <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDeleteUser(user)}>
-                               <Trash2 className="w-4 h-4" />
-                             </Button>
-                           </div>
-                         </TableCell>
-                       </TableRow>
-                     ))}
-                   </TableBody>
+                    <TableBody>
+                      {paginatedUsers.map((user) => (
+                        <TableRow key={user.id} className="group hover:bg-primary/[0.02] transition-colors border-b border-border/50">
+                          <TableCell className="py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="relative group/avatar">
+                                <Avatar className="w-10 h-10 border border-border/50 transition-all group-hover/avatar:border-primary/30">
+                                  <AvatarImage src={user.avatarUrl || ""} />
+                                  <AvatarFallback className="bg-gradient-to-br from-primary/10 to-primary/20 text-primary font-semibold text-xs">
+                                    {user.fullName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                {user.status.toLowerCase() === "active" && (
+                                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-background rounded-full" />
+                                )}
+                              </div>
+                              <div>
+                                <p className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors">{user.fullName || t("noName")}</p>
+                                <p className="text-[12px] text-muted-foreground font-medium">{user.email}</p>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-wrap gap-1.5">
+                              {user.roles.length > 0 ? user.roles.map((role) => (
+                                <Badge key={role.id} variant="secondary" className="px-2 py-0.5 rounded-md text-[10px] font-bold tracking-tight bg-secondary/50 text-secondary-foreground border-none">
+                                  {role.name.replace("ROLE_", "")}
+                                </Badge>
+                              )) : <span className="text-xs text-muted-foreground italic">{t('noRoles')}</span>}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={cn(
+                              "pl-1.5 pr-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border-none flex items-center gap-1.5 w-fit",
+                              user.status.toLowerCase() === "active"
+                                ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                                : user.status.toLowerCase() === "banned"
+                                ? "bg-rose-500/10 text-rose-700 dark:text-rose-400"
+                                : "bg-zinc-500/10 text-zinc-700 dark:text-zinc-400"
+                            )}>
+                              <span className={cn(
+                                "w-1.5 h-1.5 rounded-full",
+                                user.status.toLowerCase() === "active" ? "bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)] animate-pulse" : 
+                                user.status.toLowerCase() === "banned" ? "bg-rose-500" : "bg-zinc-400"
+                              )} />
+                              {t(user.status.toLowerCase() as any) || user.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col">
+                              <span className="text-xs font-medium text-foreground">{new Date(user.createdAt).toLocaleDateString()}</span>
+                              <span className="text-[10px] text-muted-foreground">{new Date(user.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10" onClick={() => navigate(`/admin/users/${user.id}/edit`)}>
+                                <Pencil className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className={cn(
+                                "h-8 w-8",
+                                user.status.toLowerCase() === "active" ? "text-orange-500 hover:bg-orange-50/50" : "text-emerald-500 hover:bg-emerald-50/50"
+                              )} onClick={() => handleToggleStatus(user)}>
+                                {user.status.toLowerCase() === "active" ? <UserX className="w-3.5 h-3.5" /> : <UserCheck className="w-3.5 h-3.5" />}
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-rose-500 hover:bg-rose-50/50" onClick={() => handleDeleteUser(user)}>
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
                  </Table>
                </div>
              )}

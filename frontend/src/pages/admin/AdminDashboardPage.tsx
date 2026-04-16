@@ -128,7 +128,7 @@ export default function AdminDashboardPage() {
 
   return (
     <AdminLayout pageTitle={t('adminDashboard')} pageDescription={t('adminDashboardDesc')}>
-      <div className="space-y-6">
+      <div className="space-y-3 sm:space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {summaryCards.map((card, index) => (
             <motion.div key={card.title} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}>

@@ -12,6 +12,7 @@ import attemptService from "@/services/attemptService";
 import answerService from "@/services/answerService";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 // Internal data structures matching the frontend state
 interface Question {
@@ -266,6 +267,98 @@ export default function TestTakingPage() {
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const renderSidebarContent = () => (
+    <>
+      <div className="px-6 pb-6 pt-4 space-y-4 bg-muted/20 border-b border-border/50 shrink-0">
+        <div>
+          <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1">{t('timeRemaining')}</p>
+          <div className={cn(
+            "flex items-center gap-3 text-3xl font-mono font-black",
+            timeLeft <= 300 ? "text-destructive animate-pulse" : "text-foreground"
+          )}>
+            <Clock className="w-6 h-6" />
+            {formatTime(timeLeft)}
+          </div>
+        </div>
+
+        <Button
+          onClick={() => setShowSubmitDialog(true)}
+          className="w-full gap-2 py-6 text-lg font-bold shadow-lg"
+          variant="default"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Flag className="w-5 h-5" />}
+          {t('submitTest')}
+        </Button>
+        <div className="flex justify-between items-center text-xs">
+          <span className="text-muted-foreground font-medium">{t('progress')}</span>
+          <span className="text-foreground font-bold">{answeredCount}/{totalQuestions} {t('answered')}</span>
+        </div>
+
+        <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
+           <div className="h-full bg-primary transition-all duration-300" style={{ width: `${(answeredCount/totalQuestions)*100}%` }} />
+        </div>
+      </div>
+
+      {/* Question Navigator */}
+      <ScrollArea className="flex-1 border-t border-border">
+        <div className="p-4 space-y-6">
+          {parts.map((p, partIdx) => {
+            const partStart = parts.slice(0, partIdx).reduce((s, pp) => s + pp.questions.length, 0);
+            return (
+              <div key={p.id} className="space-y-3">
+                <p className="text-[10px] font-bold text-muted-foreground flex items-center gap-2 uppercase tracking-widest">
+                  <span className={cn(
+                    "w-2 h-2 rounded-full",
+                    p.section === "listening" ? "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]" : "bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+                  )} />
+                  {p.title}
+                </p>
+                <div className="grid grid-cols-6 gap-1.5">
+                  {p.questions.map((q, qIdx) => {
+                    const gIdx = partStart + qIdx;
+                    const isAnswered = answers[gIdx] !== undefined;
+                    const isFlagged = flaggedQuestions.has(gIdx);
+                    const isCurrent = currentPart === partIdx && currentQuestionInPart === qIdx;
+                    return (
+                      <button
+                        key={q.id}
+                        onClick={() => goToQuestion(gIdx)}
+                        disabled={isSubmitting}
+                        className={cn(
+                          "aspect-square rounded-md text-[10px] font-bold transition-all flex items-center justify-center border",
+                          isCurrent
+                            ? "bg-primary text-primary-foreground border-primary shadow-md scale-110 z-10"
+                            : isFlagged
+                            ? "bg-amber-50 text-amber-600 border-amber-300 shadow-sm"
+                            : isAnswered
+                            ? "bg-primary/10 text-primary border-primary/30"
+                            : "bg-muted/50 text-muted-foreground border-transparent hover:border-muted-foreground/30 hover:bg-muted"
+                        )}
+                      >
+                        {q.displayNumber}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </ScrollArea>
+
+      {/* Legend */}
+      <div className="p-4 border-t border-border bg-muted/10 shrink-0">
+        <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-[9px] font-bold text-muted-foreground uppercase tracking-wider">
+          <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-sm bg-muted border border-border" /> {t('unanswered')}</span>
+          <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-sm bg-primary/20 border border-primary/30" /> {t('answered')}</span>
+          <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-sm bg-amber-100 border border-amber-300" /> {t('flagged')}</span>
+          <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-sm bg-primary border border-primary" /> {t('current')}</span>
+        </div>
+      </div>
+    </>
+  );
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background">
@@ -360,7 +453,7 @@ export default function TestTakingPage() {
           )}
 
           {/* Question Content */}
-          <div ref={questionRef} className="max-w-3xl mx-auto p-6 space-y-6">
+          <div ref={questionRef} className="max-w-3xl mx-auto p-6 space-y-6 pb-32 lg:pb-8">
             {!question ? (
               <div className="py-20 text-center text-muted-foreground">{t('noQuestionsFound')}</div>
             ) : (
@@ -596,98 +689,39 @@ export default function TestTakingPage() {
           </div>
         </div>
 
-        {/* Right Sidebar */}
+        {/* Right Sidebar Desktop */}
         <aside className="w-80 bg-card border-l border-border flex flex-col shrink-0 sticky top-14 h-[calc(100vh-3.5rem)] hidden lg:flex shadow-xl z-20 overflow-hidden">
-          <div className="px-6 pb-6 pt-4 space-y-4 bg-muted/20 border-b border-border/50">
-            <div>
-              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1">{t('timeRemaining')}</p>
-              <div className={cn(
-
-                "flex items-center gap-3 text-3xl font-mono font-black",
-                timeLeft <= 300 ? "text-destructive animate-pulse" : "text-foreground"
-              )}>
-                <Clock className="w-6 h-6" />
-                {formatTime(timeLeft)}
-              </div>
-            </div>
-
-            <Button
-              onClick={() => setShowSubmitDialog(true)}
-              className="w-full gap-2 py-6 text-lg font-bold shadow-lg"
-              variant="default"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Flag className="w-5 h-5" />}
-              {t('submitTest')}
-            </Button>
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-muted-foreground font-medium">{t('progress')}</span>
-              <span className="text-foreground font-bold">{answeredCount}/{totalQuestions} {t('answered')}</span>
-            </div>
-
-            <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
-               <div className="h-full bg-primary transition-all duration-300" style={{ width: `${(answeredCount/totalQuestions)*100}%` }} />
-            </div>
-          </div>
-
-          {/* Question Navigator */}
-          <ScrollArea className="flex-1 border-t border-border">
-            <div className="p-4 space-y-6">
-              {parts.map((p, partIdx) => {
-                const partStart = parts.slice(0, partIdx).reduce((s, pp) => s + pp.questions.length, 0);
-                return (
-                  <div key={p.id} className="space-y-3">
-                    <p className="text-[10px] font-bold text-muted-foreground flex items-center gap-2 uppercase tracking-widest">
-                      <span className={cn(
-                        "w-2 h-2 rounded-full",
-                        p.section === "listening" ? "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]" : "bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"
-                      )} />
-                      {p.title}
-                    </p>
-                    <div className="grid grid-cols-6 gap-1.5">
-                      {p.questions.map((q, qIdx) => {
-                        const gIdx = partStart + qIdx;
-                        const isAnswered = answers[gIdx] !== undefined;
-                        const isFlagged = flaggedQuestions.has(gIdx);
-                        const isCurrent = currentPart === partIdx && currentQuestionInPart === qIdx;
-                        return (
-                          <button
-                            key={q.id}
-                            onClick={() => goToQuestion(gIdx)}
-                            disabled={isSubmitting}
-                            className={cn(
-                              "aspect-square rounded-md text-[10px] font-bold transition-all flex items-center justify-center border",
-                              isCurrent
-                                ? "bg-primary text-primary-foreground border-primary shadow-md scale-110 z-10"
-                                : isFlagged
-                                ? "bg-amber-50 text-amber-600 border-amber-300 shadow-sm"
-                                : isAnswered
-                                ? "bg-primary/10 text-primary border-primary/30"
-                                : "bg-muted/50 text-muted-foreground border-transparent hover:border-muted-foreground/30 hover:bg-muted"
-                            )}
-                          >
-                            {q.displayNumber}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </ScrollArea>
-
-          {/* Legend */}
-          <div className="p-4 border-t border-border bg-muted/10">
-            <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-[9px] font-bold text-muted-foreground uppercase tracking-wider">
-              <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-sm bg-muted border border-border" /> {t('unanswered')}</span>
-              <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-sm bg-primary/20 border border-primary/30" /> {t('answered')}</span>
-              <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-sm bg-amber-100 border border-amber-300" /> {t('flagged')}</span>
-              <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-sm bg-primary border border-primary" /> {t('current')}</span>
-            </div>
-          </div>
-
+          {renderSidebarContent()}
         </aside>
+      </div>
+
+      {/* Mobile Bottom Bar & Navigator Sheet */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 flex items-center justify-between z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
+        <div className="flex flex-col">
+          <span className="text-[10px] text-muted-foreground font-bold uppercase">{t('timeRemaining')}</span>
+          <div className={cn("text-xl font-mono font-black", timeLeft <= 300 ? "text-destructive animate-pulse" : "text-foreground")}>
+            {formatTime(timeLeft)}
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Button onClick={() => setShowSubmitDialog(true)} size="sm" className="font-bold gap-1.5" disabled={isSubmitting}>
+            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Flag className="w-4 h-4" />}
+            <span>{t('submitTest')}</span>
+          </Button>
+
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="sm" className="font-bold gap-1.5">
+                <BookOpen className="w-4 h-4" />
+                <span className="hidden sm:inline">Menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[85vw] sm:w-[350px] p-0 flex flex-col">
+              {renderSidebarContent()}
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
 
       {/* Submit Confirmation Dialog */}

@@ -122,6 +122,10 @@ public class UserService {
             throw new BadRequestException("Email already exists");
         }
 
+        if (request.getPassword() == null || request.getPassword().isBlank()) {
+            throw new BadRequestException("Password is required for new users");
+        }
+
         User user = new User();
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));

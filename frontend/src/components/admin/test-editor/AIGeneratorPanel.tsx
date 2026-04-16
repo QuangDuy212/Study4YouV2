@@ -168,12 +168,12 @@ export default function AIGeneratorPanel({ open, initialPart, currentParts, onCl
               <Select value={selectedPart} onValueChange={(v) => setSelectedPart(v as PartType)} disabled={isGenerating}>
                 <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="PART_2">{t('part2Desc')} (25)</SelectItem>
-                  <SelectItem value="PART_3">{t('part3Desc')} (39)</SelectItem>
-                  <SelectItem value="PART_4">{t('part4Desc')} (30)</SelectItem>
-                  <SelectItem value="PART_5">{t('part5Desc')} (30)</SelectItem>
-                  <SelectItem value="PART_6">{t('part6Desc')} (16)</SelectItem>
-                  <SelectItem value="PART_7">{t('part7Desc')} (54)</SelectItem>
+                  <SelectItem value="PART_2">{t('part2Desc')} ({PART_QUESTION_LIMITS.PART_2})</SelectItem>
+                  <SelectItem value="PART_3">{t('part3Desc')} ({PART_QUESTION_LIMITS.PART_3})</SelectItem>
+                  <SelectItem value="PART_4">{t('part4Desc')} ({PART_QUESTION_LIMITS.PART_4})</SelectItem>
+                  <SelectItem value="PART_5">{t('part5Desc')} ({PART_QUESTION_LIMITS.PART_5})</SelectItem>
+                  <SelectItem value="PART_6">{t('part6Desc')} ({PART_QUESTION_LIMITS.PART_6})</SelectItem>
+                  <SelectItem value="PART_7">{t('part7Desc')} ({PART_QUESTION_LIMITS.PART_7})</SelectItem>
                 </SelectContent>
               </Select>
             </div>

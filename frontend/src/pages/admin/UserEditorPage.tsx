@@ -81,10 +81,10 @@ export default function UserEditorPage() {
         toast.success(t("userCreated") || "User created successfully");
       } else if (id) {
         await userService.updateUser(id, {
+          email,
           fullName: name,
           status,
           roleIds: selectedRoleIds
-          // Optional: handle password reset via separate call if password field is filled
         });
 
         if (password.trim()) {
@@ -97,7 +97,20 @@ export default function UserEditorPage() {
       }
       navigate("/admin/users");
     } catch (err: any) {
-      toast.error(t("error"), { description: err?.response?.data?.message || err.message });
+      const resp = err?.response?.data;
+      let errorMsg = resp?.message || err.message;
+      
+      // If there are validation errors, format them into the description
+      let description = "";
+      if (resp?.data && typeof resp.data === 'object') {
+        description = Object.entries(resp.data)
+          .map(([field, msg]) => `${field}: ${msg}`)
+          .join(", ");
+      } else {
+        description = err?.response?.data?.message || err.message;
+      }
+
+      toast.error(t("error"), { description });
     } finally {
       setIsSaving(false);
     }
@@ -159,14 +172,14 @@ export default function UserEditorPage() {
               </div>
               <div className="space-y-2">
                 <Label>{t("status")}</Label>
-                <Select value={status} onValueChange={(v) => setStatus(v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ACTIVE">{t("active")}</SelectItem>
-                    <SelectItem value="DISABLED">{t("disabled")}</SelectItem>
-                    <SelectItem value="BANNED">{t("banned")}</SelectItem>
-                  </SelectContent>
-                </Select>
+                    <Select value={status} onValueChange={(v) => setStatus(v)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ACTIVE">{t("active")}</SelectItem>
+                        <SelectItem value="INACTIVE">{t("inactive")}</SelectItem>
+                        <SelectItem value="BANNED">{t("banned")}</SelectItem>
+                      </SelectContent>
+                    </Select>
               </div>
             </div>
           </CardContent>

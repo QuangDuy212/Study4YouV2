@@ -158,7 +158,7 @@ public class AiService {
                 aiUsers.forEach(u -> {
                     u.setRoleId(safeRoleId);
                     u.setStatus(status);
-                    if (u.getPassword() == null) u.setPassword("Study4You@2025");
+                    if (u.getPassword() == null) u.setPassword("123456");
                 });
                 return aiUsers;
             } catch (Exception e) {
@@ -188,7 +188,7 @@ public class AiService {
             result.add(GeneratedUserResponse.builder()
                     .name(fullName)
                     .email(email)
-                    .password("Study4You@2025")
+                    .password("123456")
                     .roleId(safeRoleId)
                     .status(status)
                     .build());

@@ -205,8 +205,8 @@ export default function AdminTestTable({
                           <p className="font-medium text-foreground">{test.name}</p>
                         </div>
                       </TableCell>
-                      <TableCell><span className="capitalize text-sm">{test.skill}</span></TableCell>
-                      <TableCell><Badge className={cn("capitalize", levelConfig[test.level])}>{test.level}</Badge></TableCell>
+                      <TableCell><span className="capitalize text-sm">{t(test.skill.toLowerCase() as any)}</span></TableCell>
+                      <TableCell><Badge className={cn("capitalize", levelConfig[test.level])}>{t(`level${test.level.charAt(0).toUpperCase()}${test.level.slice(1).toLowerCase()}` as any)}</Badge></TableCell>
                       <TableCell className="text-muted-foreground">{test.duration} {t('minutes')}</TableCell>
                       <TableCell className="text-muted-foreground">{test.questions}</TableCell>
                       <TableCell><Badge className={cn("capitalize", statusConfig[test.status])}>{t(test.status)}</Badge></TableCell>
@@ -306,7 +306,7 @@ export default function AdminTestTable({
                       </div>
                       <div>
                         <p className="font-medium text-foreground">{test.name}</p>
-                        <Badge className={cn("capitalize text-xs mt-1", statusConfig[test.status])}>{test.status}</Badge>
+                        <Badge className={cn("capitalize text-xs mt-1", statusConfig[test.status])}>{t(test.status)}</Badge>
                       </div>
                     </div>
                     <DropdownMenu>
@@ -327,7 +327,7 @@ export default function AdminTestTable({
                     </DropdownMenu>
                   </div>
                   <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div><p className="text-muted-foreground text-xs mb-0.5">{t('level')}</p><Badge className={cn("capitalize text-xs", levelConfig[test.level])}>{test.level}</Badge></div>
+                    <div><p className="text-muted-foreground text-xs mb-0.5">{t('level')}</p><Badge className={cn("capitalize text-xs", levelConfig[test.level])}>{t(`level${test.level.charAt(0).toUpperCase()}${test.level.slice(1).toLowerCase()}` as any)}</Badge></div>
                     <div><p className="text-muted-foreground text-xs mb-0.5">{t('duration')}</p><p className="font-medium">{test.duration} {t('minutes')}</p></div>
                     <div><p className="text-muted-foreground text-xs mb-0.5">{t('questions')}</p><p className="font-medium">{test.questions}</p></div>
                   </div>

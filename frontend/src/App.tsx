@@ -32,6 +32,8 @@ import NotFound from "./pages/NotFound";
 import ForbiddenPage from "./pages/ForbiddenPage";
 import ProfilePage from "./pages/admin/ProfilePage";
 import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
+import NotificationManagementPage from "./pages/admin/NotificationManagementPage";
+import NotificationsPage from "./pages/NotificationsPage";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +57,7 @@ const App = () => (
                 <Route path="/result/:id" element={<ProtectedRoute><ResultPage /></ProtectedRoute>} />
                 <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
                 <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+                <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
                 {/* Admin Routes */}
                 <Route path="/admin" element={<ProtectedRoute requireAdmin requiredPermission="VIEW_ADMIN_DASHBOARD"><AdminDashboardPage /></ProtectedRoute>} />
                 <Route path="/admin/tests" element={<ProtectedRoute requireAdmin requiredPermission="MANAGE_TESTS"><AdminPage /></ProtectedRoute>} />
@@ -75,6 +78,7 @@ const App = () => (
                 <Route path="/admin/analytics" element={<ProtectedRoute requireAdmin requiredPermission="VIEW_ANALYTICS"><AnalyticsPage /></ProtectedRoute>} />
                 <Route path="/admin/profile" element={<ProtectedRoute requireAdmin><ProfilePage /></ProtectedRoute>} />
                 <Route path="/admin/settings" element={<ProtectedRoute requireAdmin><AdminSettingsPage /></ProtectedRoute>} />
+                <Route path="/admin/notifications" element={<ProtectedRoute requireAdmin requiredPermission="MANAGE_USERS"><NotificationManagementPage /></ProtectedRoute>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

@@ -134,7 +134,7 @@ export default function AIGenerateUsersPage() {
           await userService.createUser({
             email: user.email,
             fullName: user.name,
-            password: user.password || "Study4You@2025",
+            password: user.password || "123456",
             status: user.status,
             roleIds: [user.roleId]
           });
@@ -156,7 +156,7 @@ export default function AIGenerateUsersPage() {
   };
 
   const getRoleName = (roleId: string) => {
-    return roles.find(r => r.id === roleId)?.name || "Unknown";
+    return roles.find(r => r.id === roleId)?.name || t("unknown");
   };
 
   const getRoleBadgeClass = (roleId: string) => {
@@ -191,7 +191,7 @@ export default function AIGenerateUsersPage() {
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
-                <Label>{t('numberOfUsers')} (Max 20)</Label>
+                <Label>{t('numberOfUsers')} ({t('max')} 20)</Label>
                 <Input 
 
                   type="number" 
