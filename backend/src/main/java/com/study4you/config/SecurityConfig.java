@@ -42,9 +42,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/error").permitAll()
-                        .requestMatchers("/ai/**").permitAll()
-                        .requestMatchers("/uploads/**").permitAll()
+                        .requestMatchers("/api/v1/auth/**", "/auth/**", "/error").permitAll()
+                        .requestMatchers("/api/v1/ai/**", "/ai/**").permitAll()
+                        .requestMatchers("/api/v1/uploads/**", "/uploads/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception
@@ -62,15 +62,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost", 
-                "http://127.0.0.1", 
-                "http://localhost:80", 
-                "http://localhost:3000", 
-                "http://localhost:5173", 
-                "http://localhost:8081"
-        ));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedOriginPatterns(List.of("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
         
