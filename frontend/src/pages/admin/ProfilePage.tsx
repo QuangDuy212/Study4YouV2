@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import userService, { UserResponse } from "@/services/userService";
-import AdminLayout from "@/components/admin/AdminLayout";
-import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -20,9 +18,6 @@ export default function ProfilePage() {
   const { t } = useLanguage();
   const location = useLocation();
   
-  // Choose layout based on route
-  const isAdminRoute = location.pathname.startsWith("/admin");
-  const Layout = isAdminRoute ? AdminLayout : DashboardLayout;
 
   const [profile, setProfile] = useState<UserResponse | null>(null);
   const [fullName, setFullName] = useState("");
@@ -89,17 +84,15 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <Layout pageTitle={t("userProfilePage")} pageDescription={t("userProfilePageDesc")}>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      </Layout>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
     );
   }
 
   return (
-    <Layout pageTitle={t("userProfilePage")} pageDescription={t("userProfilePageDesc")}>
-      <div className="max-w-3xl mx-auto space-y-6">
+    <>
+      <div className="max-w-3xl mx-auto space-y-6 pt-4">
         {/* Profile Header Card */}
         <Card>
           <CardContent className="pt-6">
@@ -199,6 +192,6 @@ export default function ProfilePage() {
           </Button>
         </div>
       </div>
-    </Layout>
+    </>
   );
 }

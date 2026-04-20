@@ -5,7 +5,6 @@ import { ArrowLeft, Save, ShieldCheck, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import roleService from "@/services/roleService";
 import permissionService, { type PermissionResponse } from "@/services/permissionService";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -125,17 +124,14 @@ export default function RoleEditorPage() {
 
   if (isLoading) {
     return (
-      <AdminLayout pageTitle={t("loading")} pageDescription="">
+      <>
         <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout
-      pageTitle={isCreate ? t("createRole") : t("editRole")}
-      pageDescription={isCreate ? t("defineNewRole") : (t("editingRoleText")?.replace("{name}", roleName) || `Editing role: ${roleName}`)}
-    >
+    <>
       <div className="mb-4 flex items-center justify-between">
         <Button variant="ghost" size="sm" onClick={() => navigate("/admin/roles")}>
           <ArrowLeft className="w-4 h-4 mr-1.5" /> {t("backToRoles")}
@@ -203,6 +199,6 @@ export default function RoleEditorPage() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </>
   );
 }

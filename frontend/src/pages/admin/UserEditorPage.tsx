@@ -5,7 +5,6 @@ import { ArrowLeft, Save, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import userService from "@/services/userService";
 import roleService, { type RoleResponse } from "@/services/roleService";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -118,17 +117,14 @@ export default function UserEditorPage() {
 
   if (isLoading) {
     return (
-      <AdminLayout pageTitle={t("loading")} pageDescription="">
+      <>
         <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout
-      pageTitle={isCreate ? t("createUser") : t("editUser")}
-      pageDescription={isCreate ? t("registerNewUser") : t("editingUserText")?.replace("{name}", name) || `Editing user: ${name}`}
-    >
+    <>
       <div className="mb-4 flex items-center justify-between">
         <Button variant="ghost" size="sm" onClick={() => navigate("/admin/users")}>
           <ArrowLeft className="w-4 h-4 mr-1.5" /> {t("backToUsers")}
@@ -211,6 +207,6 @@ export default function UserEditorPage() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </>
   );
 }

@@ -7,7 +7,6 @@ import {
   Plus, Pencil, Trash2, AlertTriangle, ChevronLeft, ChevronRight, Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -103,7 +102,7 @@ export default function UsersPage() {
   };
 
   return (
-    <AdminLayout pageTitle={t('usersManagement')} pageDescription={t('usersManagementDesc')}>
+    <>
       <div className="space-y-3 sm:space-y-6">
         <Card>
           <CardContent className="p-4">
@@ -273,6 +272,6 @@ export default function UsersPage() {
 
         </Dialog>
       </div>
-    </AdminLayout>
+    </>
   );
 }

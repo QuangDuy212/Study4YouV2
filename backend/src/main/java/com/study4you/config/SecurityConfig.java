@@ -45,6 +45,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/**", "/auth/**", "/error").permitAll()
                         .requestMatchers("/api/v1/ai/**", "/ai/**").permitAll()
                         .requestMatchers("/api/v1/uploads/**", "/uploads/**").permitAll()
+                        // Public course browsing (detail & listing)
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/courses", "/api/v1/courses/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception

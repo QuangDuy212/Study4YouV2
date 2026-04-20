@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, Outlet } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -15,7 +15,9 @@ import {
   ChevronLeft,
   User,
   Bell,
-  Menu
+  Menu,
+  GraduationCap,
+  PlayCircle
 } from "lucide-react";
 import NotificationDropdown from "@/components/NotificationDropdown";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
@@ -31,13 +33,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
-interface DashboardLayoutProps {
-  children: React.ReactNode;
-  pageTitle?: string;
-  pageDescription?: string;
-}
-
-export default function DashboardLayout({ children, pageTitle, pageDescription }: DashboardLayoutProps) {
+export default function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const { t } = useLanguage();
@@ -47,10 +43,39 @@ export default function DashboardLayout({ children, pageTitle, pageDescription }
   const navItems = [
     { icon: LayoutDashboard, label: t("dashboard"), href: "/dashboard" },
     { icon: BookOpen, label: t("toeicTests"), href: "/tests" },
+    { icon: GraduationCap, label: t("courses"), href: "/courses" },
+    { icon: PlayCircle, label: t("myCourses"), href: "/my-courses" },
     { icon: User, label: t("profile"), href: "/profile" },
     { icon: Bell, label: t("notifications"), href: "/notifications" },
     { icon: Settings, label: t("settings"), href: "/settings" },
   ];
+
+  const path = location.pathname;
+  let pageTitle = t("dashboard");
+  let pageDescription = t("dashboardDesc");
+
+  if (path.startsWith("/tests")) {
+    pageTitle = t("toeicTests");
+    pageDescription = t("toeicTestsDesc");
+  } else if (path.startsWith("/courses")) {
+    pageTitle = t("exploreCourses");
+    pageDescription = t("exploreCoursesDesc");
+  } else if (path.startsWith("/my-courses") || path.startsWith("/learn")) {
+    pageTitle = t("myCourses");
+    pageDescription = t("myCoursesDesc");
+  } else if (path.startsWith("/payment")) {
+    pageTitle = t("paymentCheckout");
+    pageDescription = t("paymentCheckoutDesc");
+  } else if (path.startsWith("/profile")) {
+    pageTitle = t("profile");
+    pageDescription = t("profileDesc");
+  } else if (path.startsWith("/settings")) {
+    pageTitle = t("settings");
+    pageDescription = t("settingsDesc");
+  } else if (path.startsWith("/notifications")) {
+    pageTitle = t("notifications");
+    pageDescription = t("notificationsDesc") || "";
+  }
 
   const sidebarNavContent = (
     <>
@@ -80,7 +105,7 @@ export default function DashboardLayout({ children, pageTitle, pageDescription }
       <nav className="flex-1 py-6 px-3 overflow-y-auto">
         <ul className="space-y-1">
           {navItems.map((item) => {
-            const isActive = location.pathname === item.href;
+            const isActive = location.pathname === item.href || (item.href !== "/dashboard" && location.pathname.startsWith(item.href));
             return (
               <li key={item.href}>
                 <Link
@@ -231,8 +256,8 @@ export default function DashboardLayout({ children, pageTitle, pageDescription }
           </div>
         </header>
 
-        <main className="p-4 sm:p-6">
-          {children}
+        <main className="flex-1 overflow-y-auto w-full pb-8">
+          <Outlet />
         </main>
       </motion.div>
     </div>

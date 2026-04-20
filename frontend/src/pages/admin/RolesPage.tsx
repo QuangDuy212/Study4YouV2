@@ -4,7 +4,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import roleService, { type RoleResponse } from "@/services/roleService";
 import permissionService from "@/services/permissionService";
 import { Search, Plus, Pencil, Trash2, Shield, ShieldCheck, AlertTriangle } from "lucide-react";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,7 +72,7 @@ export default function RolesPage() {
   };
 
   return (
-    <AdminLayout pageTitle={t("roleManagement")} pageDescription={t("roleManagementDesc")}>
+    <>
       <div className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Card>
@@ -176,6 +175,6 @@ export default function RolesPage() {
           </DialogContent>
         </Dialog>
       </div>
-    </AdminLayout>
+    </>
   );
 }

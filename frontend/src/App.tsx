@@ -1,3 +1,4 @@
+import "./course.css";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -34,6 +35,17 @@ import ProfilePage from "./pages/admin/ProfilePage";
 import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
 import NotificationManagementPage from "./pages/admin/NotificationManagementPage";
 import NotificationsPage from "./pages/NotificationsPage";
+import CoursesPage from "./pages/CoursesPage";
+import CourseDetailPage from "./pages/CourseDetailPage";
+import LearnPage from "./pages/LearnPage";
+import MyCoursesPage from "./pages/MyCoursesPage";
+import PaymentPage from "./pages/PaymentPage";
+import AdminCoursesPage from "./pages/admin/AdminCoursesPage";
+import AdminCourseEditorPage from "./pages/admin/AdminCourseEditorPage";
+import AdminCurriculumPage from "./pages/admin/AdminCurriculumPage";
+import AdminLessonEditorPage from "./pages/admin/AdminLessonEditorPage";
+import DashboardLayout from "@/components/DashboardLayout";
+import AdminLayout from "@/components/admin/AdminLayout";
 
 const queryClient = new QueryClient();
 
@@ -51,34 +63,65 @@ const App = () => (
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/403" element={<ForbiddenPage />} />
-                <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-                <Route path="/tests" element={<ProtectedRoute><TestsPage /></ProtectedRoute>} />
-                <Route path="/tests/:id/attempt" element={<ProtectedRoute><TestTakingPage /></ProtectedRoute>} />
-                <Route path="/result/:id" element={<ProtectedRoute><ResultPage /></ProtectedRoute>} />
-                <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-                <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-                <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
-                {/* Admin Routes */}
-                <Route path="/admin" element={<ProtectedRoute requireAdmin requiredPermission="VIEW_ADMIN_DASHBOARD"><AdminDashboardPage /></ProtectedRoute>} />
-                <Route path="/admin/tests" element={<ProtectedRoute requireAdmin requiredPermission="MANAGE_TESTS"><AdminPage /></ProtectedRoute>} />
-                <Route path="/admin/tests/create" element={<ProtectedRoute requireAdmin><TestEditorPage /></ProtectedRoute>} />
-                <Route path="/admin/tests/:id/edit" element={<ProtectedRoute requireAdmin><TestEditorPage /></ProtectedRoute>} />
-                <Route path="/admin/tests/:id/view" element={<ProtectedRoute requireAdmin requiredPermission="MANAGE_TESTS"><TestViewPage /></ProtectedRoute>} />
-                <Route path="/admin/questions" element={<ProtectedRoute requireAdmin requiredPermission="MANAGE_QUESTIONS"><QuestionBankPage /></ProtectedRoute>} />
-                <Route path="/admin/questions/create" element={<ProtectedRoute requireAdmin><QuestionEditorPage /></ProtectedRoute>} />
-                <Route path="/admin/questions/:id/edit" element={<ProtectedRoute requireAdmin><QuestionEditorPage /></ProtectedRoute>} />
-                <Route path="/admin/questions/ai-generate" element={<ProtectedRoute requireAdmin requiredPermission="MANAGE_QUESTIONS"><AIGeneratePage /></ProtectedRoute>} />
-                <Route path="/admin/users" element={<ProtectedRoute requireAdmin requiredPermission="MANAGE_USERS"><UsersPage /></ProtectedRoute>} />
-                <Route path="/admin/users/ai-generate" element={<ProtectedRoute requireAdmin><AIGenerateUsersPage /></ProtectedRoute>} />
-                <Route path="/admin/users/create" element={<ProtectedRoute requireAdmin><UserEditorPage /></ProtectedRoute>} />
-                <Route path="/admin/users/:id/edit" element={<ProtectedRoute requireAdmin><UserEditorPage /></ProtectedRoute>} />
-                <Route path="/admin/roles" element={<ProtectedRoute requireAdmin><RolesPage /></ProtectedRoute>} />
-                <Route path="/admin/roles/create" element={<ProtectedRoute requireAdmin><RoleEditorPage /></ProtectedRoute>} />
-                <Route path="/admin/roles/:id/edit" element={<ProtectedRoute requireAdmin requiredPermission="MANAGE_USERS"><RoleEditorPage /></ProtectedRoute>} />
-                <Route path="/admin/analytics" element={<ProtectedRoute requireAdmin requiredPermission="VIEW_ANALYTICS"><AnalyticsPage /></ProtectedRoute>} />
-                <Route path="/admin/profile" element={<ProtectedRoute requireAdmin><ProfilePage /></ProtectedRoute>} />
-                <Route path="/admin/settings" element={<ProtectedRoute requireAdmin><AdminSettingsPage /></ProtectedRoute>} />
-                <Route path="/admin/notifications" element={<ProtectedRoute requireAdmin requiredPermission="MANAGE_USERS"><NotificationManagementPage /></ProtectedRoute>} />
+
+                {/* Dashboard Routes wrapper */}
+                <Route element={<DashboardLayout />}>
+                  {/* Public or partially public course routes inside dashboard */}
+                  <Route path="/courses" element={<CoursesPage />} />
+                  <Route path="/courses/:id" element={<CourseDetailPage />} />
+                  
+                  {/* Protected dashboard routes */}
+                  <Route element={<ProtectedRoute />}>
+                    <Route path="/dashboard" element={<DashboardPage />} />
+                    <Route path="/tests" element={<TestsPage />} />
+                    <Route path="/tests/:id/attempt" element={<TestTakingPage />} />
+                    <Route path="/result/:id" element={<ResultPage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/notifications" element={<NotificationsPage />} />
+                    <Route path="/learn/:courseId" element={<LearnPage />} />
+                    <Route path="/my-courses" element={<MyCoursesPage />} />
+                    <Route path="/payment/:courseId" element={<PaymentPage />} />
+                  </Route>
+                </Route>
+
+                {/* Admin Routes wrapper */}
+                <Route element={<ProtectedRoute requireAdmin />}>
+                  <Route element={<AdminLayout />}>
+                    <Route path="/admin" element={<ProtectedRoute requiredPermission="VIEW_ADMIN_DASHBOARD"><AdminDashboardPage /></ProtectedRoute>} />
+                    <Route path="/admin/tests" element={<ProtectedRoute requiredPermission="MANAGE_TESTS"><AdminPage /></ProtectedRoute>} />
+                    <Route path="/admin/tests/create" element={<TestEditorPage />} />
+                    <Route path="/admin/tests/:id/edit" element={<TestEditorPage />} />
+                    <Route path="/admin/tests/:id/view" element={<ProtectedRoute requiredPermission="MANAGE_TESTS"><TestViewPage /></ProtectedRoute>} />
+                    
+                    <Route path="/admin/questions" element={<ProtectedRoute requiredPermission="MANAGE_QUESTIONS"><QuestionBankPage /></ProtectedRoute>} />
+                    <Route path="/admin/questions/create" element={<QuestionEditorPage />} />
+                    <Route path="/admin/questions/:id/edit" element={<QuestionEditorPage />} />
+                    <Route path="/admin/questions/ai-generate" element={<ProtectedRoute requiredPermission="MANAGE_QUESTIONS"><AIGeneratePage /></ProtectedRoute>} />
+                    
+                    <Route path="/admin/courses" element={<AdminCoursesPage />} />
+                    <Route path="/admin/courses/create" element={<AdminCourseEditorPage />} />
+                    <Route path="/admin/courses/:id/edit" element={<AdminCourseEditorPage />} />
+                    <Route path="/admin/courses/:id/lessons" element={<AdminCurriculumPage />} />
+                    <Route path="/admin/courses/:id/lessons/create" element={<AdminLessonEditorPage />} />
+                    <Route path="/admin/courses/:id/lessons/:lessonId/edit" element={<AdminLessonEditorPage />} />
+
+                    <Route path="/admin/users" element={<ProtectedRoute requiredPermission="MANAGE_USERS"><UsersPage /></ProtectedRoute>} />
+                    <Route path="/admin/users/ai-generate" element={<AIGenerateUsersPage />} />
+                    <Route path="/admin/users/create" element={<UserEditorPage />} />
+                    <Route path="/admin/users/:id/edit" element={<UserEditorPage />} />
+                    
+                    <Route path="/admin/roles" element={<RolesPage />} />
+                    <Route path="/admin/roles/create" element={<RoleEditorPage />} />
+                    <Route path="/admin/roles/:id/edit" element={<ProtectedRoute requiredPermission="MANAGE_USERS"><RoleEditorPage /></ProtectedRoute>} />
+                    
+                    <Route path="/admin/analytics" element={<ProtectedRoute requiredPermission="VIEW_ANALYTICS"><AnalyticsPage /></ProtectedRoute>} />
+                    <Route path="/admin/profile" element={<ProfilePage />} />
+                    <Route path="/admin/settings" element={<AdminSettingsPage />} />
+                    <Route path="/admin/notifications" element={<ProtectedRoute requiredPermission="MANAGE_USERS"><NotificationManagementPage /></ProtectedRoute>} />
+                  </Route>
+                </Route>
+
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

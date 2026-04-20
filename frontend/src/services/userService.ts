@@ -14,7 +14,7 @@ export interface UserResponse {
 
 export interface UserRequest {
   email: string;
-  password: string;
+  password?: string;
   fullName: string;
   phone?: string;
   status?: string;

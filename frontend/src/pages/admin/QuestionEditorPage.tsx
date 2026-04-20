@@ -5,7 +5,6 @@ import { ArrowLeft, Save, CheckCircle2, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import questionService from "@/services/questionService";
 import partService, { type ToeicPartResponse } from "@/services/partService";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -124,17 +123,14 @@ export default function QuestionEditorPage() {
 
   if (isLoadingData) {
     return (
-      <AdminLayout pageTitle={t("loading")} pageDescription="">
+      <>
         <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout
-      pageTitle={isCreate ? t("addQuestion") : `${t("edit")} ${t("question")}`}
-      pageDescription={isCreate ? t("questionBankDesc") : `${t("edit")} ${t("question")}`}
-    >
+    <>
       <div className="mb-4 flex items-center justify-between">
         <Button variant="ghost" size="sm" onClick={() => navigate("/admin/questions")}>
           <ArrowLeft className="w-4 h-4 mr-1.5" /> {t("back")}
@@ -236,6 +232,6 @@ export default function QuestionEditorPage() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </>
   );
 }

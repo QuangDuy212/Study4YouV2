@@ -45,6 +45,8 @@ backend/application-local.yml
 backend/application-dev.yml
 backend/application-prod.yml
 backend/uploads/*
+uploads/
+**/uploads/
 
 # Database
 *.db
@@ -76,3 +78,9 @@ frontend/.vite/deps
 *.webp
 *.zip
 *.pdf
+*.mp4
+*.mkv
+*.mov
+*.avi
+*.wmv
+*.flv

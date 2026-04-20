@@ -4,7 +4,6 @@ import { AnimatePresence } from "framer-motion";
 import { Sparkles } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +33,7 @@ export default function AIGeneratePage() {
   };
 
   return (
-    <AdminLayout pageTitle={t('aiQuestionGenerator')} pageDescription={t('generateReadingQuestionsDesc')}>
+    <>
       <div className="w-full space-y-6">
         <Card>
           <CardHeader>
@@ -133,6 +132,6 @@ export default function AIGeneratePage() {
           />
         )}
       </AnimatePresence>
-    </AdminLayout>
+    </>
   );
 }

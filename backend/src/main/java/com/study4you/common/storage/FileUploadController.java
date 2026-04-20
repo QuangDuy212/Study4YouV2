@@ -27,4 +27,11 @@ public class FileUploadController {
         String fileName = url.substring(url.lastIndexOf("/") + 1);
         return ResponseEntity.ok(new FileUploadResponse(url, fileName));
     }
+
+    @PostMapping(value = "/upload-video", consumes = "multipart/form-data")
+    public ResponseEntity<FileUploadResponse> uploadVideo(@RequestParam("file") MultipartFile file) {
+        String url = fileStorageService.saveVideo(file);
+        String fileName = url.substring(url.lastIndexOf("/") + 1);
+        return ResponseEntity.ok(new FileUploadResponse(url, fileName));
+    }
 }

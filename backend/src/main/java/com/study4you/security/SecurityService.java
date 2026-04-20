@@ -25,11 +25,12 @@ public class SecurityService {
         String email;
         if (principal instanceof UserDetails) {
             email = ((UserDetails) principal).getUsername();
+        } else if ("anonymousUser".equals(principal)) {
+            return null;
         } else {
             email = principal.toString();
         }
 
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        return userRepository.findByEmail(email).orElse(null);
     }
 }

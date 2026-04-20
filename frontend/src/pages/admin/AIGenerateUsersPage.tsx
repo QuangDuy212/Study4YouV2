@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sparkles, Loader2, RotateCcw, Pencil, Trash2, Save, ArrowLeft, Check, X } from "lucide-react";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -168,7 +167,7 @@ export default function AIGenerateUsersPage() {
   };
 
   return (
-    <AdminLayout pageTitle={t('aiGenerateUsers')} pageDescription={t('aiGenerateUsersDesc')}>
+    <>
       <div className="space-y-6 w-full">
         <Button variant="ghost" className="gap-2 -ml-2" onClick={() => navigate("/admin/users")}>
           <ArrowLeft className="w-4 h-4" /> {t('backToUsers')}
@@ -369,6 +368,6 @@ export default function AIGenerateUsersPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-    </AdminLayout>
+    </>
   );
 }

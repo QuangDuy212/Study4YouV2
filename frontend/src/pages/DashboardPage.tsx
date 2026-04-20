@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
 import { TrendingUp, Target, Trophy, ArrowRight, FileText, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -65,7 +64,7 @@ export default function DashboardPage() {
   const dateLocale = lang === 'vi' ? vi : enUS;
 
   return (
-    <DashboardLayout>
+    <>
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
@@ -161,6 +160,6 @@ export default function DashboardPage() {
           </div>
         </motion.div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

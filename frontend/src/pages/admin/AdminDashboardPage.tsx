@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Users, FileText, HelpCircle, TrendingUp, Clock, Loader2, Sparkles, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -127,7 +126,7 @@ export default function AdminDashboardPage() {
   ];
 
   return (
-    <AdminLayout pageTitle={t('adminDashboard')} pageDescription={t('adminDashboardDesc')}>
+    <>
       <div className="space-y-3 sm:space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {summaryCards.map((card, index) => (
@@ -319,6 +318,6 @@ export default function AdminDashboardPage() {
           </Card>
         </motion.div>
       </div>
-    </AdminLayout>
+    </>
   );
 }

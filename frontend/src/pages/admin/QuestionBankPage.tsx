@@ -9,7 +9,6 @@ import {
   AlertTriangle, Filter, HelpCircle, Sparkles,
   ChevronLeft, ChevronRight,
 } from "lucide-react";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -151,7 +150,7 @@ export default function QuestionBankPage() {
   };
 
   return (
-    <AdminLayout pageTitle={t('questionBank')} pageDescription={t('questionBankDesc')}>
+    <>
       <div className="space-y-6">
         <Card>
           <CardContent className="p-4">
@@ -294,6 +293,6 @@ export default function QuestionBankPage() {
           </DialogContent>
         </Dialog>
       </div>
-    </AdminLayout>
+    </>
   );
 }

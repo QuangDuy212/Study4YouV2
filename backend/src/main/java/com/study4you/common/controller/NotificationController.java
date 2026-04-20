@@ -31,16 +31,16 @@ public class NotificationController {
         return ResponseEntity.ok(ApiResponse.success(count));
     }
 
-    @PutMapping("/{id}/read")
-    public ResponseEntity<ApiResponse<Void>> markAsRead(@PathVariable UUID id) {
-        notificationService.markAsRead(id);
-        return ResponseEntity.ok(ApiResponse.success("Notification marked as read", null));
-    }
-
     @PutMapping("/read-all")
     public ResponseEntity<ApiResponse<Void>> markAllAsRead() {
         notificationService.markAllAsRead();
         return ResponseEntity.ok(ApiResponse.success("All notifications marked as read", null));
+    }
+
+    @PutMapping("/{id}/read")
+    public ResponseEntity<ApiResponse<Void>> markAsRead(@PathVariable UUID id) {
+        notificationService.markAsRead(id);
+        return ResponseEntity.ok(ApiResponse.success("Notification marked as read", null));
     }
 
     @PostMapping("/admin")

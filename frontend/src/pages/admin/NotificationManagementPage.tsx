@@ -1,5 +1,4 @@
 import { useState } from "react";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -65,10 +64,7 @@ export default function NotificationManagementPage() {
   };
 
   return (
-    <AdminLayout 
-      pageTitle={t("notification.management")} 
-      pageDescription={t("notification.managementDesc")}
-    >
+    <>
       <div className="max-w-4xl mx-auto space-y-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -235,6 +231,6 @@ export default function NotificationManagementPage() {
           </Card>
         </div>
       </div>
-    </AdminLayout>
+    </>
   );
 }

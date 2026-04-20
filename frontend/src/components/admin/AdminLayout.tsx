@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, Outlet } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,7 +18,8 @@ import {
   LogOut,
   User,
   Sparkles,
-  Menu
+  Menu,
+  GraduationCap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -35,13 +36,7 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import NotificationDropdown from "@/components/admin/NotificationDropdown";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
-interface AdminLayoutProps {
-  children: React.ReactNode;
-  pageTitle: string;
-  pageDescription?: string;
-}
-
-export default function AdminLayout({ children, pageTitle, pageDescription }: AdminLayoutProps) {
+export default function AdminLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -66,6 +61,7 @@ export default function AdminLayout({ children, pageTitle, pageDescription }: Ad
     { icon: LayoutDashboard, label: t("dashboard"), href: "/admin", permission: "VIEW_ADMIN_DASHBOARD" },
     { icon: FileText, label: t("manageTests"), href: "/admin/tests", permission: "MANAGE_TESTS" },
     { icon: Database, label: t("questionBank"), href: "/admin/questions", permission: "MANAGE_QUESTIONS" },
+    { icon: GraduationCap, label: t("manageCourses"), href: "/admin/courses" },
     { icon: Users, label: t("users"), href: "/admin/users", permission: "MANAGE_USERS" },
     { icon: Shield, label: t("roles"), href: "/admin/roles", permission: "MANAGE_USERS" },
     { icon: Sparkles, label: t("aiQuestions"), href: "/admin/questions/ai-generate", permission: "MANAGE_QUESTIONS" },
@@ -73,6 +69,30 @@ export default function AdminLayout({ children, pageTitle, pageDescription }: Ad
     { icon: Bell, label: t("notifications"), href: "/admin/notifications", permission: "MANAGE_USERS" },
     { icon: BarChart3, label: t("analytics"), href: "/admin/analytics", permission: "VIEW_ANALYTICS" },
   ];
+
+  const path = location.pathname;
+  let pageTitle = t("adminDashboard");
+  let pageDescription = "Overview of system activity and performance";
+
+  if (path.startsWith("/admin/tests")) {
+    pageTitle = t("manageTests");
+  } else if (path.startsWith("/admin/questions")) {
+    pageTitle = t("questionBank");
+  } else if (path.startsWith("/admin/courses")) {
+    pageTitle = t("manageCourses");
+  } else if (path.startsWith("/admin/users")) {
+    pageTitle = t("users");
+  } else if (path.startsWith("/admin/roles")) {
+    pageTitle = t("roles");
+  } else if (path.startsWith("/admin/notifications")) {
+    pageTitle = t("notifications");
+  } else if (path.startsWith("/admin/analytics")) {
+    pageTitle = t("analytics");
+  } else if (path.startsWith("/admin/settings")) {
+    pageTitle = t("settings");
+  } else if (path.startsWith("/admin/profile")) {
+    pageTitle = t("profile");
+  }
 
   const filteredItems = navigationItems.filter(item => 
     !item.permission || hasPermission(item.permission)
@@ -266,7 +286,7 @@ export default function AdminLayout({ children, pageTitle, pageDescription }: Ad
         </header>
 
         <main className="flex-1 p-2 sm:p-6 overflow-x-hidden">
-          {children}
+          <Outlet />
         </main>
       </motion.div>
     </div>

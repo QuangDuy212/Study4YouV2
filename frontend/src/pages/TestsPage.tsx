@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
 import { FileText, Clock, ArrowRight, Headphones, BookOpen, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -46,7 +45,7 @@ export default function TestsPage() {
   }, [t, user]);
 
   return (
-    <DashboardLayout>
+    <>
       <div className="max-w-6xl mx-auto space-y-8">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <div className="flex items-center gap-3 mb-2">
@@ -124,6 +123,6 @@ export default function TestsPage() {
           )}
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

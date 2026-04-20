@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import AdminLayout from "@/components/admin/AdminLayout";
 import AdminSummaryCards from "@/components/admin/AdminSummaryCards";
 import AdminFilters from "@/components/admin/AdminFilters";
 import { Button } from "@/components/ui/button";
@@ -117,7 +116,7 @@ export default function AdminPage() {
   };
 
   return (
-    <AdminLayout pageTitle={t('testManagementTitle')} pageDescription={t('testManagementDesc')}>
+    <>
       <div className="space-y-6">
         <AdminSummaryCards tests={tests} />
         <AdminFilters
@@ -144,6 +143,6 @@ export default function AdminPage() {
         />
       </div>
       <ViewTestDialog open={viewOpen} onOpenChange={setViewOpen} test={viewingTest} onEdit={handleEdit} />
-    </AdminLayout>
+    </>
   );
 }

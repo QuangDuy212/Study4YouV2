@@ -1,6 +1,5 @@
 import { useTheme, Theme } from "@/contexts/ThemeContext";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
-import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -56,7 +55,7 @@ export default function SettingsPage() {
   }, [reducedMotion]);
 
   return (
-    <DashboardLayout>
+    <>
       <div className="max-w-4xl mx-auto space-y-8 p-6">
         <div>
           <h1 className="text-3xl font-bold text-foreground">{t("settings")}</h1>
@@ -174,6 +173,6 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

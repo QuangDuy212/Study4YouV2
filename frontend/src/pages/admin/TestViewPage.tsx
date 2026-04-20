@@ -4,7 +4,6 @@ import { ArrowLeft, BookOpen, Headphones, Clock, HelpCircle, Calendar } from "lu
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import testService from "@/services/testService";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -120,27 +119,27 @@ export default function TestViewPage() {
 
   if (loading) {
     return (
-      <AdminLayout pageTitle={t("viewTest")} pageDescription={t("loadingTestData")}>
+      <>
         <div className="space-y-4"><Skeleton className="h-8 w-48" /><Skeleton className="h-64 w-full" /></div>
-      </AdminLayout>
+      </>
     );
   }
 
   if (!testData) {
     return (
-      <AdminLayout pageTitle={t("viewTest")} pageDescription={t("testNotFound")}>
+      <>
         <div className="text-center py-12">
           <p className="text-muted-foreground">{t("testNotFound")}</p>
           <Button onClick={() => navigate("/admin/tests")} className="mt-4">{t("backToTests")}</Button>
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   const SkillIcon = testData.skill === "listening" ? Headphones : BookOpen;
 
   return (
-    <AdminLayout pageTitle={testData.name} pageDescription={t("fullTestPreview")}>
+    <>
       <div className="mb-4">
         <Button variant="ghost" size="sm" onClick={() => navigate("/admin/tests")}>
           <ArrowLeft className="w-4 h-4 mr-1.5" /> {t("backToTests")}
@@ -216,7 +215,7 @@ export default function TestViewPage() {
         ))}
       </Tabs>
 
-    </AdminLayout>
+    </>
   );
 }
 
