@@ -25,4 +25,8 @@ public class PaymentResponse {
     private String referenceCode;
     private String paymentUrl;
     private LocalDateTime createdAt;
+
+    private Boolean isVatRequired;
+    private String companyName;
+    private String taxCode;
 }

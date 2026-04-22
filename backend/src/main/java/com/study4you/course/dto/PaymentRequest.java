@@ -17,4 +17,8 @@ public class PaymentRequest {
 
     @NotNull(message = "Payment method is required")
     private PaymentMethod paymentMethod;
+
+    private Boolean isVatRequired;
+    private String companyName;
+    private String taxCode;
 }

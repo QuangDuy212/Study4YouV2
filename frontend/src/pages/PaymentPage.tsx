@@ -11,6 +11,9 @@ import { BANK_CONFIG } from "@/config/paymentConfig";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { format } from "date-fns";
+// @ts-ignore
+import html2pdf from "html2pdf.js";
 import { Button } from "@/components/ui/button";
 
 function formatPrice(price: number, t: (k: string) => string): string {
@@ -23,13 +26,12 @@ export default function PaymentPage() {
   const { courseId } = useParams<{ courseId: string }>();
   const navigate = useNavigate();
   const [course, setCourse] = useState<CourseResponse | null>(null);
-  const [method, setMethod] = useState<PaymentMethod>("MOCK");
+  const [method, setMethod] = useState<PaymentMethod>("VIETQR");
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
-  const [isStudent, setIsStudent] = useState(false);
-  const [eduEmail, setEduEmail] = useState("");
-  const [verifying, setVerifying] = useState(false);
   const [showVat, setShowVat] = useState(false);
+  const [companyName, setCompanyName] = useState("");
+  const [taxCode, setTaxCode] = useState("");
   const [securityChecked, setSecurityChecked] = useState(false);
   const [showVietQR, setShowVietQR] = useState(false);
   const [paymentDone, setPaymentDone] = useState(false);
@@ -50,26 +52,19 @@ export default function PaymentPage() {
       .finally(() => setLoading(false));
   }, [courseId, navigate, t]);
 
-  const handleVerifyStudent = () => {
-    if (!eduEmail.endsWith(".edu") && !eduEmail.endsWith(".edu.vn")) {
-      toast.error("Please enter a valid school email (@school.edu.vn)");
-      return;
-    }
-    setVerifying(true);
-    setTimeout(() => {
-      setIsStudent(true);
-      setVerifying(false);
-      toast.success(t("verifiedStudent"));
-    }, 1500);
-  };
-
-  const finalPrice = isStudent ? 0 : (course?.price || 0);
+  const finalPrice = course?.price || 0;
 
   const handlePay = async () => {
     if (!courseId) return;
     setPaying(true);
     try {
-      const payment = await paymentService.createPayment({ courseId, paymentMethod: method });
+      const payment = await paymentService.createPayment({ 
+        courseId, 
+        paymentMethod: method,
+        isVatRequired: showVat,
+        companyName: showVat ? companyName : undefined,
+        taxCode: showVat ? taxCode : undefined
+      });
       setCurrentPayment(payment);
 
       if (method === "VIETQR") {
@@ -108,6 +103,22 @@ export default function PaymentPage() {
     }
   };
 
+  const handleDownloadReceipt = () => {
+    const element = document.getElementById("receipt-content");
+    if (!element) return;
+    
+    const opt = {
+      margin: 10,
+      filename: `Receipt_${currentPayment?.referenceCode || "S4Y"}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    
+    // We need to temporarily show it or clone it to capture
+    html2pdf().from(element).set(opt).save();
+  };
+
   if (loading) {
     return (
       <div className="payment-page">
@@ -130,7 +141,7 @@ export default function PaymentPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background premium-gradient-bg py-12 px-4">
+    <div className="min-h-screen bg-background premium-gradient-bg py-12 px-4 print:hidden">
       <div className="max-w-6xl mx-auto">
         <Link to={`/courses/${courseId}`} className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary mb-8 transition-colors">
           <ChevronLeft className="w-4 h-4 mr-1" />
@@ -147,54 +158,6 @@ export default function PaymentPage() {
             >
               <h1 className="text-4xl font-black tracking-tight text-foreground">{t("paymentCheckout")}</h1>
               
-              {/* Student Discount Section */}
-              {!isStudent ? (
-                <div className="bg-primary/5 border border-primary/20 rounded-3xl p-6 relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
-                    <GraduationCap size={80} />
-                  </div>
-                  <div className="relative z-10">
-                    <h3 className="text-lg font-bold text-primary flex items-center gap-2 mb-2">
-                       <Ticket className="w-5 h-5" />
-                       {t("studentVerification")}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-4 max-w-md">{t("isStudentDesc")}</p>
-                    <div className="flex gap-2 max-w-sm">
-                      <Input 
-                        placeholder={t("academicEmailPlaceholder")} 
-                        className="rounded-xl border-primary/20 bg-background/50 focus:ring-primary/20"
-                        value={eduEmail}
-                        onChange={(e) => setEduEmail(e.target.value)}
-                      />
-                      <button 
-                        onClick={handleVerifyStudent}
-                        disabled={verifying}
-                        className="bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
-                      >
-                        {verifying ? t("processing") : t("verifyNow")}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <motion.div 
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-6 flex items-center justify-between"
-                >
-                   <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
-                         <CheckCircle2 />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-emerald-600 dark:text-emerald-400">{t("verifiedStudent")}</h3>
-                        <p className="text-sm text-emerald-600/70">{eduEmail}</p>
-                      </div>
-                   </div>
-                   <Badge variant="outline" className="bg-emerald-500 text-white border-none px-3 py-1 font-bold">100% OFF</Badge>
-                </motion.div>
-              )}
-
               {/* Billing Info */}
               <div className="glass-card-premium rounded-[2rem] p-8 space-y-8 border border-border/50">
                 <div className="flex flex-col gap-6">
@@ -223,11 +186,21 @@ export default function PaymentPage() {
                         <div className="grid grid-cols-2 gap-4">
                            <div className="space-y-2">
                               <Label>{t("companyName")}</Label>
-                              <Input placeholder="Study4You Corp" className="rounded-xl" />
+                              <Input 
+                                placeholder="Study4You Corp" 
+                                className="rounded-xl" 
+                                value={companyName}
+                                onChange={(e) => setCompanyName(e.target.value)}
+                              />
                            </div>
                            <div className="space-y-2">
                               <Label>{t("taxCode")}</Label>
-                              <Input placeholder="0123456789" className="rounded-xl" />
+                              <Input 
+                                placeholder="0123456789" 
+                                className="rounded-xl" 
+                                value={taxCode}
+                                onChange={(e) => setTaxCode(e.target.value)}
+                              />
                            </div>
                         </div>
                       </motion.div>
@@ -278,12 +251,7 @@ export default function PaymentPage() {
                   <h3 className="font-bold text-foreground">{t("paymentMethod")}</h3>
                   <div className="grid gap-3">
                     {[
-                      { id: "VNPAY", title: t("vnpayGateway"), desc: t("vnpayDesc"), icon: "🏦" },
                       { id: "VIETQR", title: "VietQR", desc: t("vietqrDesc"), icon: "📲" },
-                      { id: "MOMO", title: "MoMo Wallet", desc: "Pay with MoMo App", icon: "🔴" },
-                      { id: "ZALOPAY", title: "ZaloPay", desc: "Quick & Secure", icon: "🟢" },
-                      { id: "STRIPE", title: "Credit Card", desc: "Visa, Mastercard", icon: "💳" },
-                      { id: "MOCK", title: t("testPayment"), desc: t("testPaymentDesc"), icon: <Zap className="w-4 h-4 text-amber-500" /> },
                     ].map(m => (
                       <label 
                         key={m.id} 
@@ -307,9 +275,6 @@ export default function PaymentPage() {
                           <span className="block font-bold text-foreground leading-tight">{m.title}</span>
                           <span className="text-xs text-muted-foreground">{m.desc}</span>
                         </div>
-                        {m.id === "VNPAY" && (
-                          <Badge variant="outline" className="bg-primary/10 text-primary border-none text-[10px] py-0">POPULAR</Badge>
-                        )}
                       </label>
                     ))}
                   </div>
@@ -343,16 +308,10 @@ export default function PaymentPage() {
                   <div className="space-y-4 pt-4">
                     <div className="flex justify-between text-muted-foreground text-sm">
                       <span>{t("course")}</span>
-                      <span className={isStudent ? "line-through" : "font-bold text-foreground"}>
+                      <span className="font-bold text-foreground">
                         {formatPrice(course.price, t)}
                       </span>
                     </div>
-                    {isStudent && (
-                      <div className="flex justify-between text-emerald-500 font-bold text-sm">
-                        <span>{t("studentDiscount")}</span>
-                        <span>-{formatPrice(course.price, t)}</span>
-                      </div>
-                    )}
                     <div className="flex justify-between items-baseline pt-4 border-t border-border">
                        <span className="text-lg font-bold text-foreground">{t("total")}</span>
                        <span className="text-4xl font-black tracking-tighter text-primary">
@@ -458,7 +417,81 @@ export default function PaymentPage() {
                           <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
                           <h4 className="font-bold text-emerald-700 text-lg">Hệ thống đang kiểm tra...</h4>
                           <p className="text-xs text-emerald-700/70">Cảm ơn bạn! Đơn hàng của bạn đang được duyệt. Khóa học sẽ tự động xuất hiện trong "Khóa học của tôi" sau khi Admin xác nhận tiền về túi.</p>
-                          <Button onClick={() => navigate("/dashboard")} className="w-full bg-emerald-600">Quay về trang chủ</Button>
+                          
+                          <div className="flex gap-3 mt-4">
+                            <Button onClick={() => navigate("/dashboard")} className="w-full bg-emerald-600 hover:bg-emerald-700 font-bold rounded-xl h-12 shadow-lg shadow-emerald-600/20">
+                              Về trang chủ
+                            </Button>
+                          </div>
+
+                          {/* Hidden Receipt for Printing/Downloading */}
+                          <div id="receipt-content" className="hidden print:block fixed inset-0 bg-white z-[9999] p-10 text-black">
+                             <div className="max-w-2xl mx-auto border-2 border-gray-100 p-8 rounded-2xl">
+                                <div className="flex justify-between items-start border-b pb-6 mb-6">
+                                   <div>
+                                      <h1 className="text-2xl font-black text-blue-600">STUDY4YOU</h1>
+                                      <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mt-1">Nền tảng học trực tuyến</p>
+                                   </div>
+                                   <div className="text-right">
+                                      <h2 className="text-xl font-bold uppercase">Biên lai thanh toán</h2>
+                                      <p className="text-sm text-gray-500">Mã đơn: {currentPayment?.referenceCode}</p>
+                                   </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-8 mb-8">
+                                   <div>
+                                      <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Thông tin khách hàng</p>
+                                      <p className="text-sm font-bold">Học viên Study4You</p>
+                                      <p className="text-xs text-gray-500">ID: {currentPayment?.userId?.slice(0, 8)}</p>
+                                   </div>
+                                   <div className="text-right">
+                                      <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Ngày giao dịch</p>
+                                      <p className="text-sm font-bold">{format(new Date(), 'dd/MM/yyyy HH:mm')}</p>
+                                   </div>
+                                </div>
+
+                                {showVat && (
+                                  <div className="bg-gray-50 p-4 rounded-xl mb-8 border border-gray-100">
+                                     <p className="text-[10px] text-gray-400 uppercase font-bold mb-2">Thông tin hóa đơn VAT</p>
+                                     <p className="text-sm font-bold">🏢 {companyName}</p>
+                                     <p className="text-xs text-gray-600">MST: {taxCode}</p>
+                                  </div>
+                                )}
+
+                                <table className="w-full mb-8">
+                                   <thead className="border-b-2 border-gray-100">
+                                      <tr>
+                                         <th className="py-3 text-left text-[10px] font-bold text-gray-400 uppercase">Khóa học</th>
+                                         <th className="py-3 text-right text-[10px] font-bold text-gray-400 uppercase">Đơn giá</th>
+                                      </tr>
+                                   </thead>
+                                   <tbody className="divide-y divide-gray-50">
+                                      <tr>
+                                         <td className="py-4">
+                                            <p className="text-sm font-bold">{course.title}</p>
+                                            <p className="text-[10px] text-gray-400 uppercase tracking-tighter">Truy cập trọn đời • Full HD Video</p>
+                                         </td>
+                                         <td className="py-4 text-right font-bold text-sm">
+                                            {formatPrice(course.price, t)}
+                                         </td>
+                                      </tr>
+                                   </tbody>
+                                   <tfoot>
+                                      <tr className="border-t-2 border-gray-100">
+                                         <td className="py-4 text-right font-bold text-gray-400 uppercase text-[10px]">Tổng thanh toán</td>
+                                         <td className="py-4 text-right text-xl font-black text-blue-600">
+                                            {formatPrice(finalPrice, t)}
+                                         </td>
+                                      </tr>
+                                   </tfoot>
+                                </table>
+
+                                <div className="text-center pt-8 border-t border-dashed border-gray-200">
+                                   <p className="text-sm font-bold text-gray-800">Cảm ơn bạn đã tin tưởng Study4You!</p>
+                                   <p className="text-[10px] text-gray-400 mt-1 italic">Đây là biên lai xác nhận giao dịch tự động. Khóa học sẽ được kích hoạt ngay sau khi Admin phê duyệt.</p>
+                                </div>
+                             </div>
+                          </div>
                        </motion.div>
                     )}
                   </AnimatePresence>

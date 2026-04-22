@@ -6,6 +6,9 @@ export type PaymentStatus = "PENDING" | "SUCCESS" | "FAILED";
 export interface PaymentRequest {
   courseId: string;
   paymentMethod: PaymentMethod;
+  isVatRequired?: boolean;
+  companyName?: string;
+  taxCode?: string;
 }
 
 export interface PaymentResponse {
@@ -20,6 +23,9 @@ export interface PaymentResponse {
   referenceCode: string;
   paymentUrl?: string;
   createdAt: string;
+  isVatRequired?: boolean;
+  companyName?: string;
+  taxCode?: string;
 }
 
 const paymentService = {

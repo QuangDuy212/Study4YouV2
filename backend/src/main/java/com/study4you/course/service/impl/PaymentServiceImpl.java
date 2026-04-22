@@ -61,10 +61,11 @@ public class PaymentServiceImpl implements PaymentService {
         Payment payment;
         if (existingPending.isPresent()) {
             payment = existingPending.get();
-            payment.setPaymentMethod(request.getPaymentMethod());
-            payment.setTransactionRef(UUID.randomUUID().toString());
             payment.setReferenceCode(generateReferenceCode(user.getEmail()));
             payment.setAmount(amount);
+            payment.setIsVatRequired(request.getIsVatRequired());
+            payment.setCompanyName(request.getCompanyName());
+            payment.setTaxCode(request.getTaxCode());
             log.info("UPDATING EXISTING PENDING PAYMENT: ID={}", payment.getId());
         } else {
             payment = Payment.builder()
@@ -75,6 +76,9 @@ public class PaymentServiceImpl implements PaymentService {
                     .paymentMethod(request.getPaymentMethod())
                     .transactionRef(UUID.randomUUID().toString())
                     .referenceCode(generateReferenceCode(user.getEmail()))
+                    .isVatRequired(request.getIsVatRequired())
+                    .companyName(request.getCompanyName())
+                    .taxCode(request.getTaxCode())
                     .build();
             log.info("CREATING NEW PAYMENT: User={}, Course={}", user.getEmail(), course.getTitle());
         }
@@ -223,19 +227,23 @@ public class PaymentServiceImpl implements PaymentService {
     public byte[] exportPaymentsAsCsv() {
         List<Payment> payments = paymentRepository.findAll();
         StringBuilder csv = new StringBuilder();
-        csv.append("PaymentID,Course,User,Amount,Method,ReferenceCode,Status,TransactionRef,CreatedAt\n");
+        java.text.DecimalFormat df = new java.text.DecimalFormat("#,### VNĐ");
+        csv.append("PaymentID,Course,User,Amount,Method,ReferenceCode,Status,VATRequested,CompanyName,TaxCode,TransactionRef,CreatedAt\n");
         for (Payment p : payments) {
             csv.append(p.getId()).append(",")
                .append("\"").append(p.getCourse().getTitle()).append("\",")
                .append(p.getUser().getEmail()).append(",")
-               .append(p.getAmount()).append(",")
+               .append("\"").append(df.format(p.getAmount())).append("\",")
                .append(p.getPaymentMethod()).append(",")
                .append(p.getReferenceCode()).append(",")
                .append(p.getStatus()).append(",")
+               .append(p.getIsVatRequired()).append(",")
+               .append("\"").append(p.getCompanyName() != null ? p.getCompanyName() : "").append("\",")
+               .append("\"").append(p.getTaxCode() != null ? p.getTaxCode() : "").append("\",")
                .append(p.getTransactionRef()).append(",")
                .append(p.getCreatedAt()).append("\n");
         }
-        return csv.toString().getBytes();
+        return ("\uFEFF" + csv.toString()).getBytes(java.nio.charset.StandardCharsets.UTF_8);
     }
 
     // ------------------------------------------------------------------ HELPERS
@@ -249,6 +257,9 @@ public class PaymentServiceImpl implements PaymentService {
                 .transactionRef(payment.getTransactionRef())
                 .referenceCode(payment.getReferenceCode())
                 .createdAt(payment.getCreatedAt())
+                .isVatRequired(payment.getIsVatRequired())
+                .companyName(payment.getCompanyName())
+                .taxCode(payment.getTaxCode())
                 .build();
 
         if (payment.getUser() != null) {

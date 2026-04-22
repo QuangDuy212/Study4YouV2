@@ -63,7 +63,7 @@ export default function AdminLayout() {
     { icon: FileText, label: t("manageTests"), href: "/admin/tests", permission: "MANAGE_TESTS" },
     { icon: Database, label: t("questionBank"), href: "/admin/questions", permission: "MANAGE_QUESTIONS" },
     { icon: GraduationCap, label: t("manageCourses"), href: "/admin/courses" },
-    { icon: CreditCard, label: "Payments", href: "/admin/payments" },
+    { icon: CreditCard, label: t("managePayments"), href: "/admin/payments" },
     { icon: Users, label: t("users"), href: "/admin/users", permission: "MANAGE_USERS" },
     { icon: Shield, label: t("roles"), href: "/admin/roles", permission: "MANAGE_USERS" },
     { icon: Sparkles, label: t("aiQuestions"), href: "/admin/questions/ai-generate", permission: "MANAGE_QUESTIONS" },
@@ -74,7 +74,7 @@ export default function AdminLayout() {
 
   const path = location.pathname;
   let pageTitle = t("adminDashboard");
-  let pageDescription = "Overview of system activity and performance";
+  let pageDescription = t("adminDashboardDesc");
 
   if (path.startsWith("/admin/tests")) {
     pageTitle = t("manageTests");
@@ -82,6 +82,8 @@ export default function AdminLayout() {
     pageTitle = t("questionBank");
   } else if (path.startsWith("/admin/courses")) {
     pageTitle = t("manageCourses");
+  } else if (path.startsWith("/admin/payments")) {
+    pageTitle = t("paymentManagement");
   } else if (path.startsWith("/admin/users")) {
     pageTitle = t("users");
   } else if (path.startsWith("/admin/roles")) {

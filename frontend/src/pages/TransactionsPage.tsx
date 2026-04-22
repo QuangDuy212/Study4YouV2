@@ -19,12 +19,65 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { toast } from "sonner";
+// @ts-ignore
+import html2pdf from "html2pdf.js";
+
+function docSoThienVND(number: number): string {
+  if (number === 0) return "Không đồng";
+  const units = ["", "nghìn", "triệu", "tỷ", "nghìn tỷ", "triệu tỷ"];
+  const digits = ["không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"];
+  
+  function readThreeDigits(n: number, isFirstGroup: boolean): string {
+    let res = "";
+    const h = Math.floor(n / 100);
+    const t = Math.floor((n % 100) / 10);
+    const u = n % 10;
+    
+    if (h > 0 || !isFirstGroup) {
+      res += digits[h] + " trăm ";
+    }
+    
+    if (t > 0) {
+      res += digits[t] + " mươi ";
+    } else if (h > 0 && u > 0) {
+      res += "lẻ ";
+    }
+    
+    if (t > 0 && u === 1) {
+      res += "mốt";
+    } else if (t > 0 && u === 5) {
+      res += "lăm";
+    } else if (u > 0 || (h === 0 && t === 0 && isFirstGroup)) {
+      res += digits[u];
+    }
+    
+    return res.trim();
+  }
+
+  let res = "";
+  let unitIdx = 0;
+  let n = number;
+  
+  while (n > 0) {
+    const group = n % 1000;
+    if (group > 0) {
+      const groupStr = readThreeDigits(group, n < 1000);
+      res = groupStr + " " + units[unitIdx] + " " + res;
+    }
+    n = Math.floor(n / 1000);
+    unitIdx++;
+  }
+  
+  const final = res.trim();
+  return final.charAt(0).toUpperCase() + final.slice(1) + " đồng chẵn";
+}
 
 export default function TransactionsPage() {
   const { t } = useLanguage();
   const [transactions, setTransactions] = useState<PaymentResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTx, setSelectedTx] = useState<PaymentResponse | null>(null);
 
   useEffect(() => {
     loadTransactions();
@@ -39,6 +92,28 @@ export default function TransactionsPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleDownloadInvoice = (tx: PaymentResponse) => {
+    setSelectedTx(tx);
+    
+    // Wait for state update and DOM render
+    setTimeout(() => {
+      const element = document.getElementById("invoice-template");
+      if (!element) return;
+      
+      const opt = {
+        margin: 10,
+        filename: `Invoice_${tx.referenceCode || tx.id.slice(0,8)}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+      
+      html2pdf().from(element).set(opt).save().then(() => {
+        setSelectedTx(null);
+      });
+    }, 100);
   };
 
   const getStatusColor = (status: string) => {
@@ -185,10 +260,23 @@ export default function TransactionsPage() {
                         {tx.status}
                       </Badge>
                     </td>
-                    <td className="p-6 text-right">
-                       <Button variant="ghost" size="icon" className="hover:bg-primary/10 hover:text-primary rounded-xl">
-                          <ExternalLink className="w-4 h-4" />
-                       </Button>
+                     <td className="p-6 text-right">
+                       <div className="flex justify-end gap-2">
+                          {(tx.status?.toUpperCase() === "SUCCESS") && (
+                            <Button 
+                              onClick={() => handleDownloadInvoice(tx)}
+                              variant="outline" 
+                              size="sm"
+                              className="bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-600 hover:text-white rounded-xl font-bold gap-2"
+                            >
+                               <Download className="w-4 h-4" />
+                               Tải về
+                            </Button>
+                          )}
+                          <Button variant="ghost" size="icon" className="hover:bg-primary/10 hover:text-primary rounded-xl">
+                             <ExternalLink className="w-4 h-4" />
+                          </Button>
+                       </div>
                     </td>
                   </motion.tr>
                 ))
@@ -197,6 +285,101 @@ export default function TransactionsPage() {
           </table>
         </div>
       </div>
+
+      {/* Hidden Invoice Template for PDF Generation */}
+      {selectedTx && (
+        <div className="fixed -left-[9999px] top-0">
+          <div id="invoice-template" className="w-[210mm] bg-white p-[20mm] text-black" style={{ fontFamily: 'Arial, sans-serif', lineHeight: '1.5' }}>
+             <div className="text-center mb-8" style={{ textAlign: 'center' }}>
+                <h1 className="text-3xl font-bold uppercase" style={{ margin: '0 0 10px 0', fontSize: '28px' }}>HÓA ĐƠN THANH TOÁN</h1>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', fontSize: '12px', marginTop: '-30px' }}>
+                   <div style={{ textAlign: 'left' }}>
+                      <p style={{ margin: '0' }}>Ký hiệu: S4Y-2026</p>
+                      <p style={{ margin: '0' }}>Số: {selectedTx.referenceCode?.replace(/\s/g, '') || selectedTx.id.slice(0,8).toUpperCase()}</p>
+                   </div>
+                </div>
+                <p style={{ fontStyle: 'italic', margin: '20px 0 0 0' }}>Ngày {format(new Date(selectedTx.createdAt), 'dd')} tháng {format(new Date(selectedTx.createdAt), 'MM')} năm {format(new Date(selectedTx.createdAt), 'yyyy')}</p>
+             </div>
+
+             <div style={{ borderTop: '2px solid black', borderBottom: '1px solid black', padding: '15px 0', marginBottom: '20px', fontSize: '14px' }}>
+                <p style={{ margin: '2px 0' }}><strong>Tên người bán:</strong> CÔNG TY TNHH STUDY4YOU</p>
+                <p style={{ margin: '2px 0' }}><strong>Mã số thuế:</strong> 010123456789</p>
+                <p style={{ margin: '2px 0' }}><strong>Địa chỉ:</strong> Số 1, Đường Đại Cồ Việt, Quận Hai Bà Trưng, TP. Hà Nội</p>
+                <p style={{ margin: '2px 0' }}><strong>Số tài khoản:</strong> 1234567890 - Ngân hàng Techcombank</p>
+             </div>
+
+             <div style={{ marginBottom: '20px', fontSize: '14px' }}>
+                <p style={{ margin: '2px 0' }}><strong>Họ tên người mua hàng:</strong> Học viên Study4You</p>
+                <p style={{ margin: '2px 0' }}><strong>Tên đơn vị:</strong> {selectedTx.isVatRequired ? selectedTx.companyName : "..........................................................................................."}</p>
+                <p style={{ margin: '2px 0' }}><strong>Địa chỉ:</strong> .............................................................................................................................</p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '5px' }}>
+                   <p style={{ margin: '0', flex: '1' }}><strong>Hình thức thanh toán:</strong> {selectedTx.paymentMethod}</p>
+                   <p style={{ margin: '0', flex: '1' }}><strong>MST:</strong> {selectedTx.isVatRequired ? selectedTx.taxCode : "..................................."}</p>
+                   <p style={{ margin: '0', width: '100px' }}><strong>Tiền tệ:</strong> VNĐ</p>
+                </div>
+             </div>
+
+             <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid black', fontSize: '14px', marginBottom: '20px' }}>
+                <thead>
+                   <tr style={{ backgroundColor: '#f2f2f2' }}>
+                      <th style={{ border: '1px solid black', padding: '10px', width: '50px', textAlign: 'center' }}>STT</th>
+                      <th style={{ border: '1px solid black', padding: '10px', textAlign: 'left' }}>Tên hàng hóa, dịch vụ</th>
+                      <th style={{ border: '1px solid black', padding: '10px', width: '100px', textAlign: 'center' }}>Đơn vị</th>
+                      <th style={{ border: '1px solid black', padding: '10px', width: '70px', textAlign: 'center' }}>SL</th>
+                      <th style={{ border: '1px solid black', padding: '10px', width: '120px', textAlign: 'right' }}>Đơn giá</th>
+                      <th style={{ border: '1px solid black', padding: '10px', width: '120px', textAlign: 'right' }}>Thành tiền</th>
+                   </tr>
+                </thead>
+                <tbody>
+                   <tr style={{ height: '50px' }}>
+                      <td style={{ border: '1px solid black', padding: '10px', textAlign: 'center' }}>1</td>
+                      <td style={{ border: '1px solid black', padding: '10px', fontWeight: 'bold' }}>{selectedTx.courseTitle}</td>
+                      <td style={{ border: '1px solid black', padding: '10px', textAlign: 'center' }}>Khóa học</td>
+                      <td style={{ border: '1px solid black', padding: '10px', textAlign: 'center' }}>1</td>
+                      <td style={{ border: '1px solid black', padding: '10px', textAlign: 'right' }}>{selectedTx.amount.toLocaleString()}</td>
+                      <td style={{ border: '1px solid black', padding: '10px', textAlign: 'right' }}>{selectedTx.amount.toLocaleString()}</td>
+                   </tr>
+                </tbody>
+             </table>
+
+             <div style={{ fontSize: '15px', marginTop: '20px' }}>
+                <p style={{ margin: '5px 0' }}><strong>Tổng tiền thanh toán:</strong> <span style={{ fontSize: '18px' }}>{selectedTx.amount.toLocaleString()} VNĐ</span></p>
+                <p style={{ margin: '5px 0', fontStyle: 'italic' }}><strong>Số tiền viết bằng chữ:</strong> {docSoThienVND(selectedTx.amount)}</p>
+             </div>
+
+             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '50px', fontSize: '14px' }}>
+                <div style={{ textAlign: 'center', width: '250px' }}>
+                   <p style={{ fontWeight: 'bold', margin: '0' }}>Người mua hàng</p>
+                   <p style={{ fontStyle: 'italic', fontSize: '12px', margin: '0' }}>(Ký, ghi rõ họ tên)</p>
+                </div>
+                <div style={{ textAlign: 'center', width: '250px', position: 'relative' }}>
+                   <p style={{ fontWeight: 'bold', margin: '0' }}>Người bán hàng</p>
+                   <p style={{ fontStyle: 'italic', fontSize: '12px', margin: '0' }}>(Ký, đóng dấu, ghi rõ họ tên)</p>
+                   
+                   {/* Giả lập dấu mộc Study4You */}
+                   <div style={{ 
+                      marginTop: '20px', 
+                      color: 'red', 
+                      border: '3px solid red', 
+                      padding: '5px 15px', 
+                      display: 'inline-block', 
+                      borderRadius: '10px',
+                      transform: 'rotate(-5deg)',
+                      fontWeight: 'black',
+                      fontSize: '16px',
+                      opacity: '0.8'
+                   }}>
+                      STUDY4YOU
+                   </div>
+                </div>
+             </div>
+
+             <div style={{ textAlign: 'center', marginTop: '80px', fontSize: '11px', fontStyle: 'italic', borderTop: '1px dashed #ccc', paddingTop: '10px' }}>
+                <p>(Cần kiểm tra, đối chiếu khi lập, nhận hóa đơn)</p>
+             </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

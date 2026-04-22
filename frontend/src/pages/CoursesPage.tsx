@@ -1,80 +1,74 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import courseService, { type CourseResponse, type PageResponse } from "@/services/courseService";
+import courseService from "@/services/courseService";
 import { CourseCard } from "@/components/course/CourseCard";
 import { GraduationCap, Search } from "lucide-react";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useQuery } from "@tanstack/react-query";
 
 export default function CoursesPage() {
   const { t } = useLanguage();
-  const [data, setData] = useState<PageResponse<CourseResponse> | null>(null);
   const [keyword, setKeyword] = useState("");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
-  const [loading, setLoading] = useState(true);
 
-  const fetchCourses = useCallback(async () => {
-    setLoading(true);
-    try {
-      const result = await courseService.getAllCourses({ keyword: search || undefined, page, size: 12 });
-      setData(result);
-    } finally {
-      setLoading(false);
-    }
-  }, [search, page]);
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(keyword);
+      setPage(0);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [keyword]);
 
-  useEffect(() => { fetchCourses(); }, [fetchCourses]);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setPage(0);
-    setSearch(keyword);
-  };
+  const { data, isLoading, isPlaceholderData } = useQuery({
+    queryKey: ["courses", search, page],
+    queryFn: () => courseService.getAllCourses({ keyword: search || undefined, page, size: 12 }),
+    placeholderData: (previousData) => previousData,
+    staleTime: 5000,
+  });
 
   return (
-    <>
-      <div className="max-w-6xl mx-auto space-y-8 pb-12">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <GraduationCap className="w-5 h-5 text-primary" />
-                </div>
-                <h1 className="font-display text-3xl font-bold text-foreground">{t("exploreCourses")}</h1>
-              </div>
-              <p className="text-muted-foreground">{t("exploreCoursesDesc")}</p>
+    <div className="max-w-6xl mx-auto space-y-8 pb-12">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <GraduationCap className="w-5 h-5 text-primary" />
             </div>
-            
-            <form onSubmit={handleSearch} className="flex items-center gap-2 max-w-md w-full">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input 
-                  value={keyword}
-                  onChange={e => setKeyword(e.target.value)}
-                  placeholder={t("searchCourses")} 
-                  className="pl-9 bg-card border-border"
-                />
-              </div>
-              <Button type="submit">{t("search")}</Button>
-            </form>
+            <h1 className="font-display text-3xl font-bold text-foreground">{t("exploreCourses")}</h1>
           </div>
-        </motion.div>
+          <p className="text-muted-foreground">{t("exploreCoursesDesc")}</p>
+        </div>
+        
+        <div className="relative max-w-md w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input 
+            value={keyword}
+            onChange={e => setKeyword(e.target.value)}
+            placeholder={t("searchCourses")} 
+            className="pl-9 bg-card border-border h-12 rounded-xl shadow-sm"
+          />
+        </div>
+      </div>
 
-      {/* Course Grid */}
       <div className="pt-2">
-        {loading ? (
+        {isLoading && !data ? (
           <div className="courses-page__skeleton-grid">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="course-skeleton" />
             ))}
           </div>
         ) : data && data.content.length > 0 ? (
-          <>
-            <p className="courses-page__count">
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }}
+            className={isPlaceholderData ? "opacity-50 transition-opacity" : ""}
+          >
+            <p className="courses-page__count mb-6 font-medium text-sm">
               {t("coursesFoundCount", { count: data.totalElements })}
               {search && <> for "<strong>{search}</strong>"</>}
             </p>
@@ -86,44 +80,43 @@ export default function CoursesPage() {
 
             {/* Pagination */}
             {data.totalPages > 1 && (
-              <div className="courses-page__pagination">
-                <button
-                  className="pagination-btn"
+              <div className="courses-page__pagination mt-12 flex justify-center items-center gap-4">
+                <Button
+                  variant="outline"
                   disabled={page === 0}
                   onClick={() => setPage(p => p - 1)}
+                  className="rounded-xl font-bold"
                 >
                   ← Prev
-                </button>
-                <span className="pagination-info">
+                </Button>
+                <span className="text-sm font-bold text-muted-foreground">
                   Page {page + 1} of {data.totalPages}
                 </span>
-                <button
-                  className="pagination-btn"
+                <Button
+                  variant="outline"
                   disabled={page >= data.totalPages - 1}
                   onClick={() => setPage(p => p + 1)}
+                  className="rounded-xl font-bold"
                 >
                   Next →
-                </button>
+                </Button>
               </div>
             )}
-          </>
+          </motion.div>
         ) : (
-          <div className="courses-page__empty">
-            <svg viewBox="0 0 96 96" fill="none" width={80} height={80}>
-              <circle cx="48" cy="48" r="48" fill="rgba(99,102,241,0.08)" />
-              <path d="M48 28c0-1.1.9-2 2-2h12a2 2 0 012 2v12a2 2 0 01-2 2H50a2 2 0 01-2-2V28z" fill="rgba(99,102,241,0.3)" />
-              <rect x="28" y="42" width="40" height="28" rx="4" fill="rgba(99,102,241,0.2)" />
-            </svg>
-            <h3>No courses found</h3>
-            {search && (
-              <button className="btn-ghost" onClick={() => { setSearch(""); setKeyword(""); setPage(0); }}>
-                Clear search
-              </button>
-            )}
+          <div className="courses-page__empty py-20 text-center">
+             <div className="w-20 h-20 bg-muted rounded-[2rem] mx-auto flex items-center justify-center mb-4">
+                <Search className="w-10 h-10 text-muted-foreground/30" />
+             </div>
+             <h3 className="text-xl font-bold">{t("noCoursesFound")}</h3>
+             {search && (
+               <Button variant="link" onClick={() => { setKeyword(""); setSearch(""); setPage(0); }}>
+                 Clear search
+               </Button>
+             )}
           </div>
         )}
       </div>
-      </div>
-    </>
+    </div>
   );
 }

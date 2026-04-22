@@ -45,4 +45,10 @@ public class Payment extends BaseEntity {
     /** Short human-readable code for manual transfer content (e.g., S4Y-12345) */
     @Column(unique = true, length = 100)
     private String referenceCode;
+
+    // VAT Invoice fields
+    @Builder.Default
+    private Boolean isVatRequired = false;
+    private String companyName;
+    private String taxCode;
 }
