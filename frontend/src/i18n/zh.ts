@@ -64,7 +64,7 @@ export const zh = {
   myCourses: "我的课程",
   courseContent: "课程内容",
   curriculum: "课程表",
-  lessonsCount: "{{count}} 课时",
+  lessonsCount: "{count} 课时",
   lessonPlaceholder: "选择课程开始学习",
   noDescription: "本课时专注于视频内容，无额外文字描述。",
   prev: "上一个",

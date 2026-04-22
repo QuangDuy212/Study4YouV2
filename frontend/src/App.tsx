@@ -17,6 +17,7 @@ import TestTakingPage from "./pages/TestTakingPage";
 import ResultPage from "./pages/ResultPage";
 import SettingsPage from "./pages/SettingsPage";
 import AdminPage from "./pages/AdminPage";
+import AdminPaymentsPage from "./pages/admin/AdminPaymentsPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import QuestionBankPage from "./pages/admin/QuestionBankPage";
 import QuestionEditorPage from "./pages/admin/QuestionEditorPage";
@@ -40,6 +41,8 @@ import CourseDetailPage from "./pages/CourseDetailPage";
 import LearnPage from "./pages/LearnPage";
 import MyCoursesPage from "./pages/MyCoursesPage";
 import PaymentPage from "./pages/PaymentPage";
+import PaymentResultPage from "./pages/PaymentResultPage";
+import TransactionsPage from "./pages/TransactionsPage";
 import AdminCoursesPage from "./pages/admin/AdminCoursesPage";
 import AdminCourseEditorPage from "./pages/admin/AdminCourseEditorPage";
 import AdminCurriculumPage from "./pages/admin/AdminCurriculumPage";
@@ -82,6 +85,8 @@ const App = () => (
                     <Route path="/learn/:courseId" element={<LearnPage />} />
                     <Route path="/my-courses" element={<MyCoursesPage />} />
                     <Route path="/payment/:courseId" element={<PaymentPage />} />
+                    <Route path="/payment/callback" element={<PaymentResultPage />} />
+                    <Route path="/transactions" element={<TransactionsPage />} />
                   </Route>
                 </Route>
 
@@ -99,8 +104,9 @@ const App = () => (
                     <Route path="/admin/questions/:id/edit" element={<QuestionEditorPage />} />
                     <Route path="/admin/questions/ai-generate" element={<ProtectedRoute requiredPermission="MANAGE_QUESTIONS"><AIGeneratePage /></ProtectedRoute>} />
                     
-                    <Route path="/admin/courses" element={<AdminCoursesPage />} />
-                    <Route path="/admin/courses/create" element={<AdminCourseEditorPage />} />
+                     <Route path="/admin/courses" element={<AdminCoursesPage />} />
+                     <Route path="/admin/payments" element={<AdminPaymentsPage />} />
+                     <Route path="/admin/courses/create" element={<AdminCourseEditorPage />} />
                     <Route path="/admin/courses/:id/edit" element={<AdminCourseEditorPage />} />
                     <Route path="/admin/courses/:id/lessons" element={<AdminCurriculumPage />} />
                     <Route path="/admin/courses/:id/lessons/create" element={<AdminLessonEditorPage />} />

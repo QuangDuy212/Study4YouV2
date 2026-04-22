@@ -17,7 +17,8 @@ import {
   Bell,
   Menu,
   GraduationCap,
-  PlayCircle
+  PlayCircle,
+  CreditCard
 } from "lucide-react";
 import NotificationDropdown from "@/components/NotificationDropdown";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
@@ -45,6 +46,7 @@ export default function DashboardLayout() {
     { icon: BookOpen, label: t("toeicTests"), href: "/tests" },
     { icon: GraduationCap, label: t("courses"), href: "/courses" },
     { icon: PlayCircle, label: t("myCourses"), href: "/my-courses" },
+    { icon: CreditCard, label: t("billingHistory"), href: "/transactions" },
     { icon: User, label: t("profile"), href: "/profile" },
     { icon: Bell, label: t("notifications"), href: "/notifications" },
     { icon: Settings, label: t("settings"), href: "/settings" },

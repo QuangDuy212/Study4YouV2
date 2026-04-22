@@ -22,5 +22,7 @@ public class PaymentResponse {
     private PaymentStatus status;
     private PaymentMethod paymentMethod;
     private String transactionRef;
+    private String referenceCode;
+    private String paymentUrl;
     private LocalDateTime createdAt;
 }

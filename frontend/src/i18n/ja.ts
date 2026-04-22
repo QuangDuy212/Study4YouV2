@@ -65,7 +65,7 @@ export const ja = {
   myCourses: "マイコース",
   courseContent: "コース内容",
   curriculum: "カリキュラム",
-  lessonsCount: "{{count}} レッスン",
+  lessonsCount: "{count} レッスン",
   lessonPlaceholder: "レッスンを選択して開始",
   noDescription: "このレッスンはビデオコンテンツに焦点を当てており、追加のテキスト説明はありません。",
   prev: "前へ",

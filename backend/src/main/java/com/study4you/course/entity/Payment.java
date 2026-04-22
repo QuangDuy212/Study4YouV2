@@ -30,15 +30,19 @@ public class Payment extends BaseEntity {
     private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "varchar(255)")
     @Builder.Default
     private PaymentStatus status = PaymentStatus.PENDING;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "payment_method", nullable = false, columnDefinition = "varchar(255)")
     @Builder.Default
     private PaymentMethod paymentMethod = PaymentMethod.MOCK;
 
     /** External transaction reference (VNPay txn ID, etc.) */
     private String transactionRef;
+
+    /** Short human-readable code for manual transfer content (e.g., S4Y-12345) */
+    @Column(unique = true, length = 100)
+    private String referenceCode;
 }

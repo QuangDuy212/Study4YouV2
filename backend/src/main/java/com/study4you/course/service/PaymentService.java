@@ -2,16 +2,22 @@ package com.study4you.course.service;
 
 import com.study4you.course.dto.PaymentRequest;
 import com.study4you.course.dto.PaymentResponse;
-
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.UUID;
 
 public interface PaymentService {
 
-    PaymentResponse createPayment(PaymentRequest request, UUID userId);
+    PaymentResponse createPayment(PaymentRequest request, UUID userId, HttpServletRequest httpRequest);
 
     /** Mock/VNPay callback: mark payment SUCCESS and auto-enroll */
     PaymentResponse confirmPayment(UUID paymentId, UUID userId);
 
     List<PaymentResponse> getPaymentHistory(UUID userId);
+
+    List<PaymentResponse> getAllPayments();
+
+    PaymentResponse adminConfirmPayment(UUID paymentId);
+
+    byte[] exportPaymentsAsCsv();
 }
