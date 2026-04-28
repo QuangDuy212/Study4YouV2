@@ -4,7 +4,6 @@ import { AnimatePresence } from "framer-motion";
 import { Sparkles } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -30,11 +29,11 @@ export default function AIGeneratePage() {
 
   const handleQuestionsGenerated = (partType: PartType, questions: TestQuestion[]) => {
     setGeneratedQuestions((prev) => [...prev, ...questions]);
-    toast.success(`Generated ${questions.length} questions for ${PART_LABELS[partType].label}`);
+    toast.success(t('generatedCountQuestions').replace('{count}', String(questions.length)));
   };
 
   return (
-    <AdminLayout pageTitle={t('aiQuestionGenerator')} pageDescription={t('generateReadingQuestionsDesc')}>
+    <>
       <div className="w-full space-y-6">
         <Card>
           <CardHeader>
@@ -54,9 +53,9 @@ export default function AIGeneratePage() {
                 <Select value={selectedPart} onValueChange={(v) => setSelectedPart(v as PartType)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="PART_5">{t('part5Desc')} (30 Q)</SelectItem>
-                    <SelectItem value="PART_6">{t('part6Desc')} (16 Q)</SelectItem>
-                    <SelectItem value="PART_7">{t('part7Desc')} (54 Q)</SelectItem>
+                    <SelectItem value="PART_5">{t('part5Desc')} ({AI_QUESTION_COUNTS.PART_5} Q)</SelectItem>
+                    <SelectItem value="PART_6">{t('part6Desc')} ({AI_QUESTION_COUNTS.PART_6} Q)</SelectItem>
+                    <SelectItem value="PART_7">{t('part7Desc')} ({AI_QUESTION_COUNTS.PART_7} Q)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -133,6 +132,6 @@ export default function AIGeneratePage() {
           />
         )}
       </AnimatePresence>
-    </AdminLayout>
+    </>
   );
 }

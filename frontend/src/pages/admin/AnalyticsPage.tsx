@@ -4,7 +4,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import {
   TrendingUp, Users, BookOpen, Headphones, CheckCircle, XCircle, Activity, Loader2,
 } from "lucide-react";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -47,12 +46,12 @@ export default function AnalyticsPage() {
 
   if (loading || !data) {
     return (
-      <AdminLayout pageTitle={t('analyticsTitle')} pageDescription={t('analyticsDesc')}>
+      <>
         <div className="flex flex-col items-center justify-center min-h-[400px]">
           <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
           <p className="text-muted-foreground">{t('loadingAnalytics') || "Loading analytics data..."}</p>
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
@@ -66,7 +65,7 @@ export default function AnalyticsPage() {
   const listeningStat = data.skillPerformance.find(s => s.skill.toLowerCase() === "listening") || { avgScore: 0, passRate: 0 };
 
   return (
-    <AdminLayout pageTitle={t('analyticsTitle')} pageDescription={t('analyticsDesc')}>
+    <>
       <div className="space-y-6">
         {/* Summary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -189,6 +188,6 @@ export default function AnalyticsPage() {
           </Card>
         </motion.div>
       </div>
-    </AdminLayout>
+    </>
   );
 }

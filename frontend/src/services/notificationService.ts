@@ -28,6 +28,10 @@ export const notificationService = {
   async markAllAsRead(): Promise<void> {
     await apiClient.put("/notifications/read-all");
   },
+
+  async createNotification(data: { title: string, content: string, type: string, userId?: string }): Promise<void> {
+    await apiClient.post("/notifications/admin", data);
+  },
 };
 
 export default notificationService;

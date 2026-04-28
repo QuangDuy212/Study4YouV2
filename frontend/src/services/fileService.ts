@@ -31,4 +31,17 @@ export const uploadImage = async (file: File): Promise<FileUploadResponse> => {
   return response.data;
 };
 
+export const uploadVideo = async (file: File): Promise<FileUploadResponse> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  const response = await apiClient.post<FileUploadResponse>('/files/upload-video', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  
+  return response.data;
+};
+
 

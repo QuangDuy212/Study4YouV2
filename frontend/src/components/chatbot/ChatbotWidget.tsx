@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { MessageCircle, X } from "lucide-react";
+import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChatWindow } from "./ChatWindow";
 import { AnimatePresence, motion } from "framer-motion";
@@ -21,10 +22,14 @@ const SUGGESTED_QUESTIONS = [
 ];
 
 export function ChatbotWidget() {
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // Hide chatbot during tests to avoid UI distraction and overlap with mobile controls
+  const isTestTakingPage = /\/tests\/.*\/attempt/.test(location.pathname);
 
   const handleSend = useCallback(async (content: string) => {
     const userMessage: Message = {
@@ -83,6 +88,8 @@ export function ChatbotWidget() {
   const handleClear = () => {
     setMessages([]);
   };
+
+  if (isTestTakingPage) return null;
 
   return (
     <>

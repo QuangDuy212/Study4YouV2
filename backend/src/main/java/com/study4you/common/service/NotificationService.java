@@ -5,6 +5,7 @@ import com.study4you.common.entity.Notification;
 import com.study4you.common.repository.NotificationRepository;
 import com.study4you.security.SecurityService;
 import com.study4you.user.entity.User;
+import com.study4you.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final UserRepository userRepository;
     private final SecurityService securityService;
 
     @Transactional(readOnly = true)
@@ -70,6 +72,20 @@ public class NotificationService {
         notification.setContent(content);
         notification.setType(type);
         notificationRepository.save(notification);
+    }
+
+    @Transactional
+    public void createNotificationToAll(String title, String content, String type) {
+        List<User> allUsers = userRepository.findAll();
+        List<Notification> notifications = allUsers.stream().map(user -> {
+            Notification n = new Notification();
+            n.setUserId(user.getId());
+            n.setTitle(title);
+            n.setContent(content);
+            n.setType(type);
+            return n;
+        }).collect(Collectors.toList());
+        notificationRepository.saveAll(notifications);
     }
 
     private NotificationResponse mapToResponse(Notification notification) {

@@ -5,7 +5,6 @@ import { ArrowLeft, Save, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import userService from "@/services/userService";
 import roleService, { type RoleResponse } from "@/services/roleService";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -81,10 +80,10 @@ export default function UserEditorPage() {
         toast.success(t("userCreated") || "User created successfully");
       } else if (id) {
         await userService.updateUser(id, {
+          email,
           fullName: name,
           status,
           roleIds: selectedRoleIds
-          // Optional: handle password reset via separate call if password field is filled
         });
 
         if (password.trim()) {
@@ -97,7 +96,20 @@ export default function UserEditorPage() {
       }
       navigate("/admin/users");
     } catch (err: any) {
-      toast.error(t("error"), { description: err?.response?.data?.message || err.message });
+      const resp = err?.response?.data;
+      let errorMsg = resp?.message || err.message;
+      
+      // If there are validation errors, format them into the description
+      let description = "";
+      if (resp?.data && typeof resp.data === 'object') {
+        description = Object.entries(resp.data)
+          .map(([field, msg]) => `${field}: ${msg}`)
+          .join(", ");
+      } else {
+        description = err?.response?.data?.message || err.message;
+      }
+
+      toast.error(t("error"), { description });
     } finally {
       setIsSaving(false);
     }
@@ -105,17 +117,14 @@ export default function UserEditorPage() {
 
   if (isLoading) {
     return (
-      <AdminLayout pageTitle={t("loading")} pageDescription="">
+      <>
         <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout
-      pageTitle={isCreate ? t("createUser") : t("editUser")}
-      pageDescription={isCreate ? t("registerNewUser") : t("editingUserText")?.replace("{name}", name) || `Editing user: ${name}`}
-    >
+    <>
       <div className="mb-4 flex items-center justify-between">
         <Button variant="ghost" size="sm" onClick={() => navigate("/admin/users")}>
           <ArrowLeft className="w-4 h-4 mr-1.5" /> {t("backToUsers")}
@@ -159,14 +168,14 @@ export default function UserEditorPage() {
               </div>
               <div className="space-y-2">
                 <Label>{t("status")}</Label>
-                <Select value={status} onValueChange={(v) => setStatus(v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ACTIVE">{t("active")}</SelectItem>
-                    <SelectItem value="DISABLED">{t("disabled")}</SelectItem>
-                    <SelectItem value="BANNED">{t("banned")}</SelectItem>
-                  </SelectContent>
-                </Select>
+                    <Select value={status} onValueChange={(v) => setStatus(v)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ACTIVE">{t("active")}</SelectItem>
+                        <SelectItem value="INACTIVE">{t("inactive")}</SelectItem>
+                        <SelectItem value="BANNED">{t("banned")}</SelectItem>
+                      </SelectContent>
+                    </Select>
               </div>
             </div>
           </CardContent>
@@ -198,6 +207,6 @@ export default function UserEditorPage() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </>
   );
 }

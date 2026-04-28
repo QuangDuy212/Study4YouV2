@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import AdminLayout from "@/components/admin/AdminLayout";
+import axios from "axios";
 import AdminSummaryCards from "@/components/admin/AdminSummaryCards";
 import AdminFilters from "@/components/admin/AdminFilters";
 import { Button } from "@/components/ui/button";
@@ -116,8 +116,29 @@ export default function AdminPage() {
     navigate("/admin/tests/create");
   };
 
+  const handleExportPayments = async () => {
+    try {
+      const token = localStorage.getItem("access_token");
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/payments/export`, {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'payments_report.csv');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      toast.success(t('reportReady'));
+    } catch (error) {
+      toast.error(t('failedToLoad'));
+    }
+  };
+
   return (
-    <AdminLayout pageTitle={t('testManagementTitle')} pageDescription={t('testManagementDesc')}>
+    <>
       <div className="space-y-6">
         <AdminSummaryCards tests={tests} />
         <AdminFilters
@@ -126,6 +147,7 @@ export default function AdminPage() {
           levelFilter={levelFilter} onLevelFilterChange={setLevelFilter}
           statusFilter={statusFilter} onStatusFilterChange={setStatusFilter}
           onCreateTest={handleCreateTest}
+          onExportPayments={handleExportPayments}
         />
         <AdminTestTable
           tests={paginatedTests} 
@@ -144,6 +166,6 @@ export default function AdminPage() {
         />
       </div>
       <ViewTestDialog open={viewOpen} onOpenChange={setViewOpen} test={viewingTest} onEdit={handleEdit} />
-    </AdminLayout>
+    </>
   );
 }

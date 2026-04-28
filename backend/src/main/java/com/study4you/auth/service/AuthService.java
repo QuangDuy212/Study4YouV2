@@ -12,6 +12,7 @@ import com.study4you.security.CustomUserDetailsService;
 import com.study4you.security.JwtUtil;
 import com.study4you.user.entity.User;
 import com.study4you.user.repository.UserRepository;
+import com.study4you.role.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -33,6 +34,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final CustomUserDetailsService userDetailsService;
     private final UserActivityService userActivityService;
+    private final RoleRepository roleRepository;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -45,6 +47,8 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setFullName(request.getFullName());
         user.setStatus(UserStatus.ACTIVE);
+
+        roleRepository.findByName("STUDENT").ifPresent(role -> user.setRoles(java.util.Collections.singleton(role)));
 
         User savedUser = userRepository.save(user);
         

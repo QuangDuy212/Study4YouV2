@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useTheme, Theme } from "@/contexts/ThemeContext";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 import settingsService from "@/services/settingsService";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -79,16 +78,16 @@ export default function AdminSettingsPage() {
 
   if (loading) {
     return (
-      <AdminLayout pageTitle={t("settings")} pageDescription={t("settingsDesc")}>
+      <>
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout pageTitle={t("settings")} pageDescription={t("settingsDesc")}>
+    <>
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Language */}
         <Card>
@@ -190,6 +189,6 @@ export default function AdminSettingsPage() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </>
   );
 }

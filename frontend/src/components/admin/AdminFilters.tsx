@@ -1,4 +1,4 @@
-import { Search, Filter, Plus, X } from "lucide-react";
+import { Search, Filter, Plus, X, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -21,6 +21,7 @@ interface AdminFiltersProps {
   statusFilter: string;
   onStatusFilterChange: (value: string) => void;
   onCreateTest: () => void;
+  onExportPayments?: () => void;
 }
 
 export default function AdminFilters({
@@ -33,6 +34,7 @@ export default function AdminFilters({
   statusFilter,
   onStatusFilterChange,
   onCreateTest,
+  onExportPayments,
 }: AdminFiltersProps) {
   const { t } = useLanguage();
   const activeFilters = [skillFilter, levelFilter, statusFilter].filter(
@@ -115,6 +117,12 @@ export default function AdminFilters({
         </div>
 
         <div className="flex items-center gap-3 lg:ml-auto">
+          {onExportPayments && (
+            <Button variant="outline" onClick={onExportPayments} className="gap-2 border-primary/20 hover:bg-primary/5 text-primary">
+              <FileDown className="w-4 h-4" />
+              <span className="hidden sm:inline">{t('exportRecords')}</span>
+            </Button>
+          )}
           <Button onClick={onCreateTest} className="gap-2">
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">{t('createNewTest')}</span>

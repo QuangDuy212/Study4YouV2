@@ -8,7 +8,6 @@ import testService from "@/services/testService";
 import partService from "@/services/partService";
 import questionService from "@/services/questionService";
 import { Button } from "@/components/ui/button";
-import AdminLayout from "@/components/admin/AdminLayout";
 import TestInfoSection from "@/components/admin/test-editor/TestInfoSection";
 import PartManager from "@/components/admin/test-editor/PartManager";
 import AIGeneratorPanel from "@/components/admin/test-editor/AIGeneratorPanel";
@@ -159,17 +158,14 @@ export default function TestEditorPage() {
 
   if (isLoading) {
     return (
-      <AdminLayout pageTitle={t("loading")} pageDescription="">
+      <>
         <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout
-      pageTitle={isCreate ? t("createNewTest") : t("editTest")}
-      pageDescription={isCreate ? t("buildNewTest") : (t("editing")?.replace("{name}", testData.name) || `Editing: ${testData.name}`)}
-    >
+    <>
       <div className="mb-4">
         <Button variant="ghost" size="sm" onClick={() => navigate("/admin/tests")}>
           <ArrowLeft className="w-4 h-4 mr-1.5" /> {t("backToTests")}
@@ -197,6 +193,6 @@ export default function TestEditorPage() {
           />
         )}
       </AnimatePresence>
-    </AdminLayout>
+    </>
   );
 }

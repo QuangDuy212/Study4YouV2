@@ -158,7 +158,7 @@ public class AiService {
                 aiUsers.forEach(u -> {
                     u.setRoleId(safeRoleId);
                     u.setStatus(status);
-                    if (u.getPassword() == null) u.setPassword("Study4You@2025");
+                    if (u.getPassword() == null) u.setPassword("123456");
                 });
                 return aiUsers;
             } catch (Exception e) {
@@ -188,7 +188,7 @@ public class AiService {
             result.add(GeneratedUserResponse.builder()
                     .name(fullName)
                     .email(email)
-                    .password("Study4You@2025")
+                    .password("123456")
                     .roleId(safeRoleId)
                     .status(status)
                     .build());
@@ -352,22 +352,23 @@ public class AiService {
     }
 
     private GeneratedQuestionResponse buildPart3Question(String difficulty, int index, String topic) {
-        String[] qTypes = {
-            "What is the main topic of the conversation?",
-            "What does the man want to know?",
-            "When is the event scheduled?"
+        String[][] qData = {
+            {"What is the main topic of the conversation?", "A software update", "A project deadline", "A broken computer", "A meeting cancellation"},
+            {"What does the man want to know?", "The release date", "The cost of repairs", "The location of the office", "The manager's phone number"},
+            {"When is the event scheduled?", "Tomorrow morning", "Next week", "This evening", "On Monday"}
         };
         int qTypeIndex = (index - 1) % 3;
+        String[] currentQ = qData[qTypeIndex];
         
         return GeneratedQuestionResponse.builder()
-                .content(qTypes[qTypeIndex])
+                .content(currentQ[0])
                 .passage("M: Hi, do you know when the new " + (topic != null ? topic : "software") + " update will be released? W: Yes, it is scheduled for tomorrow morning.")
                 .correctAnswer("A")
                 .options(new java.util.ArrayList<>(List.of(
-                    OptionDto.builder().label("A").content("A software update / He wants to know about it / Tomorrow").build(),
-                    OptionDto.builder().label("B").content("A project deadline").build(),
-                    OptionDto.builder().label("C").content("A broken computer").build(),
-                    OptionDto.builder().label("D").content("A meeting cancellation").build()
+                    OptionDto.builder().label("A").content(currentQ[1]).build(),
+                    OptionDto.builder().label("B").content(currentQ[2]).build(),
+                    OptionDto.builder().label("C").content(currentQ[3]).build(),
+                    OptionDto.builder().label("D").content(currentQ[4]).build()
                 )))
                 .build();
     }
@@ -383,7 +384,7 @@ public class AiService {
                 .correctAnswer("B")
                 .options(new java.util.ArrayList<>(List.of(
                     OptionDto.builder().label("A").content("Yes, it's very new.").build(),
-                    OptionDto.builder().label("B").content("On your desk. / At 3 PM.").build(),
+                    OptionDto.builder().label("B").content(index % 2 == 0 ? "At 3 PM." : "On your desk.").build(),
                     OptionDto.builder().label("C").content("About 20 pages.").build()
                 )))
                 .build();
