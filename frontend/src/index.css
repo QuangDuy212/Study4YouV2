@@ -306,7 +306,7 @@
 
 @layer components {
   .glass-card {
-    @apply bg-card/80 border border-border/50 shadow-[var(--shadow-card)];
+    @apply bg-card/80 backdrop-blur-xl border border-border/50 shadow-[var(--shadow-card)];
   }
 
   .glass-card-hover {

@@ -5,7 +5,7 @@ export interface CourseRequest {
   description?: string;
   price: number;
   thumbnailUrl?: string;
-  status?: "DRAFT" | "PUBLISHED";
+  status?: "DRAFT" | "PUBLISHED" | "DELETED";
 }
 
 export interface SectionResponse {
@@ -33,7 +33,7 @@ export interface CourseResponse {
   description?: string;
   price: number;
   thumbnailUrl?: string;
-  status: "DRAFT" | "PUBLISHED";
+  status: "DRAFT" | "PUBLISHED" | "DELETED";
   createdAt: string;
   updatedAt: string;
   sections?: SectionResponse[];
@@ -89,6 +89,11 @@ const courseService = {
 
   publishCourse: async (id: string): Promise<CourseResponse> => {
     const res = await apiClient.patch(`/courses/${id}/publish`);
+    return res.data.data;
+  },
+
+  restoreCourse: async (id: string): Promise<CourseResponse> => {
+    const res = await apiClient.patch(`/courses/${id}/restore`);
     return res.data.data;
   },
 };

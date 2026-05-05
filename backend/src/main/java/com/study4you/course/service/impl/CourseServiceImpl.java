@@ -60,7 +60,19 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public void deleteCourse(UUID id) {
         Course course = findOrThrow(id);
-        courseRepository.delete(course);
+        course.setStatus(CourseStatus.DELETED);
+        courseRepository.save(course);
+    }
+
+    @Override
+    public CourseResponse restoreCourse(UUID id) {
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + id));
+        if (course.getStatus() != CourseStatus.DELETED) {
+            throw new BadRequestException("Course is not deleted");
+        }
+        course.setStatus(CourseStatus.DRAFT);
+        return toResponse(courseRepository.save(course), null);
     }
 
     @Override
@@ -133,8 +145,12 @@ public class CourseServiceImpl implements CourseService {
     // ------------------------------------------------------------------ HELPERS
 
     private Course findOrThrow(UUID id) {
-        return courseRepository.findById(id)
+        Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + id));
+        if (course.getStatus() == CourseStatus.DELETED) {
+            throw new ResourceNotFoundException("Course has been deleted: " + id);
+        }
+        return course;
     }
 
     private CourseResponse toResponse(Course course, Boolean enrolled) {
