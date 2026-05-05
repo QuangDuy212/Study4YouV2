@@ -16,6 +16,8 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
 
     Page<Course> findByStatus(CourseStatus status, Pageable pageable);
 
+    Page<Course> findByStatusNot(CourseStatus status, Pageable pageable);
+
     @Query("SELECT c FROM Course c WHERE c.status = :status AND " +
            "(LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "LOWER(c.description) LIKE LOWER(CONCAT('%', :keyword, '%')))")

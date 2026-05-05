@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Plus, Edit, Trash2, Search, Video, Eye, Loader2 } from "lucide-react";
+import { Plus, Edit, Trash2, Search, Video, Eye, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -26,7 +26,7 @@ export default function AdminCoursesPage() {
       setCourses(data);
     } catch (error) {
       toast.error("Failed to load courses");
-      setCourses({ content: [], totalElements: 0, totalPages: 0, size: 10, number: 0 });
+      setCourses({ content: [], totalElements: 0, totalPages: 0, pageSize: 10, pageNumber: 0, last: true });
     } finally {
       setLoading(false);
     }
@@ -50,6 +50,16 @@ export default function AdminCoursesPage() {
       fetchCourses();
     } catch (e: any) {
       toast.error(e.response?.data?.message || "Failed to delete course");
+    }
+  };
+
+  const handleRestore = async (id: string, title: string) => {
+    try {
+      await courseService.restoreCourse(id);
+      toast.success(`Course "${title}" restored successfully`);
+      fetchCourses();
+    } catch (e: any) {
+      toast.error(e.response?.data?.message || "Failed to restore course");
     }
   };
 
@@ -123,25 +133,36 @@ export default function AdminCoursesPage() {
                         )}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={course.status === "PUBLISHED" ? "default" : "outline"}>
+                        <Badge 
+                          variant={course.status === "PUBLISHED" ? "default" : course.status === "DELETED" ? "destructive" : "outline"}
+                          className={course.status === "DELETED" ? "bg-red-100 text-red-700 hover:bg-red-100 border-red-200" : ""}
+                        >
                           {course.status}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="icon" asChild>
-                            <Link to={`/courses/${course.id}`} target="_blank">
-                              <Eye className="w-4 h-4 text-primary" />
-                            </Link>
-                          </Button>
-                          <Button variant="ghost" size="icon" asChild>
-                            <Link to={`/admin/courses/${course.id}/edit`}>
-                              <Edit className="w-4 h-4 text-blue-500" />
-                            </Link>
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDelete(course.id, course.title)}>
-                            <Trash2 className="w-4 h-4 text-destructive" />
-                          </Button>
+                          {course.status === "DELETED" ? (
+                            <Button variant="ghost" size="icon" onClick={() => handleRestore(course.id, course.title)} title="Restore course">
+                              <RefreshCw className="w-4 h-4 text-emerald-600" />
+                            </Button>
+                          ) : (
+                            <>
+                              <Button variant="ghost" size="icon" asChild>
+                                <Link to={`/courses/${course.id}`} target="_blank">
+                                  <Eye className="w-4 h-4 text-primary" />
+                                </Link>
+                              </Button>
+                              <Button variant="ghost" size="icon" asChild>
+                                <Link to={`/admin/courses/${course.id}/edit`}>
+                                  <Edit className="w-4 h-4 text-blue-500" />
+                                </Link>
+                              </Button>
+                              <Button variant="ghost" size="icon" onClick={() => handleDelete(course.id, course.title)}>
+                                <Trash2 className="w-4 h-4 text-destructive" />
+                              </Button>
+                            </>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>

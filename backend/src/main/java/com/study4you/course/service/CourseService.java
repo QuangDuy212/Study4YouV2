@@ -15,6 +15,8 @@ public interface CourseService {
 
     void deleteCourse(UUID id);
 
+    CourseResponse restoreCourse(UUID id);
+
     CourseResponse publishCourse(UUID id);
 
     PageResponse<CourseResponse> getAllPublishedCourses(String keyword, Pageable pageable);

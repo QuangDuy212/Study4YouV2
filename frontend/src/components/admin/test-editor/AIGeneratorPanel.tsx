@@ -19,7 +19,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 interface AIGeneratorPanelProps {
   open: boolean;
   initialPart: PartType;
-  currentParts: TestPart[];
+  currentParts?: TestPart[];
   onClose: () => void;
   onQuestionsGenerated: (partType: PartType, questions: TestQuestion[]) => void;
 }
@@ -78,7 +78,7 @@ export default function AIGeneratorPanel({ open, initialPart, currentParts, onCl
 
   const info = PART_LABELS[selectedPart];
   const maxLimit = PART_QUESTION_LIMITS[selectedPart] || 0;
-  const currentCount = currentParts.find(p => p.type === selectedPart)?.questions.length || 0;
+  const currentCount = currentParts?.find(p => p.type === selectedPart)?.questions.length || 0;
   const count = Math.max(0, maxLimit - currentCount);
 
   const handleGenerate = useCallback(async () => {

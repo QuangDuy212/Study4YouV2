@@ -86,4 +86,10 @@ public class CourseController {
     public ResponseEntity<ApiResponse<CourseResponse>> publishCourse(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success("Course published", courseService.publishCourse(id)));
     }
+
+    @PatchMapping("/{id}/restore")
+    @PreAuthorize("hasAuthority('MANAGE_TESTS')")
+    public ResponseEntity<ApiResponse<CourseResponse>> restoreCourse(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success("Course restored", courseService.restoreCourse(id)));
+    }
 }
