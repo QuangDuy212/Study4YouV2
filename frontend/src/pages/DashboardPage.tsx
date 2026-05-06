@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { TrendingUp, Target, Trophy, ArrowRight, FileText, Loader2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { TrendingUp, Target, Trophy, ArrowRight, FileText, Loader2, BookOpen } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,6 +12,7 @@ import { vi, enUS } from "date-fns/locale";
 export default function DashboardPage() {
   const { t, lang } = useLanguage();
   const { profile } = useAuth();
+  const navigate = useNavigate();
   const [attempts, setAttempts] = useState<ToeicAttemptResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -145,14 +146,27 @@ export default function DashboardPage() {
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className={`font-display font-semibold text-lg ${
-                      (activity.toeicScore || 0) >= 800 ? "text-success" : 
-                      (activity.toeicScore || 0) >= 600 ? "text-warning" : "text-destructive"
-                    }`}>
-                      {activity.toeicScore || 0}/990
-                    </p>
-                    <p className="text-xs text-muted-foreground">{t('score')}</p>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <p className={`font-display font-semibold text-lg ${
+                        (activity.toeicScore || 0) >= 800 ? "text-success" : 
+                        (activity.toeicScore || 0) >= 600 ? "text-warning" : "text-destructive"
+                      }`}>
+                        {activity.toeicScore || 0}/990
+                      </p>
+                      <p className="text-xs text-muted-foreground">{t('score')}</p>
+                    </div>
+                    {activity.submittedAt && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => navigate(`/tests/${activity.id}/review`)}
+                        className="gap-1.5 text-xs font-semibold shrink-0"
+                      >
+                        <BookOpen className="w-3.5 h-3.5" />
+                        Review
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))

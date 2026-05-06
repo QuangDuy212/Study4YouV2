@@ -38,4 +38,7 @@ public class ToeicAnswer extends BaseEntity {
 
     @Column(nullable = false)
     private Boolean correct;
+
+    @Column(nullable = false)
+    private Boolean isFlagged = false;
 }

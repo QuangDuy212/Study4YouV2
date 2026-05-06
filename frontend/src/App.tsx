@@ -15,6 +15,7 @@ import DashboardPage from "./pages/DashboardPage";
 import TestsPage from "./pages/TestsPage";
 import TestTakingPage from "./pages/TestTakingPage";
 import ResultPage from "./pages/ResultPage";
+import TestReviewPage from "./pages/TestReviewPage";
 import SettingsPage from "./pages/SettingsPage";
 import AdminPage from "./pages/AdminPage";
 import AdminPaymentsPage from "./pages/admin/AdminPaymentsPage";
@@ -78,6 +79,7 @@ const App = () => (
                     <Route path="/dashboard" element={<DashboardPage />} />
                     <Route path="/tests" element={<TestsPage />} />
                     <Route path="/tests/:id/attempt" element={<TestTakingPage />} />
+                    <Route path="/tests/:submissionId/review" element={<TestReviewPage />} />
                     <Route path="/result/:id" element={<ResultPage />} />
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route path="/profile" element={<ProfilePage />} />

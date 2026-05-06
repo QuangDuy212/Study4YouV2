@@ -53,6 +53,7 @@ public class ToeicAnswerService {
         answer.setQuestionId(request.getQuestionId());
         answer.setSelectedOption(request.getSelectedOption());
         answer.setCorrect(request.getCorrect());
+        answer.setIsFlagged(request.getIsFlagged());
 
         ToeicAnswer savedAnswer = toeicAnswerRepository.save(answer);
         return mapToResponse(savedAnswer);
@@ -67,6 +68,7 @@ public class ToeicAnswerService {
         answer.setQuestionId(request.getQuestionId());
         answer.setSelectedOption(request.getSelectedOption());
         answer.setCorrect(request.getCorrect());
+        answer.setIsFlagged(request.getIsFlagged());
 
         ToeicAnswer updatedAnswer = toeicAnswerRepository.save(answer);
         return mapToResponse(updatedAnswer);

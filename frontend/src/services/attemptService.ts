@@ -36,6 +36,42 @@ export interface ApiWrapped<T> {
   data: T;
 }
 
+export interface ReviewOption {
+  label: string;
+  content: string;
+}
+
+export interface ReviewQuestion {
+  questionId: string;
+  questionNumber: number;
+  content: string | null;
+  passage: string | null;
+  imageUrl: string | null;
+  audioUrl: string | null;
+  options: ReviewOption[];
+  userAnswer: string | null;
+  correctAnswer: string;
+  explanation: string | null;
+  correct: boolean;
+  partName: string;
+}
+
+export interface TestReviewResponse {
+  submissionId: string;
+  testId: string;
+  testTitle: string;
+  userId: string;
+  toeicScore: number | null;
+  rawScore: number;
+  totalQuestions: number;
+  wrongCount: number;
+  unansweredCount: number;
+  startedAt: string;
+  submittedAt: string | null;
+  completionTimeSeconds: number | null;
+  questions: ReviewQuestion[];
+}
+
 export const attemptService = {
   async getAttempts(
     userId?: string,
@@ -79,6 +115,13 @@ export const attemptService = {
 
   async deleteAttempt(id: string): Promise<void> {
     await apiClient.delete(`/toeic/attempts/${id}`);
+  },
+
+  async getReview(submissionId: string): Promise<TestReviewResponse> {
+    const { data } = await apiClient.get<ApiWrapped<TestReviewResponse>>(
+      `/toeic/tests/${submissionId}/review`
+    );
+    return data.data;
   },
 };
 

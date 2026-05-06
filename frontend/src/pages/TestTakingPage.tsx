@@ -95,15 +95,8 @@ export default function TestTakingPage() {
 
         setParts(mappedParts);
 
-        // Initialize timer from localStorage if exists
-        const saved = localStorage.getItem(storageKey);
-        if (saved) {
-          const { time, timestamp } = JSON.parse(saved);
-          const elapsed = Math.floor((Date.now() - timestamp) / 1000);
-          setTimeLeft(Math.max(0, time - elapsed));
-        } else {
-          setTimeLeft(testData.durationMinutes * 60 || TOTAL_TIME);
-        }
+        // Khởi tạo thời gian mới hoàn toàn mỗi khi vào trang
+        setTimeLeft(testData.durationMinutes * 60 || TOTAL_TIME);
       } catch (err) {
         console.error("Failed to load test:", err);
         toast.error("Failed to load test details");
@@ -211,7 +204,7 @@ export default function TestTakingPage() {
       // 1. Calculate scores
       let correct = 0;
       let globalIdx = 0;
-      const answerRequests: { questionId: string; selected: string; correct: boolean }[] = [];
+      const answerRequests: { questionId: string; selected: string; correct: boolean; isFlagged: boolean }[] = [];
 
       parts.forEach((p) => {
         p.questions.forEach((q) => {
@@ -220,7 +213,8 @@ export default function TestTakingPage() {
             const label = String.fromCharCode(65 + selectedIdx);
             const isCorrect = (selectedIdx === q.correct);
             if (isCorrect) correct++;
-            answerRequests.push({ questionId: q.id, selected: label, correct: isCorrect });
+            const isFlagged = flaggedQuestions.has(globalIdx);
+            answerRequests.push({ questionId: q.id, selected: label, correct: isCorrect, isFlagged });
           }
           globalIdx++;
         });
@@ -246,13 +240,14 @@ export default function TestTakingPage() {
             attemptId: attempt.id,
             questionId: req.questionId,
             selectedOption: req.selected,
-            correct: req.correct
+            correct: req.correct,
+            isFlagged: req.isFlagged
           })
         )
       );
 
       toast.success(t('testSubmitted'));
-      navigate(`/result/${id}`, { state: { score: toeicScore, total: totalQuestions, correct, maxScore: 990 } });
+      navigate(`/result/${id}`, { state: { score: toeicScore, total: totalQuestions, correct, maxScore: 990, attemptId: attempt.id } });
     } catch (err) {
       console.error("Submission failed:", err);
       toast.error(t('errorSubmitting'));

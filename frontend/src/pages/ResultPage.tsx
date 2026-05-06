@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { Trophy, CheckCircle, XCircle, Home, RotateCcw, Loader2 } from "lucide-react";
+import { Trophy, CheckCircle, XCircle, Home, RotateCcw, Loader2, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Progress } from "@/components/ui/progress";
@@ -129,6 +129,16 @@ export default function ResultPage() {
 
             <div className="flex flex-col gap-3">
               <Button onClick={() => navigate("/dashboard")} className="w-full gap-2"><Home className="w-4 h-4" />{t('backToDashboard')}</Button>
+              {stateData?.attemptId && (
+                <Button
+                  variant="secondary"
+                  onClick={() => navigate(`/tests/${stateData.attemptId}/review`)}
+                  className="w-full gap-2"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  Review Answers
+                </Button>
+              )}
               <Button variant="outline" onClick={() => navigate(`/tests`)} className="w-full gap-2"><RotateCcw className="w-4 h-4" />{t('takeAnotherTest')}</Button>
             </div>
           </motion.div>

@@ -6,6 +6,7 @@ export interface ToeicAnswerResponse {
   questionId: string;
   selectedOption: string;
   correct: boolean;
+  isFlagged: boolean;
   createdAt: string;
 }
 
@@ -14,6 +15,7 @@ export interface ToeicAnswerRequest {
   questionId: string;
   selectedOption: string;
   correct: boolean;
+  isFlagged: boolean;
 }
 
 export interface PageResponse<T> {

@@ -24,4 +24,6 @@ public class ToeicAnswerRequest {
 
     @NotNull(message = "Correct status is required")
     private Boolean correct;
+
+    private Boolean isFlagged = false;
 }
