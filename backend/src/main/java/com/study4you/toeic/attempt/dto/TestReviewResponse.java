@@ -17,6 +17,7 @@ public class TestReviewResponse {
     private UUID testId;
     private String testTitle;
     private UUID userId;
+    private String audioUrl;
 
     // Score summary
     private Integer toeicScore;

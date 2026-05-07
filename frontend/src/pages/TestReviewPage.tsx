@@ -105,8 +105,18 @@ interface QuestionCardProps {
 }
 
 function QuestionCard({ question }: QuestionCardProps) {
+  const [showTranscript, setShowTranscript] = useState(true);
   const answered = question.userAnswer !== null;
   const isCorrect = question.correct;
+
+  const hasRealOptions = question.options?.some(
+    (opt) => opt.content && opt.content.trim() !== opt.label
+  );
+  const displayedTranscript = question.transcript || (
+    hasRealOptions
+      ? question.options.map(opt => `${opt.label}. ${opt.content}`).join("\n")
+      : null
+  );
 
   const statusBadge = !answered ? (
     <Badge variant="outline" className="gap-1 text-muted-foreground">
@@ -235,12 +245,36 @@ function QuestionCard({ question }: QuestionCardProps) {
         </div>
 
         {/* Transcript */}
-        {question.transcript && (
-          <div className="bg-amber-50/50 border border-amber-200/50 rounded-xl p-4">
-            <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
-              <Info className="w-3 h-3" /> Transcript
+        {displayedTranscript && (
+          <div className="bg-amber-50/40 border border-amber-200/50 rounded-xl p-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest flex items-center gap-1.5">
+                <Volume2 className="w-3.5 h-3.5" /> Transcript
+              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowTranscript(!showTranscript)}
+                className="h-6 text-[10px] font-bold text-amber-700 hover:bg-amber-100 hover:text-amber-800"
+              >
+                {showTranscript ? "Hide" : "Show"}
+              </Button>
+            </div>
+            {showTranscript && (
+              <p className="text-sm text-amber-900 leading-relaxed whitespace-pre-line font-medium">
+                {displayedTranscript}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Fallback placeholder if no transcript and no real options exist for listening questions */}
+        {!displayedTranscript && ["PART_1", "PART_2", "PART_3", "PART_4"].includes(question.partName) && (
+          <div className="bg-amber-50/20 border border-dashed border-amber-200/60 rounded-xl p-4 text-center mt-2">
+            <p className="text-xs text-amber-800/80 font-medium flex items-center justify-center gap-1.5">
+              <Info className="w-4 h-4 text-amber-500/80 shrink-0" />
+              No transcript available for this question. (Dữ liệu kịch bản trống trong Cơ sở dữ liệu)
             </p>
-            <p className="text-sm text-amber-900 leading-relaxed whitespace-pre-line">{question.transcript}</p>
           </div>
         )}
 
@@ -309,10 +343,10 @@ export default function TestReviewPage() {
     setCurrentIndex(Math.max(0, Math.min(idx, questions.length - 1)));
 
   return (
-    <div className="min-h-screen bg-muted/30 flex flex-col">
+    <div className="w-full bg-muted/30 flex flex-col">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 bg-card border-b border-border shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-20 bg-card border-b border-border shadow-sm">
+        <div className="w-full px-6 h-14 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
@@ -407,6 +441,26 @@ export default function TestReviewPage() {
 
         {/* ── CENTER: Question content ────────────────────────────────────── */}
         <div className="flex-1 min-w-0 space-y-4">
+          {/* Full Test Audio Player */}
+          {review.audioUrl && (
+            <div className="bg-card border border-border rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="flex items-center gap-3 w-full md:w-auto">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Volume2 className="w-5 h-5 text-primary animate-pulse" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-foreground">Listening Practice Audio</p>
+                  <p className="text-[10px] text-muted-foreground font-medium">Nghe lại toàn bộ bài nghe để luyện tai & đối chiếu đáp án</p>
+                </div>
+              </div>
+              <audio 
+                controls 
+                src={getMediaUrl(review.audioUrl)} 
+                className="w-full md:max-w-md h-9" 
+                controlsList="nodownload" 
+              />
+            </div>
+          )}
           {/* Progress bar (Single mode only) */}
           {viewMode === "single" && currentQ && (
             <div className="bg-card border border-border rounded-xl p-3 mb-2 flex items-center gap-4 shadow-sm">
@@ -514,10 +568,12 @@ export default function TestReviewPage() {
                                 >
                                   {q.questionNumber}
                                   {q.isFlagged && (
-                                    <Flag className={cn(
-                                      "absolute -top-1 -right-1 w-2.5 h-2.5",
-                                      isCurrent ? "text-amber-300 fill-amber-300" : "text-amber-600 fill-amber-600"
-                                    )} />
+                                    <div className={cn(
+                                      "absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center shadow-sm border border-background z-20",
+                                      isCurrent ? "bg-amber-300 text-amber-950" : "bg-amber-500 text-white"
+                                    )}>
+                                      <Flag className="w-2.5 h-2.5 fill-current" />
+                                    </div>
                                   )}
                                 </button>
                               );

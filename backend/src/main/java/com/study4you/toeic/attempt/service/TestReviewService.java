@@ -101,6 +101,7 @@ public class TestReviewService {
         response.setTestId(attempt.getTestId());
         response.setTestTitle(test.getTitle());
         response.setUserId(attempt.getUserId());
+        response.setAudioUrl(test.getAudioUrl());
         response.setToeicScore(attempt.getToeicScore());
         response.setRawScore((int) correctCount);
         response.setTotalQuestions(totalQuestions);

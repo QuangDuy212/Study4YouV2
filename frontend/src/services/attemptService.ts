@@ -63,6 +63,7 @@ export interface TestReviewResponse {
   testId: string;
   testTitle: string;
   userId: string;
+  audioUrl: string | null;
   toeicScore: number | null;
   rawScore: number;
   totalQuestions: number;

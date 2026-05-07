@@ -365,9 +365,9 @@ export default function TestTakingPage() {
 
 
   return (
-    <div className="min-h-screen bg-muted/30 flex flex-col">
+    <div className="w-full bg-muted/30 flex flex-col">
       {/* Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-50">
+      <header className="bg-card border-b border-border sticky top-0 z-20">
         <div className="flex items-center justify-between px-4 h-14">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="sm" onClick={() => navigate("/tests")} className="gap-1 text-muted-foreground">
