@@ -144,6 +144,7 @@ public class TestReviewService {
         dto.setExplanation(question.getExplanation());
         dto.setCorrect(isCorrect);
         dto.setFlagged(saved != null && Boolean.TRUE.equals(saved.getIsFlagged()));
+        dto.setTranscript(question.getTranscript());
         dto.setPartName(partName);
 
         return dto;

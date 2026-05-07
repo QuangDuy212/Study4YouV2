@@ -15,6 +15,7 @@ import {
   AlertCircle,
   Minus,
   Flag,
+  Volume2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -173,12 +174,25 @@ function QuestionCard({ question }: QuestionCardProps) {
 
         {/* Image */}
         {question.imageUrl && (
-          <div className="rounded-xl overflow-hidden border border-border">
+          <div className="rounded-xl overflow-hidden border border-border bg-muted/10 flex justify-center p-2">
             <img
               src={getMediaUrl(question.imageUrl)}
               alt="Question graphic"
-              className="w-full max-h-72 object-contain bg-muted/20"
+              className="max-w-full max-h-[400px] object-contain rounded-lg shadow-sm"
             />
+          </div>
+        )}
+
+        {/* Audio */}
+        {question.audioUrl && (
+          <div className="bg-primary/5 border border-primary/10 rounded-xl p-3 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+              <Volume2 className="w-4 h-4 text-primary" />
+            </div>
+            <audio controls className="h-8 flex-1">
+              <source src={getMediaUrl(question.audioUrl)} type="audio/mpeg" />
+              Your browser does not support the audio element.
+            </audio>
           </div>
         )}
 
@@ -218,6 +232,16 @@ function QuestionCard({ question }: QuestionCardProps) {
             <strong className="text-emerald-600">{question.correctAnswer}</strong>
           </span>
         </div>
+
+        {/* Transcript */}
+        {question.transcript && (
+          <div className="bg-amber-50/50 border border-amber-200/50 rounded-xl p-4">
+            <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+              <Info className="w-3 h-3" /> Transcript
+            </p>
+            <p className="text-sm text-amber-900 leading-relaxed whitespace-pre-line">{question.transcript}</p>
+          </div>
+        )}
 
         {/* Explanation */}
         {question.explanation && (

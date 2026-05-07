@@ -96,38 +96,37 @@ public class AiService {
     // ─────────────────────────────────────────────────────────────────────────
 
     public List<GeneratedQuestionResponse> generateReadingQuestions(
-            String part, String difficulty, int count, String topic) {
+            String part, String difficulty, int count, String topic, String context) {
 
         validatePart(part);
         validateDifficulty(difficulty);
 
-        if (geminiClient.isAvailable()) {
-            try {
-                String prompt = buildQuestionPrompt(part, difficulty, count, topic);
-                String responseBody = geminiClient.generate(prompt, true);
-                String cleanJson = extractJson(responseBody);
-                
-                log.debug("Extracted AI JSON for questions (Part {}): {}", part, cleanJson);
-                
-                com.fasterxml.jackson.databind.JsonNode rootNode = objectMapper.readTree(cleanJson);
-                com.fasterxml.jackson.databind.JsonNode dataNode = rootNode.has("data") ? rootNode.get("data") : rootNode;
-                
-                if (dataNode.isArray()) {
-                    return objectMapper.convertValue(dataNode, 
-                        new com.fasterxml.jackson.core.type.TypeReference<List<GeneratedQuestionResponse>>() {});
-                }
-            } catch (Exception e) {
-                log.error("AI question generation failed (Part {}): {}. Error: {}", part, e.getMessage(), e.getClass().getSimpleName());
+        if (!geminiClient.isAvailable()) {
+            throw new RuntimeException("AI service is not available. Please configure a valid API key.");
+        }
+
+        try {
+            String prompt = buildQuestionPrompt(part, difficulty, count, topic, context);
+            String responseBody = geminiClient.generate(prompt, true);
+            String cleanJson = extractJson(responseBody);
+            
+            log.debug("Extracted AI JSON for questions (Part {}): {}", part, cleanJson);
+            
+            com.fasterxml.jackson.databind.JsonNode rootNode = objectMapper.readTree(cleanJson);
+            com.fasterxml.jackson.databind.JsonNode dataNode = rootNode.has("data") ? rootNode.get("data") : rootNode;
+            
+            if (dataNode.isArray()) {
+                return objectMapper.convertValue(dataNode, 
+                    new com.fasterxml.jackson.core.type.TypeReference<List<GeneratedQuestionResponse>>() {});
             }
+            throw new RuntimeException("AI returned invalid format: expected a JSON array but got: " + dataNode.getNodeType());
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("AI question generation failed (Part {}): {}. Error: {}", part, e.getMessage(), e.getClass().getSimpleName());
+            throw new RuntimeException("AI generation failed: " + e.getMessage(), e);
         }
-
-        List<GeneratedQuestionResponse> result = new ArrayList<>();
-        for (int i = 1; i <= count; i++) {
-            result.add(buildQuestion(part, difficulty, i, topic));
-        }
-        return result;
     }
-
     public List<GeneratedUserResponse> generateUsers(
             int count, UUID defaultRoleId, String status) {
 
@@ -214,9 +213,24 @@ public class AiService {
                 .build();
     }
 
-    private String buildQuestionPrompt(String part, String difficulty, int count, String userTopic) {
+    private String buildQuestionPrompt(String part, String difficulty, int count, String userTopic, String context) {
         String setInstructions = "";
-        if ("PART_6".equals(part)) {
+        String textBlockField = "passage";
+
+        if ("PART_1".equals(part)) {
+            setInstructions = "\n- This is PART_1 (Photographs). Generate a short description of a hypothetical photograph in the 'content' field. " +
+                    "Then generate 4 options (A, B, C, D) describing potential actions or states in that photo. " +
+                    "One option must be correct, and others should be plausible distractors.";
+        } else if ("PART_2".equals(part)) {
+            setInstructions = "\n- This is PART_2 (Question-Response). Generate a short spoken question or statement. " +
+                    "Generate EXACTLY 3 options (A, B, C) instead of 4. The options must be typical spoken responses.";
+        } else if ("PART_3".equals(part) || "PART_4".equals(part)) {
+            String type = "PART_3".equals(part) ? "Conversations" : "Short Talks";
+            textBlockField = "transcript";
+            setInstructions = "\n- This is " + part + " (" + type + "). You MUST generate questions in sets of exactly 3 questions. " +
+                    "CRITICAL: You MUST provide the full conversational text in the 'transcript' field for EVERY set. " +
+                    "DO NOT use 'passage'. DO NOT leave 'transcript' empty. The transcript MUST contain the spoken dialogue with speaker labels.";
+        } else if ("PART_6".equals(part)) {
             setInstructions = "\n- This is PART_6 (Text Completion). You MUST generate sets of 4 questions. " +
                     "Each set of 4 questions MUST share the exact same 'passage' (a professional email, letter, or notice with 4 blanks marked as ____[1], ____[2], etc.). " +
                     "Provide the correct word for each blank as the correctAnswer.";
@@ -224,48 +238,48 @@ public class AiService {
             setInstructions = "\n- This is PART_7 (Reading Comprehension). Generate questions in sets. " +
                     "Each set MUST share a common 'passage' (e.g., an invoice, a press release, or an online chat). " +
                     "Vary question types: main idea, specific detail, inference, and vocabulary-in-context.";
-        } else if ("PART_2".equals(part)) {
-            setInstructions = "\n- This is PART_2 (Question-Response). Generate a short spoken question or statement. " +
-                    "Generate EXACTLY 3 options (A, B, C) instead of 4. The options must be typical spoken responses.";
-        } else if ("PART_3".equals(part) || "PART_4".equals(part)) {
-            String type = "PART_3".equals(part) ? "Conversations" : "Short Talks";
-            setInstructions = "\n- This is " + part + " (" + type + "). You MUST generate questions in sets of exactly 3 questions. " +
-                    "Each set of 3 questions MUST share the exact same 'passage' (the transcript of the " + (type.equals("Conversations") ? "conversation" : "talk") + "). " +
-                    "The passage should be realistic and include speaker labels if it is a conversation.";
         }
 
         String topicContext = (userTopic != null && !userTopic.isBlank()) 
                 ? "Primary Theme: " + userTopic 
                 : "Diverse Business Themes: " + String.join(", ", DOMAINS);
 
+        String textBlockInstruction = textBlockField.equals("transcript")
+                ? "- MANDATORY: The 'transcript' field MUST contain the full dialogue/talk. NEVER leave it empty."
+                : "- MANDATORY: The 'passage' field MUST contain the full reading text. NEVER leave it empty.";
+
+        // Add context instruction if provided
+        String contextInstruction = (context != null && !context.isBlank())
+                ? "\n- MANDATORY: Use the following provided TRANSCRIPT/PASSAGE to generate questions. DO NOT invent new text for the " + textBlockField + " field, use this: \n--- START CONTEXT ---\n" + context + "\n--- END CONTEXT ---\n"
+                : "";
+
         return String.format(
-            "ACT AS: Senior TOEIC Content Developer.\n" +
-            "TASK: Generate exactly %d TOEIC %s questions at %s difficulty level.\n" +
-            "FORMAT: Return ONLY a valid JSON object containing a 'data' array. Ensure all quotes inside text are double-escaped if needed so it is valid JSON.\n" +
-            "GUIDELINES:\n" +
-            "- CRITICAL: Ensure EACH question is completely UNIQUE. DO NOT repeat concepts, names, or vocabulary across questions.\n" +
+            "ACT AS: Expert TOEIC Content Creator.\n" +
+            "TASK: Generate exactly %d TOEIC %s questions. Difficulty: %s.\n" +
+            "OUTPUT FORMAT: Return ONLY a raw JSON object. No conversation, no markdown blocks. Use double quotes for all keys and strings.\n" +
+            "RULES:\n" +
+            "- CRITICAL ANTI-REPETITION: You MUST ensure MAXIMUM DIVERSITY. Every single set MUST have a completely UNIQUE passage/transcript and UNIQUE questions. DO NOT reuse any scenarios, names, or text. Generate completely different situations (e.g. restaurant, office meeting, airport, retail store, etc.).\n" +
             "- %s\n" +
-            "- VOCABULARY: Use common business English (e.g., 'subsidize', 'implementation', 'negotiation').\n" +
-            "- GRAMMAR: Focus on tenses, relative clauses, and multi-part prepositions.\n" +
-            "- DISTRACTORS: Options must be believable. Use different forms of the same word (e.g., success, successful, successfully) for grammar questions.\n" +
-            "- PASSSAGE CONTENT: %s.\n\n" +
+            "- %s\n" +
+            "%s\n" +
+            "%s\n\n" +
             "JSON STRUCTURE:\n" +
             "{\n" +
             "  \"data\": [\n" +
             "    {\n" +
-            "      \"content\": \"Question stem here\",\n" +
-            "      \"passage\": \"Shared text here or null\",\n" +
+            "      \"content\": \"Question text\",\n" +
+            "      \"%s\": \"MUST CONTAIN THE FULL TEXT HERE. DO NOT LEAVE EMPTY!\",\n" +
             "      \"correctAnswer\": \"A\",\n" +
             "      \"options\": [\n" +
-            "        {\"label\": \"A\", \"content\": \"Correct or Distractor\"},\n" +
-            "        {\"label\": \"B\", \"content\": \"Correct or Distractor\"},\n" +
-            "        {\"label\": \"C\", \"content\": \"Correct or Distractor\"}" +
-            ("PART_2".equals(part) ? "\n" : ",\n        {\"label\": \"D\", \"content\": \"Correct or Distractor\"}\n") +
-            "      ]\n" +
+            "        {\"label\": \"A\", \"content\": \"Choice A\"},\n" +
+            "        {\"label\": \"B\", \"content\": \"Choice B\"},\n" +
+            "        {\"label\": \"C\", \"content\": \"Choice C\"}" +
+            ("PART_2".equals(part) ? "" : ",\n        {\"label\": \"D\", \"content\": \"Choice D\"}") +
+            "\n      ]\n" +
             "    }\n" +
             "  ]\n" +
             "}",
-            count, part, difficulty, setInstructions, topicContext
+            count, part, difficulty, setInstructions, topicContext, textBlockInstruction, contextInstruction, textBlockField
         );
     }
 
@@ -281,16 +295,19 @@ public class AiService {
     }
 
     private String extractJson(String text) {
-        if (text == null || text.isBlank()) return "{}";
+        if (text == null || text.isBlank()) return "[]";
         
-        // Try to find the outermost { } or [ ]
-        int startBrace = text.indexOf("{");
-        int startBracket = text.indexOf("[");
+        // Remove markdown code blocks if present
+        String cleaned = text.replaceAll("(?s)```(?:json)?\\s*(.*?)\\s*```", "$1").trim();
+        
+        // Find the outermost [ ] or { }
+        int startBrace = cleaned.indexOf("{");
+        int startBracket = cleaned.indexOf("[");
         
         int start = -1;
         if (startBrace != -1 && (startBracket == -1 || startBrace < startBracket)) {
             start = startBrace;
-        } else {
+        } else if (startBracket != -1) {
             start = startBracket;
         }
 
@@ -314,10 +331,10 @@ public class AiService {
     // ─── Validation ──────────────────────────────────────────────────────────
 
     private void validatePart(String part) {
-        List<String> allowed = List.of("PART_2", "PART_3", "PART_4", "PART_5", "PART_6", "PART_7");
+        List<String> allowed = List.of("PART_1", "PART_2", "PART_3", "PART_4", "PART_5", "PART_6", "PART_7");
         if (!allowed.contains(part)) {
             throw new BadRequestException(
-                    "Only allowed parts: PART_2, PART_3, PART_4, PART_5, PART_6, PART_7. Got: " + part);
+                    "Only allowed parts: PART_1, PART_2, PART_3, PART_4, PART_5, PART_6, PART_7. Got: " + part);
         }
     }
 
@@ -343,12 +360,26 @@ public class AiService {
 
     private GeneratedQuestionResponse buildQuestion(String part, String difficulty, int index, String topic) {
         return switch (part) {
+            case "PART_1" -> buildPart1Question(difficulty, index, topic);
             case "PART_2" -> buildPart2Question(difficulty, index, topic);
             case "PART_3", "PART_4" -> buildPart3Question(difficulty, index, topic);
             case "PART_5" -> buildPart5Question(difficulty, index, topic);
-            case "PART_6" -> buildPart6Question(difficulty, index, topic);
             default       -> buildPart7Question(difficulty, index, topic);
         };
+    }
+
+    private GeneratedQuestionResponse buildPart1Question(String difficulty, int index, String topic) {
+        return GeneratedQuestionResponse.builder()
+                .content("A man is working at his desk.")
+                .passage("Describe the photograph.")
+                .correctAnswer("A")
+                .options(new java.util.ArrayList<>(List.of(
+                    OptionDto.builder().label("A").content("A man is working at his desk.").build(),
+                    OptionDto.builder().label("B").content("A man is eating in a restaurant.").build(),
+                    OptionDto.builder().label("C").content("A man is running in the park.").build(),
+                    OptionDto.builder().label("D").content("A man is sleeping on the sofa.").build()
+                )))
+                .build();
     }
 
     private GeneratedQuestionResponse buildPart3Question(String difficulty, int index, String topic) {

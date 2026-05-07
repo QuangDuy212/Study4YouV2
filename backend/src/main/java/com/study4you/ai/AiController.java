@@ -38,7 +38,8 @@ public class AiController {
                         request.getPart(),
                         request.getDifficulty(),
                         request.getCount(),
-                        request.getTopic()
+                        request.getTopic(),
+                        request.getContext()
                 )
         );
     }

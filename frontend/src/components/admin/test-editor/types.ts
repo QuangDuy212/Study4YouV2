@@ -14,6 +14,7 @@ export interface TestQuestion {
   audioUrl: string | null;
   imageUrl: string | null;
   passage: string | null;
+  transcript: string | null;
   correctAnswer: "A" | "B" | "C" | "D";
   options: TestOption[];
 }
@@ -80,6 +81,7 @@ export function createEmptyQuestion(partType?: PartType): TestQuestion {
     audioUrl: null,
     imageUrl: null,
     passage: null,
+    transcript: null,
     correctAnswer: "A",
     options: labels.map(label => ({ 
       label, 

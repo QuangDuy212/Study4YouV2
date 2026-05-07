@@ -15,6 +15,7 @@ public class GeneratedQuestionResponse {
 
     private String content;
     private String passage; // null for PART_5
+    private String transcript; // Dành cho các phần Nghe (Part 3, 4)
     private String correctAnswer;
     private List<OptionDto> options;
 

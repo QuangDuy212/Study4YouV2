@@ -48,6 +48,9 @@ public class ToeicQuestion extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String explanation;
 
+    @Column(columnDefinition = "TEXT")
+    private String transcript;
+
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ToeicOption> options;
 }

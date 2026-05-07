@@ -79,11 +79,31 @@ public class GeminiClient { // Giữ nguyên tên để file khác khỏi lỗi
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();
 
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = null;
+            int maxRetries = 4;
+            int retryCount = 0;
+            int delayMs = 3000; // Bắt đầu chờ 3 giây nếu gặp 429
 
-            if (response.statusCode() != 200) {
-                log.error("OpenRouter Error: {}", response.body());
-                throw new RuntimeException("HTTP " + response.statusCode() + " từ OpenRouter Server: " + response.body());
+            while (retryCount < maxRetries) {
+                response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() == 429) {
+                    retryCount++;
+                    if (retryCount >= maxRetries) {
+                        break;
+                    }
+                    log.warn("Rate limit (429) hit từ Groq. Thử lại sau {}ms... (Lần {}/{})", delayMs, retryCount, maxRetries);
+                    Thread.sleep(delayMs);
+                    delayMs *= 2; // Tăng gấp đôi thời gian chờ cho lần sau (Backoff)
+                    continue;
+                }
+                break;
+            }
+
+            if (response == null || response.statusCode() != 200) {
+                int statusCode = response != null ? response.statusCode() : 500;
+                String errorBody = response != null ? response.body() : "No response body";
+                log.error("Groq Error (HTTP {}): {}", statusCode, errorBody);
+                throw new RuntimeException("HTTP " + statusCode + " từ Groq Server: " + errorBody);
             }
 
             JsonNode root = objectMapper.readTree(response.body());

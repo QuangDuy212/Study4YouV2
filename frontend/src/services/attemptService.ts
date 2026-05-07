@@ -52,6 +52,7 @@ export interface ReviewQuestion {
   userAnswer: string | null;
   correctAnswer: string;
   explanation: string | null;
+  transcript: string | null;
   correct: boolean;
   partName: string;
 }

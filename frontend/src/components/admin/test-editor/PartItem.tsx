@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TestPart, PartType } from "./types";
 import { PART_LABELS, READING_PARTS, LISTENING_PARTS, createEmptyQuestion, PART_QUESTION_LIMITS } from "./types";
+import { toast } from "sonner";
+import aiService from "@/services/aiService";
 import QuestionEditor from "./QuestionEditor";
 import ListeningMediaUploader from "./ListeningMediaUploader";
 
@@ -122,7 +124,7 @@ export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: Pa
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="p-4 pt-0 space-y-3 border-t border-border">
+            <div className="p-6 pt-6 space-y-4 border-t border-border">
 
 
               {/* Questions */}
@@ -150,6 +152,53 @@ export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: Pa
                                 {t('set')} {gIdx + 1} ({group.length} {t('questions')})
                              </Badge>
                              <div className="flex items-center gap-2">
+                               <Button 
+                                 variant="outline" 
+                                 size="sm" 
+                                 className="h-7 text-[10px] text-primary border-primary/20 bg-primary/5 hover:bg-primary/10"
+                                 onClick={async () => {
+                                   const passageText = isListening ? group[0]?.transcript : group[0]?.passage;
+                                   const toastId = toast.loading(
+                                     passageText 
+                                       ? "AI is generating questions based on your transcript..." 
+                                       : "AI is creating a new transcript/passage and questions for this set..."
+                                   );
+                                   
+                                   try {
+                                     // Gọi API tạo đề, truyền passageText hiện tại (nếu có, nếu không để trống để AI tự sinh mới)
+                                     const data = await aiService.generateQuestions(part.type, "MEDIUM", group.length, "", passageText || "");
+                                     const startIndex = gIdx * setSize;
+                                     const updatedQuestions = [...part.questions];
+                                     
+                                     // Trích xuất Transcript/Passage tự sinh từ AI phản hồi
+                                     let generatedText = "";
+                                     if (Array.isArray(data) && data.length > 0) {
+                                       const firstQ = data[0];
+                                       generatedText = firstQ.transcript || firstQ.conversation || firstQ.passage || firstQ.reading_text || firstQ.text || firstQ.dialogue || firstQ.audio_text || "";
+                                     }
+                                     const finalContextText = passageText || generatedText;
+
+                                     (data || []).slice(0, group.length).forEach((newQ: any, i: number) => {
+                                       if (updatedQuestions[startIndex + i]) {
+                                         updatedQuestions[startIndex + i] = {
+                                           ...updatedQuestions[startIndex + i],
+                                           content: newQ.content,
+                                           correctAnswer: newQ.correctAnswer,
+                                           options: newQ.options.map((o: any) => ({ label: o.label, content: o.content })),
+                                           transcript: isListening ? finalContextText : null,
+                                           passage: !isListening ? finalContextText : null,
+                                         };
+                                       }
+                                     });
+                                     onChange({ ...part, questions: updatedQuestions });
+                                     toast.success("Set generated successfully!", { id: toastId });
+                                   } catch (err) {
+                                     toast.error("Failed to generate questions", { id: toastId });
+                                   }
+                                 }}
+                               >
+                                 <Sparkles className="w-3 h-3 mr-1" /> {t('aiGenerate') || "AI Generate"}
+                               </Button>
                                <Button 
                                 variant="ghost" 
                                 size="sm" 
@@ -179,13 +228,17 @@ export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: Pa
                                   isListening ? "font-sans" : "font-serif italic"
                                 )}
                                 placeholder={isListening ? t('enterSharedTranscript') : t('enterSharedPassage')}
-                                value={group[0]?.passage || ""}
+                                value={isListening ? (group[0]?.transcript || "") : (group[0]?.passage || "")}
                                 onChange={(e) => {
-                                  const newPassage = e.target.value;
+                                  const newText = e.target.value;
                                   const startIndex = gIdx * setSize;
                                   const updatedQuestions = [...part.questions];
                                   for (let i = startIndex; i < startIndex + group.length; i++) {
-                                    updatedQuestions[i] = { ...updatedQuestions[i], passage: newPassage };
+                                    if (isListening) {
+                                      updatedQuestions[i] = { ...updatedQuestions[i], transcript: newText };
+                                    } else {
+                                      updatedQuestions[i] = { ...updatedQuestions[i], passage: newText };
+                                    }
                                   }
                                   onChange({ ...part, questions: updatedQuestions });
                                 }}
@@ -215,7 +268,7 @@ export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: Pa
 
                     // Default view for other parts
                     return (
-                      <div className="space-y-3">
+                      <div className="space-y-4 mt-4">
                         {part.questions.map((q, qi) => (
                           <QuestionEditor
                             key={q.id}
@@ -246,7 +299,7 @@ export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: Pa
                     size="sm" 
                     onClick={addQuestion}
                     disabled={isLimitReached}
-                    className="bg-primary/5 border-primary/20 hover:bg-primary/10 text-primary disabled:opacity-50"
+                    className="bg-primary/5 border-primary/20 hover:bg-primary/10 hover:text-primary text-primary disabled:opacity-50 transition-colors"
                   >
                     <Plus className="w-3.5 h-3.5 mr-1.5" /> {t("addQuestion")}
                   </Button>
@@ -255,16 +308,16 @@ export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: Pa
                     size="sm" 
                     onClick={autoFillMissing}
                     disabled={isLimitReached}
-                    className="border-primary/20 text-primary hover:bg-primary/5 disabled:opacity-50"
+                    className="border-primary/20 text-primary hover:bg-primary/10 hover:text-primary disabled:opacity-50 transition-colors"
                   >
                     <Sparkles className="w-3.5 h-3.5 mr-1.5" /> Quick Fill ({limit - part.questions.length})
                   </Button>
-                  {part.type !== "PART_1" && (
+                  {!["PART_1", "PART_2"].includes(part.type) && (
                     <Button
                       variant="outline"
                       size="sm"
                       disabled={isLimitReached}
-                      className="border-primary/30 text-primary hover:bg-primary/5 disabled:opacity-50"
+                      className="border-primary/30 text-primary hover:bg-primary/10 hover:text-primary disabled:opacity-50 transition-colors"
                       onClick={() => onOpenAIPanel(part.type)}
                     >
                       <Sparkles className="w-3.5 h-3.5 mr-1.5" /> {t("generateWithAI")}

@@ -86,6 +86,33 @@ export default function TestEditorPage() {
 
   const handleSave = useCallback(async () => {
     if (!testData.name.trim()) { toast.error(t("pleaseEnterTestName")); return; }
+    
+    // Validate question counts for each part
+    const EXPECTED_COUNTS: Record<PartType, number> = {
+      "PART_1": 6, "PART_2": 25, "PART_3": 39, "PART_4": 30,
+      "PART_5": 30, "PART_6": 16, "PART_7": 54
+    };
+
+    const errors: string[] = [];
+    testData.parts.forEach(p => {
+      const current = p.questions.length;
+      const expected = EXPECTED_COUNTS[p.type];
+      if (current !== expected) {
+        errors.push(`${getPartLabel(p.type)} needs ${expected} questions (Current: ${current})`);
+      }
+    });
+
+    if (errors.length > 0) {
+      toast.error("Incomplete Test Data", {
+        description: (
+          <ul className="list-disc pl-4 mt-2 space-y-1 text-xs">
+            {errors.map((err, i) => <li key={i}>{err}</li>)}
+          </ul>
+        )
+      });
+      return;
+    }
+
     setIsSaving(true);
     try {
       let testId = id;
@@ -128,6 +155,7 @@ export default function TestEditorPage() {
               audioUrl: q.audioUrl,
               imageUrl: q.imageUrl,
               passage: q.passage,
+              transcript: q.transcript,
               correctAnswer: q.correctAnswer,
               options: q.options.map(o => ({ label: o.label, content: o.content }))
             };

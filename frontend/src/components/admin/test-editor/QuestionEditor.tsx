@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Trash2, GripVertical, Check, Image as ImageIcon, Loader2 } from "lucide-react";
+import { Trash2, GripVertical, Check, Image as ImageIcon, Loader2, Headphones } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -55,7 +55,7 @@ export default function QuestionEditor({
       <div className="flex items-start justify-between gap-2">
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="flex items-start gap-2 text-left flex-1 min-w-0"
+          className="flex items-start gap-4 text-left flex-1 min-w-0"
         >
           <div className="pt-0.5 shrink-0"><GripVertical className="w-4 h-4 text-muted-foreground" /></div>
           <Badge variant="outline" className="shrink-0">Q{PART_START_INDEX[partType] + index}</Badge>
@@ -161,8 +161,24 @@ export default function QuestionEditor({
             </div>
           )}
 
+          {/* Transcript for Listening Parts */}
+          {isListening && !hidePassageField && (
+            <div className="space-y-2 pt-4 border-t border-border/50 mt-4">
+              <Label className="flex items-center gap-2">
+                <Headphones className="w-4 h-4 text-primary" />
+                {t("transcript") || "Transcript"}
+              </Label>
+              <Textarea
+                placeholder={t("transcriptPlaceholder") || "Enter listening transcript..."}
+                className="min-h-[100px] font-sans text-sm italic bg-primary/5 border-primary/10"
+                value={question.transcript || ""}
+                onChange={(e) => onChange({ ...question, transcript: e.target.value })}
+              />
+            </div>
+          )}
+
           {/* Question content */}
-          <div className="space-y-2">
+          <div className="space-y-2 pt-4 border-t border-border/50">
             <Label>{t("questionLabel")}</Label>
             <Textarea
               placeholder={

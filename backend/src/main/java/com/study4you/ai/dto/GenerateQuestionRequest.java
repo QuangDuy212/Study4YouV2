@@ -19,4 +19,5 @@ public class GenerateQuestionRequest {
     private int count;
 
     private String topic; // Optional: "Travel", "Environment", "Technology", etc.
+    private String context; // Optional: Transcript or passage to generate questions from
 }

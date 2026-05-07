@@ -25,5 +25,6 @@ public class ReviewQuestionDTO {
     private boolean correct;
     @JsonProperty("isFlagged")
     private boolean flagged;
+    private String transcript;
     private String partName;
 }
