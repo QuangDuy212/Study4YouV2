@@ -27,6 +27,8 @@ public class ToeicQuestionRequest {
 
     private String passage;
 
+    private String transcript;
+
     @NotBlank(message = "Correct answer is required")
     @Size(max = 1, message = "Correct answer must be a single character")
     private String correctAnswer;

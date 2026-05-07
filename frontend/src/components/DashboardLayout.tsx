@@ -80,28 +80,42 @@ export default function DashboardLayout() {
   }
 
   const sidebarNavContent = (
-    <>
-      <div className="h-16 flex items-center px-4 border-b border-border flex-shrink-0">
-        <Link to="/" className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
-            <span className="text-primary-foreground font-bold text-lg">S</span>
-          </div>
-          <AnimatePresence>
-            {(!collapsed || isMobile) && (
-              <motion.div
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: "auto" }}
-                exit={{ opacity: 0, width: 0 }}
-                transition={{ duration: 0.2 }}
-                className="overflow-hidden"
+    <div className="flex flex-col h-full bg-card">
+      <div className={cn(
+        "h-16 flex items-center border-b border-border flex-shrink-0 px-4",
+        (collapsed && !isMobile) ? "justify-center" : "justify-between"
+      )}>
+        {(collapsed && !isMobile) ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setCollapsed(false)}
+            className="w-10 h-10 rounded-xl hover:bg-muted/50 text-foreground transition-all duration-200"
+          >
+            <Menu className="w-5 h-5 text-foreground" />
+          </Button>
+        ) : (
+          <>
+            <Link to="/" className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
+                <span className="text-primary-foreground font-bold text-lg">S</span>
+              </div>
+              <span className="font-display font-bold text-lg text-foreground whitespace-nowrap">
+                Study4You
+              </span>
+            </Link>
+            {!isMobile && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setCollapsed(true)}
+                className="w-8 h-8 rounded-lg hover:bg-muted/50 text-foreground transition-all duration-200"
               >
-                <span className="font-display font-bold text-lg text-foreground whitespace-nowrap">
-                  Study4You
-                </span>
-              </motion.div>
+                <Menu className="w-5 h-5 text-foreground" />
+              </Button>
             )}
-          </AnimatePresence>
-        </Link>
+          </>
+        )}
       </div>
 
       <nav className="flex-1 py-6 px-3 overflow-y-auto">
@@ -152,26 +166,7 @@ export default function DashboardLayout() {
         </div>
       )}
 
-      {!isMobile && (
-        <div className="p-3 border-t border-border flex-shrink-0">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setCollapsed(!collapsed)}
-            className="w-full justify-center"
-          >
-            {collapsed ? (
-              <ChevronRight className="w-5 h-5" />
-            ) : (
-              <>
-                <ChevronLeft className="w-5 h-5 mr-2" />
-                <span>{t("collapse")}</span>
-              </>
-            )}
-          </Button>
-        </div>
-      )}
-    </>
+    </div>
   );
 
   return (

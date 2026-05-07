@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Plus, Trash2, Headphones, BookOpen, Sparkles } from "lucide-react";
+import { ChevronDown, Plus, Trash2, Headphones, BookOpen, Sparkles, GripVertical, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -17,16 +17,88 @@ interface PartItemProps {
   onChange: (part: TestPart) => void;
   onDelete: () => void;
   onOpenAIPanel: (partType: PartType) => void;
+  expanded: boolean;
+  onToggle: () => void;
 }
 
-export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: PartItemProps) {
+export default function PartItem({ part, onChange, onDelete, onOpenAIPanel, expanded, onToggle }: PartItemProps) {
   const { t } = useLanguage();
-  const [expanded, setExpanded] = useState(false);
   const info = PART_LABELS[part.type];
   const isReading = READING_PARTS.includes(part.type);
   const isListening = LISTENING_PARTS.includes(part.type);
   const limit = PART_QUESTION_LIMITS[part.type];
   const isLimitReached = part.questions.length >= limit;
+
+  const [expandedQuestionIndex, setExpandedQuestionIndex] = useState<number | null>(null);
+
+  const renderQuestionItem = (q: typeof part.questions[0], absoluteIdx: number, isGrouped = false) => {
+    const isExpanded = expandedQuestionIndex === absoluteIdx;
+
+    if (isExpanded) {
+      return (
+        <div key={q.id} className="border border-border/80 rounded-xl bg-card p-4 space-y-3 shadow-sm">
+          <div className="flex items-center justify-between border-b border-border/40 pb-2 mb-2">
+            <span className="text-xs font-bold px-2 py-0.5 rounded bg-primary/10 text-primary">
+              Editing Q{absoluteIdx + 1}
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs text-muted-foreground hover:text-foreground"
+              onClick={() => setExpandedQuestionIndex(null)}
+            >
+              Collapse
+            </Button>
+          </div>
+          <QuestionEditor
+            question={q}
+            index={absoluteIdx}
+            partType={part.type}
+            onChange={(updated) => updateQuestion(absoluteIdx, updated)}
+            onDelete={() => {
+              deleteQuestion(absoluteIdx);
+              setExpandedQuestionIndex(null);
+            }}
+            hidePassageField={isGrouped}
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div
+        key={q.id}
+        onClick={() => setExpandedQuestionIndex(absoluteIdx)}
+        className="p-4 rounded-xl border border-border/80 flex items-center justify-between bg-card hover:bg-muted/30 cursor-pointer shadow-sm transition-all duration-200 group"
+      >
+        <div className="flex items-center gap-3 min-w-0">
+          <GripVertical className="w-4 h-4 text-muted-foreground/60 mr-1 flex-shrink-0" />
+          <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-secondary text-secondary-foreground whitespace-nowrap">
+            Q{absoluteIdx + 1}
+          </span>
+          <span className="text-sm text-foreground/80 font-medium truncate pr-4">
+            {q.content || "Mark your answer on your answer sheet."}
+          </span>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <Badge className="bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 border-emerald-200/60 font-semibold gap-1 text-xs px-2.5 py-1">
+            <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" /> {q.correctAnswer || "A"}
+          </Badge>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="w-8 h-8 rounded-lg text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
+            onClick={(e) => {
+              e.stopPropagation();
+              deleteQuestion(absoluteIdx);
+            }}
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    );
+  };
 
   const addQuestion = () => {
     if (isLimitReached) return;
@@ -41,7 +113,7 @@ export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: Pa
       onChange({ ...part, questions: [...part.questions, createEmptyQuestion(part.type)] });
     }
     
-    if (!expanded) setExpanded(true);
+    if (!expanded) onToggle();
   };
 
   const autoFillMissing = () => {
@@ -60,7 +132,7 @@ export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: Pa
       newQuestions = Array.from({ length: remaining }, () => createEmptyQuestion(part.type));
     }
     onChange({ ...part, questions: [...part.questions, ...newQuestions] });
-    if (!expanded) setExpanded(true);
+    if (!expanded) onToggle();
   };
 
   const updateQuestion = (index: number, q: typeof part.questions[0]) => {
@@ -74,11 +146,14 @@ export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: Pa
   };
 
   return (
-    <div className="rounded-xl border border-border bg-card overflow-hidden">
+    <div className="rounded-xl border border-border bg-card">
       {/* Part Header */}
       <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between p-4 hover:bg-muted/30 transition-colors"
+        onClick={onToggle}
+        className={cn(
+          "w-full flex items-center justify-between p-4 hover:bg-muted/30 transition-colors sticky top-14 sm:top-16 z-20 bg-card rounded-t-xl",
+          expanded && "border-b border-border/80 shadow-sm"
+        )}
       >
         <div className="flex items-center gap-3">
           <div className={cn(
@@ -228,7 +303,11 @@ export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: Pa
                                   isListening ? "font-sans" : "font-serif italic"
                                 )}
                                 placeholder={isListening ? t('enterSharedTranscript') : t('enterSharedPassage')}
-                                value={isListening ? (group[0]?.transcript || "") : (group[0]?.passage || "")}
+                                value={
+                                  isListening 
+                                    ? (group.find(q => q.transcript)?.transcript || group[0]?.transcript || "") 
+                                    : (group.find(q => q.passage)?.passage || group[0]?.passage || "")
+                                }
                                 onChange={(e) => {
                                   const newText = e.target.value;
                                   const startIndex = gIdx * setSize;
@@ -249,17 +328,7 @@ export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: Pa
                           <div className="space-y-3">
                             {group.map((q, qi) => {
                               const absoluteIdx = gIdx * setSize + qi;
-                              return (
-                                <QuestionEditor
-                                  key={q.id}
-                                  question={q}
-                                  index={absoluteIdx}
-                                  partType={part.type}
-                                  onChange={(updated) => updateQuestion(absoluteIdx, updated)}
-                                  onDelete={() => deleteQuestion(absoluteIdx)}
-                                  hidePassageField // Hide the redundant passage field inside QuestionEditor
-                                />
-                              );
+                              return renderQuestionItem(q, absoluteIdx, true);
                             })}
                           </div>
                         </div>
@@ -268,17 +337,8 @@ export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: Pa
 
                     // Default view for other parts
                     return (
-                      <div className="space-y-4 mt-4">
-                        {part.questions.map((q, qi) => (
-                          <QuestionEditor
-                            key={q.id}
-                            question={q}
-                            index={qi}
-                            partType={part.type}
-                            onChange={(updated) => updateQuestion(qi, updated)}
-                            onDelete={() => deleteQuestion(qi)}
-                          />
-                        ))}
+                      <div className="space-y-3 mt-4">
+                        {part.questions.map((q, qi) => renderQuestionItem(q, qi, false))}
                       </div>
                     );
                   })()}
@@ -294,35 +354,39 @@ export default function PartItem({ part, onChange, onDelete, onOpenAIPanel }: Pa
                   </div>
                 )}
                 <div className="flex items-center gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={addQuestion}
-                    disabled={isLimitReached}
-                    className="bg-primary/5 border-primary/20 hover:bg-primary/10 hover:text-primary text-primary disabled:opacity-50 transition-colors"
-                  >
-                    <Plus className="w-3.5 h-3.5 mr-1.5" /> {t("addQuestion")}
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={autoFillMissing}
-                    disabled={isLimitReached}
-                    className="border-primary/20 text-primary hover:bg-primary/10 hover:text-primary disabled:opacity-50 transition-colors"
-                  >
-                    <Sparkles className="w-3.5 h-3.5 mr-1.5" /> Quick Fill ({limit - part.questions.length})
-                  </Button>
-                  {!["PART_1", "PART_2"].includes(part.type) && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={isLimitReached}
-                      className="border-primary/30 text-primary hover:bg-primary/10 hover:text-primary disabled:opacity-50 transition-colors"
-                      onClick={() => onOpenAIPanel(part.type)}
-                    >
-                      <Sparkles className="w-3.5 h-3.5 mr-1.5" /> {t("generateWithAI")}
-                    </Button>
-                  )}
+                  <div className="flex items-center justify-between w-full border-t border-border/50 pt-4 mt-4">
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={addQuestion}
+                        disabled={isLimitReached}
+                        className="bg-primary/5 border-primary/20 hover:bg-primary/10 hover:text-primary text-primary disabled:opacity-50 transition-colors"
+                      >
+                        <Plus className="w-3.5 h-3.5 mr-1.5" /> {t("addQuestion")}
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={autoFillMissing}
+                        disabled={isLimitReached}
+                        className="border-primary/20 text-primary hover:bg-primary/10 hover:text-primary disabled:opacity-50 transition-colors"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 mr-1.5" /> {t('quickFill', { count: limit - part.questions.length })}
+                      </Button>
+                      {!["PART_1", "PART_2"].includes(part.type) && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={isLimitReached}
+                          className="border-primary/30 text-primary hover:bg-primary/10 hover:text-primary disabled:opacity-50 transition-colors"
+                          onClick={() => onOpenAIPanel(part.type)}
+                        >
+                          <Sparkles className="w-3.5 h-3.5 mr-1.5" /> {t("generateWithAI")}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

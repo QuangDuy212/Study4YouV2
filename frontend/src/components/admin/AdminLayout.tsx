@@ -104,27 +104,39 @@ export default function AdminLayout() {
 
   const sidebarNavContent = (
     <div className="flex flex-col h-full bg-card">
-      <div className="h-16 flex items-center px-4 border-b border-border flex-shrink-0">
-        <Link to="/admin" className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
-            <span className="text-primary-foreground font-bold text-lg">S</span>
-          </div>
-          <AnimatePresence>
-            {(!collapsed || !isDesktop) && (
-              <motion.div
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: "auto" }}
-                exit={{ opacity: 0, width: 0 }}
-                transition={{ duration: 0.2 }}
-                className="overflow-hidden"
-              >
-                <span className="font-display font-bold text-lg text-foreground whitespace-nowrap">
-                  Study4You
-                </span>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </Link>
+      <div className={cn(
+        "h-16 flex items-center border-b border-border flex-shrink-0 px-4",
+        collapsed ? "justify-center" : "justify-between"
+      )}>
+        {collapsed ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setCollapsed(false)}
+            className="w-10 h-10 rounded-xl hover:bg-muted/50 text-foreground transition-all duration-200"
+          >
+            <Menu className="w-5 h-5 text-foreground" />
+          </Button>
+        ) : (
+          <>
+            <Link to="/admin" className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
+                <span className="text-primary-foreground font-bold text-lg">S</span>
+              </div>
+              <span className="font-display font-bold text-lg text-foreground whitespace-nowrap">
+                Study4You
+              </span>
+            </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setCollapsed(true)}
+              className="w-8 h-8 rounded-lg hover:bg-muted/50 text-foreground transition-all duration-200"
+            >
+              <Menu className="w-5 h-5 text-foreground" />
+            </Button>
+          </>
+        )}
       </div>
 
       <nav className="flex-1 py-6 px-3 overflow-y-auto">
@@ -180,32 +192,14 @@ export default function AdminLayout() {
         </Link>
       </div>
 
-      {isDesktop && (
-        <div className="p-3 border-t border-border flex-shrink-0">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setCollapsed(!collapsed)}
-            className="w-full justify-center"
-          >
-            {collapsed ? (
-              <ChevronRight className="w-5 h-5" />
-            ) : (
-              <>
-                <ChevronLeft className="w-5 h-5 mr-2" />
-                <span>{t("collapse")}</span>
-              </>
-            )}
-          </Button>
-        </div>
-      )}
+
     </div>
   );
 
   if (!isMounted) return null;
 
   return (
-    <div className="min-h-screen bg-background flex overflow-x-hidden">
+    <div className="min-h-screen bg-background flex">
       {/* Sidebar - only show on desktop */}
       <div className="hidden lg:block">
         <motion.aside
@@ -289,7 +283,7 @@ export default function AdminLayout() {
           </div>
         </header>
 
-        <main className="flex-1 p-2 sm:p-6 overflow-x-hidden">
+        <main className="flex-1 p-2 sm:p-6">
           <Outlet />
         </main>
       </motion.div>

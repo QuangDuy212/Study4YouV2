@@ -20,6 +20,7 @@ public class ToeicQuestionResponse {
     private String audioUrl;
     private String imageUrl;
     private String passage;
+    private String transcript;
     private String correctAnswer;
     private Level level;
     private LocalDateTime createdAt;

@@ -105,7 +105,10 @@ export default function AIGeneratorPanel({ open, initialPart, currentParts, onCl
             { label: "C", content: match[4].trim() },
             { label: "D", content: match[5].trim() },
           ],
-          passage: null
+          passage: null,
+          audioUrl: null,
+          imageUrl: null,
+          transcript: null
         });
       }
 
@@ -268,7 +271,7 @@ export default function AIGeneratorPanel({ open, initialPart, currentParts, onCl
               mode === "ai" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
             )}
           >
-            AIGenerate
+            {t('aiGenerate')}
           </button>
           <button 
             onClick={() => setMode("quick")}
@@ -277,7 +280,7 @@ export default function AIGeneratorPanel({ open, initialPart, currentParts, onCl
               mode === "quick" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
             )}
           >
-            QuickParse
+            {t('quickParse')}
           </button>
         </div>
       </div>

@@ -13,7 +13,7 @@ import PartManager from "@/components/admin/test-editor/PartManager";
 import AIGeneratorPanel from "@/components/admin/test-editor/AIGeneratorPanel";
 import TestSidebar from "@/components/admin/test-editor/TestSidebar";
 import type { TestData, PartType, TestQuestion, Difficulty } from "@/components/admin/test-editor/types";
-import { getDefaultParts } from "@/components/admin/test-editor/types";
+import { getDefaultParts, PART_LABELS } from "@/components/admin/test-editor/types";
 
 export default function TestEditorPage() {
   const { id } = useParams<{ id: string }>();
@@ -30,6 +30,7 @@ export default function TestEditorPage() {
   const [aiPanelPart, setAiPanelPart] = useState<PartType>("PART_5");
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(!isCreate);
+  const [expandedPartId, setExpandedPartId] = useState<string | null>(null);
 
   useEffect(() => {
     if (isCreate) return;
@@ -52,6 +53,7 @@ export default function TestEditorPage() {
               audioUrl: q.audioUrl,
               imageUrl: q.imageUrl,
               passage: q.passage,
+              transcript: q.transcript || null,
               correctAnswer: q.correctAnswer as any,
               options: (q.options || []).map(o => ({ label: o.label as any, content: o.content }))
             }))
@@ -98,7 +100,7 @@ export default function TestEditorPage() {
       const current = p.questions.length;
       const expected = EXPECTED_COUNTS[p.type];
       if (current !== expected) {
-        errors.push(`${getPartLabel(p.type)} needs ${expected} questions (Current: ${current})`);
+        errors.push(`${t(PART_LABELS[p.type].labelKey)} needs ${expected} questions (Current: ${current})`);
       }
     });
 
@@ -143,12 +145,18 @@ export default function TestEditorPage() {
       for (const frontendPart of testData.parts) {
         const matchingPart = backendParts.find(p => p.part === frontendPart.type);
         if (matchingPart) {
+          const existingQuestions = matchingPart.questions || [];
+          const existingQIds = existingQuestions.map(eq => eq.id);
+          const frontendQIds = frontendPart.questions.map(fq => fq.id).filter(Boolean);
 
-          // For each question in frontendPart, save it to matchingPart.id
+          // 1. Delete questions that were removed in the frontend editor
+          const deletedQIds = existingQIds.filter(id => !frontendQIds.includes(id));
+          for (const delId of deletedQIds) {
+            await questionService.deleteQuestion(delId);
+          }
+
+          // 2. Create or Update questions
           for (const q of frontendPart.questions) {
-            // Check if question exists (has a UUID that might be from backend)
-            const isNew = !q.id || q.id.length < 30; // Simple heuristic for crypto.randomUUID vs DB ID if not careful
-            // Actually, we should probably just save all.
             const qReq = {
               partId: matchingPart.id,
               content: q.content,
@@ -159,11 +167,15 @@ export default function TestEditorPage() {
               correctAnswer: q.correctAnswer,
               options: q.options.map(o => ({ label: o.label, content: o.content }))
             };
-            
-            // If we are editing, we might be duplicate-creating questions here.
-            // Ideally we'd have a bulk sync. For this refactor, we'll assume it's a "save all" action.
-            // WARNING: This is a placeholder for better sync logic.
-            await questionService.createQuestion(qReq);
+
+            const existsInBackend = q.id && existingQIds.includes(q.id);
+            if (existsInBackend) {
+              // Update existing question
+              await questionService.updateQuestion(q.id, qReq);
+            } else {
+              // Create brand new question
+              await questionService.createQuestion(qReq);
+            }
           }
         }
       }
@@ -203,10 +215,23 @@ export default function TestEditorPage() {
       <div className="flex flex-col xl:flex-row gap-6 items-start">
         <div className="flex-1 min-w-0 w-full space-y-6">
           <TestInfoSection data={testData} onChange={updateTestData} />
-          <PartManager parts={testData.parts} onChange={(parts) => updateTestData({ parts })} onOpenAIPanel={openAIPanel} />
+          <PartManager 
+            parts={testData.parts} 
+            onChange={(parts) => updateTestData({ parts })} 
+            onOpenAIPanel={openAIPanel} 
+            expandedPartId={expandedPartId}
+            onTogglePart={(id) => setExpandedPartId(prev => prev === id ? null : id)}
+          />
         </div>
         <div className="w-full xl:w-[320px] xl:sticky xl:top-20 shrink-0">
-          <TestSidebar data={testData} onSave={handleSave} onPublish={handlePublish} isSaving={isSaving} />
+          <TestSidebar 
+            data={testData} 
+            onSave={handleSave} 
+            onPublish={handlePublish} 
+            isSaving={isSaving} 
+            expandedPartId={expandedPartId}
+            onTogglePart={(id) => setExpandedPartId(prev => prev === id ? null : id)}
+          />
         </div>
       </div>
 

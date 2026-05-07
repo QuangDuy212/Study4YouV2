@@ -39,12 +39,13 @@ export const aiService = {
   /**
    * POST /ai/generate-questions
    */
-  async generateQuestions(part: string, difficulty: string, count: number, topic?: string): Promise<any> {
+  async generateQuestions(part: string, difficulty: string, count: number, topic?: string, context?: string): Promise<any> {
     const { data } = await apiClient.post("/ai/generate-questions", {
       part,
       difficulty,
       count,
       topic,
+      context,
     });
     // Return raw data — let the caller handle both array and object formats
     return data;

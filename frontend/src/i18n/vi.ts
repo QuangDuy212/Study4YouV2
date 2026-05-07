@@ -336,6 +336,7 @@ export const vi = {
   totalTestsAdmin: "Tổng bài kiểm tra",
   totalQuestions: "Tổng câu hỏi",
   aiGenerated: "AI tạo",
+  aiGenerate: "Tạo bằng AI",
   acrossAllSkills: "Tất cả kỹ năng",
   inQuestionBank: "Trong ngân hàng câu hỏi",
   questionsAndTests: "Câu hỏi & bài kiểm tra",
@@ -364,6 +365,7 @@ export const vi = {
   allCreators: "Tất cả tác giả",
   humanCreated: "Người tạo",
   addQuestion: "Thêm câu hỏi",
+  quickFill: "Điền nhanh ({count})",
   questionPreview: "Xem trước câu hỏi",
   skill: "Kỹ năng",
   difficulty: "Mức độ",
@@ -568,6 +570,8 @@ export const vi = {
   fullTestAudio: "Âm thanh toàn bộ bài thi (dùng chung cho các phần)",
   sharedPassage: "Đoạn văn dùng chung",
   enterSharedPassage: "Nhập đoạn văn dùng chung cho nhóm câu hỏi này...",
+  sharedTranscript: "Bản ghi âm dùng chung",
+  enterSharedTranscript: "Nhập bản ghi âm dùng chung cho nhóm câu hỏi này...",
   removeSet: "Xóa nhóm câu hỏi",
   set: "Nhóm",
   setQuestions: "Câu hỏi",
@@ -619,6 +623,7 @@ export const vi = {
   parsedCountQuestions: "Đã phân tích thành công {count} câu hỏi!",
   addParsedToPart: "Thêm {count} câu hỏi vào bài thi",
   generatedQuestionsTitle: "Câu hỏi đã tạo",
+  previewGeneratedQuestions: "Xem trước câu hỏi đã tạo",
 
   // AI Generate Users Page
   aiGenerateUsers: "Tạo người dùng AI",

@@ -36,6 +36,7 @@ export interface ToeicQuestionResponse {
   partId: string;
   content: string;
   passage: string | null;
+  transcript?: string | null;
   audioUrl: string | null;
   imageUrl: string | null;
   correctAnswer: string;

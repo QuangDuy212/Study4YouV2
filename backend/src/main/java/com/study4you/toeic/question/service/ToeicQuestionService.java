@@ -62,6 +62,7 @@ public class ToeicQuestionService {
         question.setAudioUrl(request.getAudioUrl());
         question.setImageUrl(request.getImageUrl());
         question.setPassage(request.getPassage());
+        question.setTranscript(request.getTranscript());
         question.setCorrectAnswer(request.getCorrectAnswer());
         question.setLevel(request.getLevel());
 
@@ -100,6 +101,7 @@ public class ToeicQuestionService {
         question.setAudioUrl(request.getAudioUrl());
         question.setImageUrl(request.getImageUrl());
         question.setPassage(request.getPassage());
+        question.setTranscript(request.getTranscript());
         question.setCorrectAnswer(request.getCorrectAnswer());
         question.setLevel(request.getLevel());
 
@@ -170,6 +172,7 @@ public class ToeicQuestionService {
         response.setAudioUrl(question.getAudioUrl());
         response.setImageUrl(question.getImageUrl());
         response.setPassage(question.getPassage());
+        response.setTranscript(question.getTranscript());
         response.setCorrectAnswer(question.getCorrectAnswer());
         response.setLevel(question.getLevel());
         response.setCreatedAt(question.getCreatedAt());

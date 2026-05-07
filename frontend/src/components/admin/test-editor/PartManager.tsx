@@ -13,9 +13,11 @@ interface PartManagerProps {
   parts: TestPart[];
   onChange: (parts: TestPart[]) => void;
   onOpenAIPanel: (partType: PartType) => void;
+  expandedPartId: string | null;
+  onTogglePart: (id: string) => void;
 }
 
-export default function PartManager({ parts, onChange, onOpenAIPanel }: PartManagerProps) {
+export default function PartManager({ parts, onChange, onOpenAIPanel, expandedPartId, onTogglePart }: PartManagerProps) {
   const { t } = useLanguage();
   const [addPartType, setAddPartType] = useState<PartType | "">("");
 
@@ -95,6 +97,8 @@ export default function PartManager({ parts, onChange, onOpenAIPanel }: PartMana
               onChange={(p) => updatePart(i, p)}
               onDelete={() => deletePart(i)}
               onOpenAIPanel={onOpenAIPanel}
+              expanded={expandedPartId === part.id}
+              onToggle={() => onTogglePart(part.id)}
             />
           ))}
         </div>

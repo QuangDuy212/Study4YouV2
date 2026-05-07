@@ -54,6 +54,7 @@ export interface ReviewQuestion {
   explanation: string | null;
   transcript: string | null;
   correct: boolean;
+  isFlagged: boolean;
   partName: string;
 }
 

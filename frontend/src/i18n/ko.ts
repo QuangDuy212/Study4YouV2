@@ -276,6 +276,7 @@ export const ko = {
   totalTestsAdmin: "총 테스트",
   totalQuestions: "총 문제",
   aiGenerated: "AI 생성",
+  aiGenerate: "AI 생성",
   acrossAllSkills: "모든 기술",
   inQuestionBank: "문제 은행에",
   questionsAndTests: "문제 및 테스트",
@@ -303,6 +304,7 @@ export const ko = {
   allCreators: "모든 생성자",
   humanCreated: "인간 생성",
   addQuestion: "문제 추가",
+  quickFill: "빠른 채우기 ({count})",
   questionPreview: "문제 미리보기",
   skill: "기술",
   difficulty: "난이도",
@@ -413,6 +415,8 @@ export const ko = {
   generatedCountQuestions: "{count}개의 문제가 생성되었습니다",
   insertedQuestionsIntoPart: "{part}에 {count}개의 문제를 삽입했습니다",
   willGenerateCountQuestionsForPart: "{part}에 대해 {count}개의 문제를 생성합니다",
+  generateQuestionsCount: "{count}개 문제 생성",
+  quickParse: "빠른 분석",
 
   // Admin Roles
   roles: "역할",
@@ -526,6 +530,9 @@ export const ko = {
   aiReadingOnlyDesc: "AI는 읽기 파트(Part 5, 6, 7)의 문제만 생성할 수 있습니다. 파트와 난이도를 선택한 후 생성하세요.",
   part: "파트",
   generatedQuestionsTitle: "생성된 문제",
+  previewGeneratedQuestions: "생성된 문제 미리보기",
+  preparingAiRequest: "AI 요청 준비 중...",
+  partIsFull: "이 파트는 이미 문제 수 한도에 도달했습니다.",
 
   // AI Generate Users Page
   aiGenerateUsers: "AI 사용자 생성",
@@ -779,6 +786,8 @@ export const ko = {
   optionPlaceholder: "옵션 {label}",
   sharedPassage: "공통 지문",
   enterSharedPassage: "이 문제 세트의 공통 지문을 입력하세요...",
+  sharedTranscript: "공통 스크립트",
+  enterSharedTranscript: "이 질문 세트의 공통 듣기 스크립트를 입력하세요...",
   removeSet: "세트 삭제",
   set: "세트",
   setQuestions: "문제",

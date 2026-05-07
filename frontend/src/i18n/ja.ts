@@ -278,6 +278,7 @@ export const ja = {
   totalTestsAdmin: "テスト総数",
   totalQuestions: "問題総数",
   aiGenerated: "AI生成済み",
+  aiGenerate: "AI生成",
   acrossAllSkills: "全スキル対象",
   inQuestionBank: "問題バンク内",
   questionsAndTests: "問題とテスト",
@@ -306,6 +307,7 @@ export const ja = {
   allCreators: "全作成者",
   humanCreated: "手動作成",
   addQuestion: "問題を追加",
+  quickFill: "クイックフィル ({count})",
   questionPreview: "問題プレビュー",
   skill: "スキル",
   difficulty: "難易度",
@@ -402,6 +404,8 @@ export const ja = {
   generatedCountQuestions: "{count} 問の問題を生成しました",
   insertedQuestionsIntoPart: "{count} 問の問題を {part} に挿入しました",
   willGenerateCountQuestionsForPart: "{part} の問題を {count} 問生成します",
+  generateQuestionsCount: "{count} 問の問題を生成",
+  quickParse: "クイック解析",
 
   // Admin Roles
   roles: "ロール",
@@ -490,7 +494,9 @@ export const ja = {
   questionPlaceholderReading: "____ のある文章を入力...",
   optionPlaceholder: "選択肢 {label}",
   sharedPassage: "共通の文章",
-  enterSharedPassage: "この問題セットの共通文章を入力してください...",
+  enterSharedPassage: "この problem セットの共通文章を入力してください...",
+  sharedTranscript: "共通のトランスクリプト",
+  enterSharedTranscript: "この問題セットの共通の聞き取りトランスクリプトを入力してください...",
   removeSet: "セットを削除",
   set: "セット",
   setQuestions: "問題",
@@ -531,6 +537,9 @@ export const ja = {
   aiReadingOnlyDesc: "AIは読解パート（Part 5, 6, 7）の問題のみ生成できます。パートと難易度を選択して生成してください。",
   part: "パート",
   generatedQuestionsTitle: "生成された問題",
+  previewGeneratedQuestions: "生成された問題のプレビュー",
+  preparingAiRequest: "AI リクエストを準備中...",
+  partIsFull: "このパートはすでに問題数の上限に達しています。",
 
 
   // AI Generate Users Page

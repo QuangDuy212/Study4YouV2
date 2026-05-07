@@ -291,6 +291,7 @@ export const zh = {
   totalTestsAdmin: "总测试数",
   totalQuestions: "总题数",
   aiGenerated: "AI生成",
+  aiGenerate: "AI生成",
   acrossAllSkills: "所有技能",
   inQuestionBank: "在题库中",
   questionsAndTests: "题目和测试",
@@ -318,6 +319,7 @@ export const zh = {
   allCreators: "所有创建者",
   humanCreated: "人工创建",
   addQuestion: "添加题目",
+  quickFill: "快速填充 ({count})",
   questionPreview: "题目预览",
   skill: "技能",
   difficulty: "难度",
@@ -428,6 +430,8 @@ export const zh = {
   generatedCountQuestions: "已生成 {count} 道题目",
   insertedQuestionsIntoPart: "已将 {count} 道题目插入 {part}",
   willGenerateCountQuestionsForPart: "将为 {part} 生成 {count} 道题目",
+  generateQuestionsCount: "生成 {count} 道题目",
+  quickParse: "快速分析",
 
   // Admin Roles
   roles: "角色",
@@ -541,6 +545,9 @@ export const zh = {
   aiReadingOnlyDesc: "AI只能生成阅读部分的题目（Part 5, 6, 7）。选择部分和难度后生成。",
   part: "部分",
   generatedQuestionsTitle: "已生成的题目",
+  previewGeneratedQuestions: "预览生成题目",
+  preparingAiRequest: "正在准备 AI 请求...",
+  partIsFull: "此部分已达到问题数量上限。",
 
   // AI Generate Users Page
   aiGenerateUsers: "AI生成用户",
@@ -794,6 +801,8 @@ export const zh = {
   optionPlaceholder: "选项 {label}",
   sharedPassage: "共享文章",
   enterSharedPassage: "为此题组输入共享文章...",
+  sharedTranscript: "共享录音文本",
+  enterSharedTranscript: "输入此组问题的共享录音文本...",
   removeSet: "删除题组",
   set: "题组",
   setQuestions: "题目",

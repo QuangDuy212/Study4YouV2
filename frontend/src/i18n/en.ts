@@ -338,6 +338,7 @@ export const en = {
   totalTestsAdmin: "Total Tests",
   totalQuestions: "Total Questions",
   aiGenerated: "AI Generated",
+  aiGenerate: "Generate with AI",
   acrossAllSkills: "Across all skills",
   inQuestionBank: "In question bank",
   questionsAndTests: "Questions & tests",
@@ -366,6 +367,7 @@ export const en = {
   allCreators: "All Creators",
   humanCreated: "Human Created",
   addQuestion: "Add Question",
+  quickFill: "Quick Fill ({count})",
   questionPreview: "Question Preview",
   skill: "Skill",
   difficulty: "Difficulty",
@@ -573,6 +575,8 @@ export const en = {
   fullTestAudio: "Full Test Audio (shared across all parts)",
   sharedPassage: "Shared Passage",
   enterSharedPassage: "Enter the shared passage for this set of questions...",
+  sharedTranscript: "Shared Transcript",
+  enterSharedTranscript: "Enter the shared listening transcript for this set of questions...",
   removeSet: "Remove Set",
   set: "Set",
   setQuestions: "Questions",
@@ -624,6 +628,7 @@ export const en = {
   parsedCountQuestions: "Parsed {count} questions successfully!",
   addParsedToPart: "Add {count} Questions to Test",
   generatedQuestionsTitle: "Generated Questions",
+  previewGeneratedQuestions: "Preview Generated Questions",
 
   // AI Generate Users Page
   inactive: "Inactive",
