@@ -248,7 +248,7 @@ export default function AdminPaymentsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="rounded-xl font-bold h-9"
+                className="rounded-xl font-bold h-9 transition-all hover:bg-primary/10 hover:text-primary hover:border-primary/30"
                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
               >
@@ -260,7 +260,11 @@ export default function AdminPaymentsPage() {
                     key={i}
                     variant={currentPage === i + 1 ? "default" : "outline"}
                     size="sm"
-                    className="w-9 h-9 rounded-xl p-0 font-bold"
+                    className={`w-9 h-9 rounded-xl p-0 font-bold transition-all ${
+                      currentPage === i + 1 
+                        ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/15" 
+                        : "hover:bg-primary/10 hover:text-primary hover:border-primary/30"
+                    }`}
                     onClick={() => setCurrentPage(i + 1)}
                   >
                     {i + 1}
@@ -270,7 +274,7 @@ export default function AdminPaymentsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="rounded-xl font-bold h-9"
+                className="rounded-xl font-bold h-9 transition-all hover:bg-primary/10 hover:text-primary hover:border-primary/30"
                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
               >
