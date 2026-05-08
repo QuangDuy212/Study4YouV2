@@ -466,6 +466,8 @@ export const zh = {
   editingUser: "正在编辑：{name}",
   basicInformation: "基本信息",
   enterFullNamePlaceholder: "输入全名",
+  phone: "电话号码",
+  phonePlaceholder: "输入您的电话号码",
   enterEmailPlaceholder: "输入邮箱地址",
   resetPassword: "重置密码",
   leaveBlankPassword: "留空以保持当前密码",

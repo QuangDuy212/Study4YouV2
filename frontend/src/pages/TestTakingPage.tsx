@@ -393,7 +393,7 @@ export default function TestTakingPage() {
         {/* Left / Main Content */}
         <div className="flex-1 overflow-y-auto">
           {/* Part Tabs */}
-          <div className="sticky top-0 z-40 bg-card border-b border-border">
+          <div className="sticky top-0 z-10 bg-card border-b border-border">
             <div className="flex overflow-x-auto px-2">
               {parts.map((p, idx) => (
                 <button
@@ -685,7 +685,7 @@ export default function TestTakingPage() {
         </div>
 
         {/* Right Sidebar Desktop */}
-        <aside className="w-80 bg-card border-l border-border flex flex-col shrink-0 sticky top-14 h-[calc(100vh-3.5rem)] hidden lg:flex shadow-xl z-20 overflow-hidden">
+        <aside className="w-80 bg-card border-l border-border flex flex-col shrink-0 sticky top-0 h-[calc(100vh-3.5rem)] hidden lg:flex shadow-xl z-20 overflow-hidden">
           {renderSidebarContent()}
         </aside>
       </div>

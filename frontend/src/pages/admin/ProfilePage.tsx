@@ -61,6 +61,11 @@ export default function ProfilePage() {
 
       // 2. Change Password if provided
       if (newPassword) {
+        if (!currentPassword) {
+          toast.error(t("currentPasswordRequired"));
+          setSaving(false);
+          return;
+        }
         if (newPassword !== confirmPwd) {
           toast.error(t("passwordMismatch"));
           setSaving(false);
@@ -168,15 +173,15 @@ export default function ProfilePage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>{t("currentPassword")}</Label>
-              <Input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
+              <Input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} autoComplete="new-password" />
             </div>
             <div className="space-y-2">
               <Label>{t("newPassword")}</Label>
-              <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+              <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} autoComplete="new-password" />
             </div>
             <div className="space-y-2">
               <Label>{t("confirmNewPassword")}</Label>
-              <Input type="password" value={confirmPwd} onChange={(e) => setConfirmPwd(e.target.value)} />
+              <Input type="password" value={confirmPwd} onChange={(e) => setConfirmPwd(e.target.value)} autoComplete="new-password" />
             </div>
           </CardContent>
         </Card>

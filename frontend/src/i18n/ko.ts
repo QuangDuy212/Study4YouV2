@@ -451,6 +451,8 @@ export const ko = {
   editingUser: "편집 중: {name}",
   basicInformation: "기본 정보",
   enterFullNamePlaceholder: "이름 입력",
+  phone: "전화번호",
+  phonePlaceholder: "전화번호를 입력하십시오",
   enterEmailPlaceholder: "이메일 주소 입력",
   resetPassword: "비밀번호 초기화",
   leaveBlankPassword: "현재 비밀번호를 유지하려면 비워 두십시오.",

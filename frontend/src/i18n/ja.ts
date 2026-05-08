@@ -440,6 +440,8 @@ export const ja = {
   editingUser: "編集中：{name}",
   basicInformation: "基本情報",
   enterFullNamePlaceholder: "氏名を入力",
+  phone: "電話番号",
+  phonePlaceholder: "電話番号を入力してください",
   enterEmailPlaceholder: "メールアドレスを入力",
   resetPassword: "パスワードをリセット",
   leaveBlankPassword: "現在のパスワードを維持する場合は空白のまま",
