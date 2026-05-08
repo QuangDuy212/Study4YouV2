@@ -24,7 +24,6 @@ import {
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 
-
 const ITEMS_PER_PAGE = 8;
 
 export default function UsersPage() {
@@ -37,13 +36,11 @@ export default function UsersPage() {
   const [userToDelete, setUserToDelete] = useState<UserResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  
+  const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
 
   const fetchUsers = async () => {
     setIsLoading(true);
     try {
-      // Fetching first 100 users for local filtering/pagination to match existing UI logic
-      // In a real large app, we'd use server-side search/filter
       const data = await userService.getUsers(0, 100);
       setUsers(data.content);
     } catch (error: any) {
@@ -54,7 +51,9 @@ export default function UsersPage() {
     }
   };
 
-  useEffect(() => { fetchUsers(); }, []);
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
@@ -66,6 +65,11 @@ export default function UsersPage() {
 
   const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
   const paginatedUsers = filteredUsers.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+  // Reset selection when page or search or status changes
+  useEffect(() => {
+    setSelectedUserIds(new Set());
+  }, [currentPage, searchTerm, statusFilter]);
 
   const handleToggleStatus = async (user: UserResponse) => {
     const newStatus = user.status.toLowerCase() === "active" ? "INACTIVE" : "ACTIVE";
@@ -101,9 +105,71 @@ export default function UsersPage() {
     }
   };
 
+  const toggleSelectAll = () => {
+    if (paginatedUsers.length === 0) return;
+    const allSelected = paginatedUsers.every(u => selectedUserIds.has(u.id));
+    const next = new Set(selectedUserIds);
+    if (allSelected) {
+      paginatedUsers.forEach(u => next.delete(u.id));
+    } else {
+      paginatedUsers.forEach(u => next.add(u.id));
+    }
+    setSelectedUserIds(next);
+  };
+
+  const toggleSelectOne = (id: string) => {
+    const next = new Set(selectedUserIds);
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    setSelectedUserIds(next);
+  };
+
+  const handleBulkToggleStatus = async () => {
+    if (!window.confirm(`Are you sure you want to change status for ${selectedUserIds.size} selected users?`)) return;
+    setIsLoading(true);
+    try {
+      await Promise.all(Array.from(selectedUserIds).map(async (id) => {
+        const u = users.find(user => user.id === id);
+        if (u) {
+          const newStatus = u.status.toLowerCase() === "active" ? "INACTIVE" : "ACTIVE";
+          await userService.updateUser(id, { 
+            email: u.email,
+            fullName: u.fullName,
+            status: newStatus 
+          });
+        }
+      }));
+      toast.success("Successfully toggled status for selected users");
+      setSelectedUserIds(new Set());
+      fetchUsers();
+    } catch (e) {
+      toast.error("Failed to update status for some selected users");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (!window.confirm(`Are you sure you want to delete ${selectedUserIds.size} selected users?`)) return;
+    setIsLoading(true);
+    try {
+      await Promise.all(Array.from(selectedUserIds).map(id => userService.deleteUser(id)));
+      toast.success("Selected users deleted successfully");
+      setSelectedUserIds(new Set());
+      fetchUsers();
+    } catch (e) {
+      toast.error("Failed to delete some selected users");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <>
-      <div className="space-y-3 sm:space-y-6">
+      <div className="space-y-3 sm:space-y-6 pb-24">
         <Card>
           <CardContent className="p-4">
             <div className="flex flex-col lg:flex-row gap-4">
@@ -120,7 +186,6 @@ export default function UsersPage() {
                     <SelectItem value="active">{t('active')}</SelectItem>
                     <SelectItem value="inactive">{t('inactive')}</SelectItem>
                   </SelectContent>
-
                 </Select>
                 <Button variant="outline" className="gap-2" onClick={() => navigate("/admin/users/ai-generate")}>
                   <Sparkles className="w-4 h-4" /> {t('aiGenerateUsers')}
@@ -128,7 +193,6 @@ export default function UsersPage() {
                 <Button className="gap-2" onClick={() => navigate("/admin/users/create")}>
                   <Plus className="w-4 h-4" /> {t('createUser')}
                 </Button>
-
               </div>
             </div>
           </CardContent>
@@ -136,8 +200,35 @@ export default function UsersPage() {
 
         <div className="text-sm text-muted-foreground">{t('showingUsers').replace('{count}', String(filteredUsers.length))}</div>
 
-        <Card>
+        {/* Bulk Actions Bar */}
+        {selectedUserIds.size > 0 && (
+          <div className="flex items-center justify-between p-4 bg-primary/[0.03] border border-primary/20 rounded-xl animate-in fade-in slide-in-from-top-2">
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
+              <span className="text-sm font-bold text-primary">Đã chọn {selectedUserIds.size} người dùng</span>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleBulkToggleStatus}
+                className="rounded-lg font-bold shadow-sm h-9 px-4 border border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100 hover:text-orange-800 transition-all"
+              >
+                <UserX className="w-4 h-4 mr-1.5" /> Khóa/Kích hoạt nhiều
+              </Button>
+              <Button 
+                variant="destructive" 
+                size="sm" 
+                onClick={handleBulkDelete}
+                className="rounded-lg font-bold shadow-sm h-9 px-4"
+              >
+                <Trash2 className="w-4 h-4 mr-1.5" /> Xóa nhiều
+              </Button>
+            </div>
+          </div>
+        )}
 
+        <Card>
           <CardContent className="p-0">
             {isLoading ? (
               <div className="p-6 space-y-4">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}</div>
@@ -147,12 +238,19 @@ export default function UsersPage() {
                 <h3 className="text-lg font-semibold text-foreground mb-2">{t('noUsersFound')}</h3>
                 <p className="text-muted-foreground max-w-sm">{t('noUsersHint')}</p>
               </div>
-
             ) : (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-zinc-50/50 dark:bg-zinc-900/50 border-b border-border/50">
+                      <TableHead className="w-12 h-12">
+                        <input 
+                          type="checkbox" 
+                          checked={paginatedUsers.length > 0 && paginatedUsers.every(u => selectedUserIds.has(u.id))}
+                          onChange={toggleSelectAll}
+                          className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary cursor-pointer"
+                        />
+                      </TableHead>
                       <TableHead className="h-12 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{t('user')}</TableHead>
                       <TableHead className="h-12 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{t('roles')}</TableHead>
                       <TableHead className="h-12 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{t('status')}</TableHead>
@@ -160,116 +258,124 @@ export default function UsersPage() {
                       <TableHead className="h-12 text-[11px] font-bold uppercase tracking-widest text-muted-foreground text-right">{t('actions')}</TableHead>
                     </TableRow>
                   </TableHeader>
+                  <TableBody>
+                    {paginatedUsers.map((user) => (
+                      <TableRow key={user.id} className={cn(
+                        "group transition-colors border-b border-border/50",
+                        selectedUserIds.has(user.id) ? "bg-primary/[0.02]" : "hover:bg-primary/[0.01]"
+                      )}>
+                        <TableCell className="w-12 py-4">
+                          <input 
+                            type="checkbox" 
+                            checked={selectedUserIds.has(user.id)}
+                            onChange={() => toggleSelectOne(user.id)}
+                            className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary cursor-pointer"
+                          />
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="relative group/avatar">
+                              <Avatar className="w-10 h-10 border border-border/50 transition-all group-hover/avatar:border-primary/30">
+                                <AvatarImage src={user.avatarUrl || ""} />
+                                <AvatarFallback className="bg-gradient-to-br from-primary/10 to-primary/20 text-primary font-semibold text-xs">
+                                  {user.fullName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              {user.status.toLowerCase() === "active" && (
+                                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-background rounded-full" />
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-sm text-foreground transition-colors">{user.fullName || t("noName")}</p>
+                              <p className="text-[12px] text-muted-foreground font-medium">{user.email}</p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1.5">
+                            {user.roles.length > 0 ? user.roles.map((role) => (
+                              <Badge key={role.id} variant="secondary" className="px-2 py-0.5 rounded-md text-[10px] font-bold tracking-tight bg-secondary/50 text-secondary-foreground border-none">
+                                {role.name.replace("ROLE_", "")}
+                              </Badge>
+                            )) : <span className="text-xs text-muted-foreground italic">{t('noRoles')}</span>}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={cn(
+                            "pl-1.5 pr-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border-none flex items-center gap-1.5 w-fit",
+                            user.status.toLowerCase() === "active"
+                              ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                              : user.status.toLowerCase() === "banned"
+                              ? "bg-rose-500/10 text-rose-700 dark:text-rose-400"
+                              : "bg-zinc-500/10 text-zinc-700 dark:text-zinc-400"
+                          )}>
+                            <span className={cn(
+                              "w-1.5 h-1.5 rounded-full",
+                              user.status.toLowerCase() === "active" ? "bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)] animate-pulse" : 
+                              user.status.toLowerCase() === "banned" ? "bg-rose-500" : "bg-zinc-400"
+                            )} />
+                            {t(user.status.toLowerCase() as any) || user.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="text-xs font-medium text-foreground">{new Date(user.createdAt).toLocaleDateString()}</span>
+                            <span className="text-[10px] text-muted-foreground">{new Date(user.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center justify-end gap-1">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10" onClick={() => navigate(`/admin/users/${user.id}/edit`)}>
+                              <Pencil className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className={cn(
+                              "h-8 w-8",
+                              user.status.toLowerCase() === "active" ? "text-orange-500 hover:bg-orange-50/50" : "text-emerald-500 hover:bg-emerald-50/50"
+                            )} onClick={() => handleToggleStatus(user)}>
+                              {user.status.toLowerCase() === "active" ? <UserX className="w-3.5 h-3.5" /> : <UserCheck className="w-3.5 h-3.5" />}
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-rose-500 hover:bg-rose-50/50" onClick={() => handleDeleteUser(user)}>
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
 
-                    <TableBody>
-                      {paginatedUsers.map((user) => (
-                        <TableRow key={user.id} className="group hover:bg-primary/[0.02] transition-colors border-b border-border/50">
-                          <TableCell className="py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="relative group/avatar">
-                                <Avatar className="w-10 h-10 border border-border/50 transition-all group-hover/avatar:border-primary/30">
-                                  <AvatarImage src={user.avatarUrl || ""} />
-                                  <AvatarFallback className="bg-gradient-to-br from-primary/10 to-primary/20 text-primary font-semibold text-xs">
-                                    {user.fullName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
-                                  </AvatarFallback>
-                                </Avatar>
-                                {user.status.toLowerCase() === "active" && (
-                                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-background rounded-full" />
-                                )}
-                              </div>
-                              <div>
-                                <p className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors">{user.fullName || t("noName")}</p>
-                                <p className="text-[12px] text-muted-foreground font-medium">{user.email}</p>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-wrap gap-1.5">
-                              {user.roles.length > 0 ? user.roles.map((role) => (
-                                <Badge key={role.id} variant="secondary" className="px-2 py-0.5 rounded-md text-[10px] font-bold tracking-tight bg-secondary/50 text-secondary-foreground border-none">
-                                  {role.name.replace("ROLE_", "")}
-                                </Badge>
-                              )) : <span className="text-xs text-muted-foreground italic">{t('noRoles')}</span>}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge className={cn(
-                              "pl-1.5 pr-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border-none flex items-center gap-1.5 w-fit",
-                              user.status.toLowerCase() === "active"
-                                ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
-                                : user.status.toLowerCase() === "banned"
-                                ? "bg-rose-500/10 text-rose-700 dark:text-rose-400"
-                                : "bg-zinc-500/10 text-zinc-700 dark:text-zinc-400"
-                            )}>
-                              <span className={cn(
-                                "w-1.5 h-1.5 rounded-full",
-                                user.status.toLowerCase() === "active" ? "bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)] animate-pulse" : 
-                                user.status.toLowerCase() === "banned" ? "bg-rose-500" : "bg-zinc-400"
-                              )} />
-                              {t(user.status.toLowerCase() as any) || user.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-col">
-                              <span className="text-xs font-medium text-foreground">{new Date(user.createdAt).toLocaleDateString()}</span>
-                              <span className="text-[10px] text-muted-foreground">{new Date(user.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10" onClick={() => navigate(`/admin/users/${user.id}/edit`)}>
-                                <Pencil className="w-3.5 h-3.5" />
-                              </Button>
-                              <Button variant="ghost" size="icon" className={cn(
-                                "h-8 w-8",
-                                user.status.toLowerCase() === "active" ? "text-orange-500 hover:bg-orange-50/50" : "text-emerald-500 hover:bg-emerald-50/50"
-                              )} onClick={() => handleToggleStatus(user)}>
-                                {user.status.toLowerCase() === "active" ? <UserX className="w-3.5 h-3.5" /> : <UserCheck className="w-3.5 h-3.5" />}
-                              </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-rose-500 hover:bg-rose-50/50" onClick={() => handleDeleteUser(user)}>
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                 </Table>
-               </div>
-             )}
- 
-             {totalPages > 1 && (
-               <div className="flex items-center justify-between px-4 py-3 border-t border-border">
-                 <span className="text-sm text-muted-foreground">{t('page')} {currentPage} {t('of')} {totalPages}</span>
-                 <div className="flex gap-1">
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+                <span className="text-sm text-muted-foreground">{t('page')} {currentPage} {t('of')} {totalPages}</span>
+                <div className="flex gap-1">
+                  <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)}>
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map((p) => (
+                    <Button key={p} variant={p === currentPage ? "default" : "outline"} size="sm" onClick={() => setCurrentPage(p)} className="w-8">{p}</Button>
+                  ))}
+                  <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => p + 1)}>
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-                   <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)}>
-                     <ChevronLeft className="w-4 h-4" />
-                   </Button>
-                   {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map((p) => (
-                     <Button key={p} variant={p === currentPage ? "default" : "outline"} size="sm" onClick={() => setCurrentPage(p)} className="w-8">{p}</Button>
-                   ))}
-                   <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => p + 1)}>
-                     <ChevronRight className="w-4 h-4" />
-                   </Button>
-                 </div>
-               </div>
-             )}
-           </CardContent>
-         </Card>
- 
-         <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-           <DialogContent>
-             <DialogHeader>
-               <DialogTitle className="flex items-center gap-2 text-destructive"><AlertTriangle className="w-5 h-5" /> {t('deleteUser')}</DialogTitle>
-               <DialogDescription>{t('deleteUserConfirm').replace('{name}', userToDelete?.fullName || '')}</DialogDescription>
-             </DialogHeader>
+        <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-destructive"><AlertTriangle className="w-5 h-5" /> {t('deleteUser')}</DialogTitle>
+              <DialogDescription>{t('deleteUserConfirm').replace('{name}', userToDelete?.fullName || '')}</DialogDescription>
+            </DialogHeader>
             <DialogFooter>
               <Button variant="outline" onClick={() => setDeleteOpen(false)}>{t('cancel')}</Button>
               <Button variant="destructive" onClick={confirmDelete}>{t('delete')}</Button>
             </DialogFooter>
           </DialogContent>
-
         </Dialog>
       </div>
     </>

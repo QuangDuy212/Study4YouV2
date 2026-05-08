@@ -32,16 +32,16 @@ export default function CoursesPage() {
   });
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-12">
+    <div className="max-w-6xl mx-auto space-y-12 py-12 px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <GraduationCap className="w-5 h-5 text-primary" />
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-4 mb-1">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shadow-sm">
+              <GraduationCap className="w-6 h-6 text-primary" />
             </div>
-            <h1 className="font-display text-3xl font-bold text-foreground">{t("exploreCourses")}</h1>
+            <h1 className="font-display text-4xl font-bold tracking-tight text-foreground">{t("exploreCourses")}</h1>
           </div>
-          <p className="text-muted-foreground">{t("exploreCoursesDesc")}</p>
+          <p className="text-lg text-muted-foreground max-w-2xl">{t("exploreCoursesDesc")}</p>
         </div>
         
         <div className="relative max-w-md w-full">

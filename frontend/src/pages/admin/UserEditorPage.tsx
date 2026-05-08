@@ -125,87 +125,96 @@ export default function UserEditorPage() {
 
   return (
     <>
-      <div className="mb-4 flex items-center justify-between">
-        <Button variant="ghost" size="sm" onClick={() => navigate("/admin/users")}>
+      <div className="mb-6 flex items-center justify-between w-full">
+        <Button variant="ghost" size="sm" onClick={() => navigate("/admin/users")} className="rounded-xl">
           <ArrowLeft className="w-4 h-4 mr-1.5" /> {t("backToUsers")}
         </Button>
         <div className="flex gap-2">
-          <Button onClick={handleSave} disabled={isSaving} className="gap-2">
+          <Button onClick={handleSave} disabled={isSaving} className="gap-2 h-10 rounded-xl px-4 font-bold shadow-md shadow-primary/10">
             <Save className="w-4 h-4" />
             {isSaving ? t("saving") : isCreate ? t("createUser") : t("saveChanges")}
           </Button>
         </div>
       </div>
 
-      <div className="max-w-3xl space-y-6">
-        <Card>
-          <CardHeader><CardTitle className="text-lg">{t("basicInformation")}</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>{t("fullName")} *</Label>
-                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("enterFullNamePlaceholder")} />
-              </div>
-              <div className="space-y-2">
-                <Label>{t("email")} *</Label>
-                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("enterEmailPlaceholder")} disabled={!isCreate} />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>{isCreate ? `${t("password")} *` : t("resetPassword")}</Label>
-                <div className="relative">
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder={isCreate ? t("enterPassword") : t("leaveBlankPassword")}
-                  />
-                  <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full px-3" onClick={() => setShowPassword(!showPassword)}>
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </Button>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
+        {/* Left Column - Basic Information */}
+        <div className="lg:col-span-2 space-y-6">
+          <Card className="border border-border/50 shadow-sm rounded-2xl">
+            <CardHeader><CardTitle className="text-lg font-bold text-foreground">{t("basicInformation")}</CardTitle></CardHeader>
+            <CardContent className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="font-semibold text-muted-foreground text-[10px] uppercase tracking-wider">{t("fullName")} *</Label>
+                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("enterFullNamePlaceholder")} className="h-11 rounded-xl" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="font-semibold text-muted-foreground text-[10px] uppercase tracking-wider">{t("email")} *</Label>
+                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("enterEmailPlaceholder")} disabled={!isCreate} className="h-11 rounded-xl" />
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>{t("status")}</Label>
-                    <Select value={status} onValueChange={(v) => setStatus(v)}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="ACTIVE">{t("active")}</SelectItem>
-                        <SelectItem value="INACTIVE">{t("inactive")}</SelectItem>
-                        <SelectItem value="BANNED">{t("banned")}</SelectItem>
-                      </SelectContent>
-                    </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader><CardTitle className="text-lg">{t("roleAssignment")}</CardTitle></CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">{t("assignRolesDesc")}</p>
-            {availableRoles.length === 0 ? (
-               <p className="text-sm text-muted-foreground italic">No roles found on server.</p>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {availableRoles.map((role) => (
-                  <div
-                    key={role.id}
-                    className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                      selectedRoleIds.includes(role.id) ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground/30"
-                    }`}
-                    onClick={() => toggleRole(role.id)}
-                  >
-                    <Checkbox checked={selectedRoleIds.includes(role.id)} onCheckedChange={() => toggleRole(role.id)} />
-                    <span className="font-medium text-sm capitalize">{role.name.replace("ROLE_", "").toLowerCase()}</span>
-                    {selectedRoleIds.includes(role.id) && <Badge variant="secondary" className="ml-auto text-xs">{t("assigned")}</Badge>}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="font-semibold text-muted-foreground text-[10px] uppercase tracking-wider">{isCreate ? `${t("password")} *` : t("resetPassword")}</Label>
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder={isCreate ? t("enterPassword") : t("leaveBlankPassword")}
+                      className="h-11 rounded-xl pl-3 pr-10"
+                    />
+                    <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground" onClick={() => setShowPassword(!showPassword)}>
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </Button>
                   </div>
-                ))}
+                </div>
+                <div className="space-y-2">
+                  <Label className="font-semibold text-muted-foreground text-[10px] uppercase tracking-wider">{t("status")}</Label>
+                  <Select value={status} onValueChange={(v) => setStatus(v)}>
+                    <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ACTIVE">{t("active")}</SelectItem>
+                      <SelectItem value="INACTIVE">{t("inactive")}</SelectItem>
+                      <SelectItem value="BANNED">{t("banned")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Column - Role Assignment */}
+        <div className="lg:col-span-1">
+          <Card className="border border-border/50 shadow-sm rounded-2xl h-full">
+            <CardHeader><CardTitle className="text-lg font-bold text-foreground">{t("roleAssignment")}</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-xs text-muted-foreground leading-relaxed">{t("assignRolesDesc")}</p>
+              {availableRoles.length === 0 ? (
+                <p className="text-sm text-muted-foreground italic">No roles found on server.</p>
+              ) : (
+                <div className="space-y-2.5">
+                  {availableRoles.map((role) => (
+                    <div
+                      key={role.id}
+                      className={`flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
+                        selectedRoleIds.includes(role.id) 
+                          ? "border-primary bg-primary/[0.03] shadow-sm shadow-primary/5" 
+                          : "border-border hover:border-muted-foreground/30 hover:bg-muted/10"
+                      }`}
+                      onClick={() => toggleRole(role.id)}
+                    >
+                      <Checkbox checked={selectedRoleIds.includes(role.id)} onCheckedChange={() => toggleRole(role.id)} className="rounded" />
+                      <span className="font-semibold text-xs tracking-tight uppercase text-foreground">{role.name.replace("ROLE_", "")}</span>
+                      {selectedRoleIds.includes(role.id) && <Badge variant="secondary" className="ml-auto text-[10px] font-bold bg-primary/10 text-primary border-none">{t("assigned")}</Badge>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </>
   );

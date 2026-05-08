@@ -24,7 +24,7 @@ export const CourseCard = memo(({ course, enrolled, progress }: CourseCardProps)
   const { t } = useLanguage();
   
   return (
-    <div className="course-card flex flex-col bg-card border border-border shadow-sm transition-all duration-300 rounded-3xl overflow-hidden group will-change-transform">
+    <div className="course-card flex flex-col bg-card border border-border shadow-sm transition-all duration-300 rounded-3xl overflow-hidden group will-change-transform hover:shadow-xl hover:-translate-y-1">
       {/* Thumbnail */}
       <div className="course-card__thumb relative aspect-video bg-muted/30 overflow-hidden">
         {course.thumbnailUrl ? (
@@ -32,7 +32,7 @@ export const CourseCard = memo(({ course, enrolled, progress }: CourseCardProps)
             src={getMediaUrl(course.thumbnailUrl)} 
             alt={course.title} 
             loading="lazy" 
-            className="w-full h-full object-cover transition-transform duration-500 ease-out"
+            className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = 'none';
               (e.target as HTMLImageElement).parentElement?.classList.add('bg-muted');

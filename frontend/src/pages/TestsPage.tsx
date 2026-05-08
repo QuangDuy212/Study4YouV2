@@ -46,38 +46,39 @@ export default function TestsPage() {
 
   return (
     <>
-      <div className="max-w-6xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-12 py-12 px-4 sm:px-6 lg:px-8">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <FileText className="w-5 h-5 text-primary" />
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-4 mb-1">
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shadow-sm">
+                <FileText className="w-6 h-6 text-primary" />
+              </div>
+              <h1 className="font-display text-4xl font-bold tracking-tight text-foreground">{t('toeicFullTests')}</h1>
             </div>
-            <h1 className="font-display text-3xl font-bold text-foreground">{t('toeicFullTests')}</h1>
+            <p className="text-lg text-muted-foreground max-w-2xl">{t('toeicFullTestsDesc')}</p>
           </div>
-          <p className="text-muted-foreground">{t('toeicFullTestsDesc')}</p>
         </motion.div>
 
 
-        {/* Stats */}
         {!isLoading && (
-          <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-4" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}>
-            <div className="bg-card rounded-xl p-4 border border-border">
-              <p className="text-sm text-muted-foreground mb-1">{t('totalTests')}</p>
-              <p className="font-display text-2xl font-bold text-foreground">{tests.length}</p>
+          <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-6" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}>
+            <div className="bg-card rounded-2xl p-6 border border-border shadow-sm">
+              <p className="text-sm font-medium text-muted-foreground mb-1">{t('totalTests')}</p>
+              <p className="font-display text-3xl font-bold text-foreground">{tests.length}</p>
             </div>
-            <div className="bg-card rounded-xl p-4 border border-border">
-              <p className="text-sm text-muted-foreground mb-1">{t('completed')}</p>
-              <p className="font-display text-2xl font-bold text-foreground">{stats.completed}</p>
+            <div className="bg-card rounded-2xl p-6 border border-border shadow-sm">
+              <p className="text-sm font-medium text-muted-foreground mb-1">{t('completed')}</p>
+              <p className="font-display text-3xl font-bold text-foreground">{stats.completed}</p>
             </div>
-            <div className="bg-card rounded-xl p-4 border border-border">
-              <p className="text-sm text-muted-foreground mb-1">{t('bestScore')}</p>
-              <p className="font-display text-2xl font-bold text-success">{stats.bestScore}</p>
+            <div className="bg-card rounded-2xl p-6 border border-border shadow-sm">
+              <p className="text-sm font-medium text-muted-foreground mb-1">{t('bestScore')}</p>
+              <p className="font-display text-3xl font-bold text-success">{stats.bestScore}</p>
             </div>
           </motion.div>
         )}
 
         {/* Test List */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {isLoading ? (
             <div className="col-span-full py-20 flex flex-col items-center justify-center text-muted-foreground">
               <Loader2 className="w-10 h-10 animate-spin mb-4 text-primary" />
@@ -92,7 +93,7 @@ export default function TestsPage() {
             tests.map((test, index) => (
               <motion.div
                 key={test.id}
-                className="bg-card rounded-2xl p-6 border border-border hover:shadow-md transition-shadow"
+                className="group bg-card rounded-2xl p-7 border border-border hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.05 * index }}
@@ -115,7 +116,7 @@ export default function TestsPage() {
                 <Link to={`/tests/${test.id}/attempt`}>
                   <Button className="w-full gap-2">
                     {t('startTest')}
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                   </Button>
                 </Link>
               </motion.div>

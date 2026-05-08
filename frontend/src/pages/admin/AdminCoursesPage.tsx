@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Plus, Edit, Trash2, Search, Video, Eye, Loader2, RefreshCw } from "lucide-react";
+import { Plus, Edit, Trash2, Search, Video, Eye, Loader2, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -18,15 +18,29 @@ export default function AdminCoursesPage() {
   const [loading, setLoading] = useState(true);
   const [keyword, setKeyword] = useState("");
   const [page, setPage] = useState(0);
+  const [activeTab, setActiveTab] = useState<"ALL" | "ACTIVE" | "DELETED">("ALL");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const filteredCourses = useMemo(() => {
+    if (!courses?.content) return [];
+    return courses.content.filter((course) => {
+      const matchesKeyword = course.title.toLowerCase().includes(keyword.toLowerCase()) ||
+        (course.description?.toLowerCase() || "").includes(keyword.toLowerCase());
+      
+      if (activeTab === "ACTIVE") return matchesKeyword && course.status !== "DELETED";
+      if (activeTab === "DELETED") return matchesKeyword && course.status === "DELETED";
+      return matchesKeyword;
+    });
+  }, [courses, keyword, activeTab]);
 
   const fetchCourses = async () => {
     setLoading(true);
     try {
-      const data = await courseService.getAllCoursesAdmin(page, 10);
+      const data = await courseService.getAllCoursesAdmin(page, 5);
       setCourses(data);
     } catch (error) {
       toast.error("Failed to load courses");
-      setCourses({ content: [], totalElements: 0, totalPages: 0, pageSize: 10, pageNumber: 0, last: true });
+      setCourses({ content: [], totalElements: 0, totalPages: 0, pageSize: 5, pageNumber: 0, last: true });
     } finally {
       setLoading(false);
     }
@@ -35,6 +49,11 @@ export default function AdminCoursesPage() {
   useEffect(() => {
     fetchCourses();
   }, [page]);
+
+  // Reset selection when tab or page changes
+  useEffect(() => {
+    setSelectedIds(new Set());
+  }, [page, activeTab]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,13 +82,65 @@ export default function AdminCoursesPage() {
     }
   };
 
+  const toggleSelectAll = () => {
+    if (filteredCourses.length === 0) return;
+    const allSelected = filteredCourses.every(c => selectedIds.has(c.id));
+    const next = new Set(selectedIds);
+    if (allSelected) {
+      filteredCourses.forEach(c => next.delete(c.id));
+    } else {
+      filteredCourses.forEach(c => next.add(c.id));
+    }
+    setSelectedIds(next);
+  };
+
+  const toggleSelectOne = (id: string) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    setSelectedIds(next);
+  };
+
+  const handleBulkDelete = async () => {
+    if (!window.confirm(`Are you sure you want to delete ${selectedIds.size} selected courses?`)) return;
+    setLoading(true);
+    try {
+      await Promise.all(Array.from(selectedIds).map(id => courseService.deleteCourse(id)));
+      toast.success("Selected courses deleted successfully");
+      setSelectedIds(new Set());
+      fetchCourses();
+    } catch (e: any) {
+      toast.error("Failed to delete some selected courses");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBulkRestore = async () => {
+    if (!window.confirm(`Are you sure you want to restore ${selectedIds.size} selected courses?`)) return;
+    setLoading(true);
+    try {
+      await Promise.all(Array.from(selectedIds).map(id => courseService.restoreCourse(id)));
+      toast.success("Selected courses restored successfully");
+      setSelectedIds(new Set());
+      fetchCourses();
+    } catch (e: any) {
+      toast.error("Failed to restore some selected courses");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24">
       <Card>
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
+          <div className="space-y-2">
             <CardTitle>{t("manageCourses")}</CardTitle>
-            <CardDescription>Overview and management of learning courses</CardDescription>
+            <CardDescription>{t("manageCoursesDesc") || "Overview and management of learning courses"}</CardDescription>
           </div>
           <Button asChild className="gap-2 shrink-0">
             <Link to="/admin/courses/create">
@@ -79,18 +150,71 @@ export default function AdminCoursesPage() {
           </Button>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3 mb-6">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search courses..."
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                className="pl-9"
-              />
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <form onSubmit={handleSearch} className="flex gap-3 w-full md:w-auto flex-1 max-w-md">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder={t("searchCourses")}
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                  className="pl-9 h-11 rounded-xl"
+                />
+              </div>
+              <Button type="submit" variant="secondary" className="h-11 rounded-xl px-5 font-bold">{t("search")}</Button>
+            </form>
+
+            <div className="flex gap-1.5 p-1 bg-muted/40 rounded-xl border border-border/50">
+              {(["ALL", "ACTIVE", "DELETED"] as const).map((tab) => (
+                <Button
+                  key={tab}
+                  type="button"
+                  onClick={() => {
+                    setActiveTab(tab);
+                    setPage(0);
+                  }}
+                  variant={activeTab === tab ? "default" : "ghost"}
+                  className={`h-9 rounded-lg px-4 text-xs font-bold transition-all ${
+                    activeTab === tab ? "shadow-sm bg-primary text-primary-foreground" : "hover:bg-primary/10 hover:text-primary"
+                  }`}
+                >
+                  {tab === "ALL" ? t("all") : tab === "ACTIVE" ? t("activeTestsTab") : t("deletedTestsTab")}
+                </Button>
+              ))}
             </div>
-            <Button type="submit" variant="secondary">{t("search")}</Button>
-          </form>
+          </div>
+
+          {/* Bulk Actions Bar */}
+          {selectedIds.size > 0 && (
+            <div className="flex items-center justify-between p-4 mb-6 bg-primary/[0.03] border border-primary/20 rounded-xl animate-in fade-in slide-in-from-top-2">
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
+                <span className="text-sm font-bold text-primary">Đã chọn {selectedIds.size} khóa học</span>
+              </div>
+              <div className="flex gap-2">
+                {activeTab !== "DELETED" && (
+                  <Button 
+                    variant="destructive" 
+                    size="sm" 
+                    onClick={handleBulkDelete}
+                    className="rounded-lg font-bold shadow-sm h-9 px-4"
+                  >
+                    <Trash2 className="w-4 h-4 mr-1.5" /> Xóa nhiều
+                  </Button>
+                )}
+                {activeTab !== "ACTIVE" && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={handleBulkRestore}
+                    className="rounded-lg font-bold border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800 transition-all shadow-sm h-9 px-4"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-1.5" /> Khôi phục nhiều
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
 
           {loading ? (
             <div className="flex justify-center py-8"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
@@ -99,15 +223,31 @@ export default function AdminCoursesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Course</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="w-12">
+                      <input 
+                        type="checkbox" 
+                        checked={filteredCourses.length > 0 && filteredCourses.every(c => selectedIds.has(c.id))}
+                        onChange={toggleSelectAll}
+                        className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary cursor-pointer"
+                      />
+                    </TableHead>
+                    <TableHead>{t("courses")}</TableHead>
+                    <TableHead>{t("price")}</TableHead>
+                    <TableHead>{t("status")}</TableHead>
+                    <TableHead className="text-right">{t("actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {courses?.content?.map((course) => (
-                    <TableRow key={course.id}>
+                  {filteredCourses.map((course) => (
+                    <TableRow key={course.id} className={selectedIds.has(course.id) ? "bg-primary/[0.02]" : ""}>
+                      <TableCell className="w-12">
+                        <input 
+                          type="checkbox" 
+                          checked={selectedIds.has(course.id)}
+                          onChange={() => toggleSelectOne(course.id)}
+                          className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary cursor-pointer"
+                        />
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-3">
                           {course.thumbnailUrl ? (
@@ -120,7 +260,7 @@ export default function AdminCoursesPage() {
                           <div>
                             <div className="font-medium text-foreground">{course.title}</div>
                             <div className="text-xs text-muted-foreground truncate max-w-[200px]" title={course.description}>
-                              {course.description || "No description"}
+                              {course.description || t("noDesc")}
                             </div>
                           </div>
                         </div>
@@ -129,7 +269,7 @@ export default function AdminCoursesPage() {
                         {course.price > 0 ? (
                           new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(course.price)
                         ) : (
-                          <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">Free</Badge>
+                          <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">{t("free")}</Badge>
                         )}
                       </TableCell>
                       <TableCell>
@@ -137,7 +277,7 @@ export default function AdminCoursesPage() {
                           variant={course.status === "PUBLISHED" ? "default" : course.status === "DELETED" ? "destructive" : "outline"}
                           className={course.status === "DELETED" ? "bg-red-100 text-red-700 hover:bg-red-100 border-red-200" : ""}
                         >
-                          {course.status}
+                          {course.status === "PUBLISHED" ? t("published") : course.status === "DELETED" ? t("deletedTestsTab") : t("draft")}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
@@ -148,8 +288,8 @@ export default function AdminCoursesPage() {
                             </Button>
                           ) : (
                             <>
-                              <Button variant="ghost" size="icon" asChild>
-                                <Link to={`/courses/${course.id}`} target="_blank">
+                              <Button variant="ghost" size="icon" asChild title="View course curriculum">
+                                <Link to={`/admin/courses/${course.id}/lessons`}>
                                   <Eye className="w-4 h-4 text-primary" />
                                 </Link>
                               </Button>
@@ -167,15 +307,61 @@ export default function AdminCoursesPage() {
                       </TableCell>
                     </TableRow>
                   ))}
-                  {(!courses?.content || courses.content.length === 0) && (
+                  {filteredCourses.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
-                        No courses found.
+                      <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                        {t("noCoursesFound") || "No courses found."}
                       </TableCell>
                     </TableRow>
                   )}
                 </TableBody>
               </Table>
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {courses && courses.totalPages >= 1 && (
+            <div className="p-6 bg-muted/10 border border-t-0 border-border/50 rounded-b-md flex items-center justify-between">
+              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">
+                {t("showing")} {courses.pageNumber * courses.pageSize + 1} - {Math.min((courses.pageNumber + 1) * courses.pageSize, courses.totalElements)} {t("of")} {courses.totalElements}
+              </p>
+              <div className="flex gap-2 ml-auto">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-9 h-9 rounded-lg p-0 font-bold transition-all hover:bg-primary/10 hover:text-primary border border-border/50 disabled:opacity-50 flex items-center justify-center"
+                  onClick={() => setPage(prev => Math.max(0, prev - 1))}
+                  disabled={page === 0}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <div className="flex gap-1">
+                  {[...Array(courses.totalPages)].map((_, i) => (
+                    <Button
+                      key={i}
+                      variant={page === i ? "default" : "ghost"}
+                      size="sm"
+                      className={`w-9 h-9 rounded-lg p-0 font-bold transition-all ${
+                        page === i 
+                          ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/15" 
+                          : "border border-border/50 hover:bg-primary/10 hover:text-primary"
+                      }`}
+                      onClick={() => setPage(i)}
+                    >
+                      {i + 1}
+                    </Button>
+                  ))}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-9 h-9 rounded-lg p-0 font-bold transition-all hover:bg-primary/10 hover:text-primary border border-border/50 disabled:opacity-50 flex items-center justify-center"
+                  onClick={() => setPage(prev => Math.min(courses.totalPages - 1, prev + 1))}
+                  disabled={page === courses.totalPages - 1}
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>

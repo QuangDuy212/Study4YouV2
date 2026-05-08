@@ -14,6 +14,7 @@ import {
   ExternalLink,
   ChevronLeft,
   ChevronRight,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -55,12 +56,16 @@ interface AdminTestTableProps {
   onDuplicate: (test: Test) => void;
   onArchive: (test: Test) => void;
   onDelete?: (test: Test) => void;
+  onRestore?: (test: Test) => void;
   onNavigateToEdit?: (test: Test) => void;
   currentPage?: number;
   totalPages?: number;
   onPageChange?: (page: number) => void;
   totalCount?: number;
   itemsPerPage?: number;
+  selectedIds?: Set<string>;
+  onSelectAll?: () => void;
+  onSelectOne?: (id: string) => void;
 }
 
 const skillConfig: Record<string, { icon: any; color: string; bg: string }> = {
@@ -129,12 +134,16 @@ export default function AdminTestTable({
   onDuplicate, 
   onArchive, 
   onDelete, 
+  onRestore,
   onNavigateToEdit,
   currentPage = 1,
   totalPages = 1,
   onPageChange,
   totalCount = 0,
   itemsPerPage = 10,
+  selectedIds,
+  onSelectAll,
+  onSelectOne,
 }: AdminTestTableProps) {
   const { t } = useLanguage();
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
@@ -173,6 +182,14 @@ export default function AdminTestTable({
           <Table>
             <TableHeader className="sticky top-0 bg-muted/50 z-10">
               <TableRow>
+                <TableHead className="w-12">
+                  <input 
+                    type="checkbox" 
+                    checked={tests.length > 0 && tests.every(t => selectedIds?.has(t.id))}
+                    onChange={onSelectAll}
+                    className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary cursor-pointer"
+                  />
+                </TableHead>
                 <TableHead className="w-[280px]">{t('testName')}</TableHead>
                 <TableHead className="w-[100px]">{t('skill')}</TableHead>
                 <TableHead className="w-[100px]">{t('level')}</TableHead>
@@ -195,8 +212,16 @@ export default function AdminTestTable({
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.2, delay: index * 0.03 }}
-                      className={cn("border-b transition-colors hover:bg-muted/30", index % 2 === 0 ? "bg-transparent" : "bg-muted/10")}
+                      className={cn("border-b transition-colors hover:bg-muted/30", index % 2 === 0 ? "bg-transparent" : "bg-muted/10", selectedIds?.has(test.id) ? "bg-primary/[0.02]" : "")}
                     >
+                      <TableCell className="w-12">
+                        <input 
+                          type="checkbox" 
+                          checked={selectedIds?.has(test.id) || false}
+                          onChange={() => onSelectOne?.(test.id)}
+                          className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary cursor-pointer"
+                        />
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center", skill.bg)}>
@@ -217,24 +242,33 @@ export default function AdminTestTable({
                             <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onView(test)}><Eye className="w-4 h-4" /></Button></TooltipTrigger>
                             <TooltipContent className="bg-card border border-border">{t('view')}</TooltipContent>
                           </Tooltip>
-                          <Tooltip>
-                            <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(test)}><Pencil className="w-4 h-4" /></Button></TooltipTrigger>
-                            <TooltipContent className="bg-card border border-border">{t('edit')}</TooltipContent>
-                          </Tooltip>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="w-4 h-4" /></Button></DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-card border border-border">
-                              <DropdownMenuItem onClick={() => onDuplicate(test)} className="gap-2"><Copy className="w-4 h-4" />{t('duplicate')}</DropdownMenuItem>
-                              {onNavigateToEdit && (
-                                <DropdownMenuItem onClick={() => onNavigateToEdit(test)} className="gap-2"><ExternalLink className="w-4 h-4" />{t('openEditor')}</DropdownMenuItem>
-                              )}
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={() => handleArchiveClick(test)} className="gap-2 text-destructive focus:text-destructive"><Archive className="w-4 h-4" />{t('archive')}</DropdownMenuItem>
-                              {onDelete && (
-                                <DropdownMenuItem onClick={() => handleDeleteClick(test)} className="gap-2 text-destructive focus:text-destructive"><Trash2 className="w-4 h-4" />{t('delete')}</DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          {test.status === 'archived' && onRestore ? (
+                            <Tooltip>
+                              <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50/50" onClick={() => onRestore(test)}><RefreshCw className="w-4 h-4" /></Button></TooltipTrigger>
+                              <TooltipContent className="bg-card border border-border">Khôi phục</TooltipContent>
+                            </Tooltip>
+                          ) : (
+                            <Tooltip>
+                              <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(test)}><Pencil className="w-4 h-4" /></Button></TooltipTrigger>
+                              <TooltipContent className="bg-card border border-border">{t('edit')}</TooltipContent>
+                            </Tooltip>
+                          )}
+                          {test.status !== 'archived' && (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="w-4 h-4" /></Button></DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="bg-card border border-border">
+                                <DropdownMenuItem onClick={() => onDuplicate(test)} className="gap-2"><Copy className="w-4 h-4" />{t('duplicate')}</DropdownMenuItem>
+                                {onNavigateToEdit && (
+                                  <DropdownMenuItem onClick={() => onNavigateToEdit(test)} className="gap-2"><ExternalLink className="w-4 h-4" />{t('openEditor')}</DropdownMenuItem>
+                                )}
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => handleArchiveClick(test)} className="gap-2 text-destructive focus:text-destructive"><Archive className="w-4 h-4" />{t('archive')}</DropdownMenuItem>
+                                {onDelete && (
+                                  <DropdownMenuItem onClick={() => handleDeleteClick(test)} className="gap-2 text-destructive focus:text-destructive"><Trash2 className="w-4 h-4" />{t('delete')}</DropdownMenuItem>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          )}
                         </div>
                       </TableCell>
                     </motion.tr>
@@ -245,7 +279,7 @@ export default function AdminTestTable({
           </Table>
         </div>
 
-        {totalPages > 1 && (
+        {totalPages >= 1 && (
           <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-muted/20">
             <div className="text-sm text-muted-foreground">
               {t('showing')} {totalCount > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-{Math.min(currentPage * itemsPerPage, totalCount)} {t('of')} {totalCount} {t('tests').toLowerCase()}
@@ -313,7 +347,11 @@ export default function AdminTestTable({
                       <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="w-4 h-4" /></Button></DropdownMenuTrigger>
                        <DropdownMenuContent align="end" className="bg-card border border-border">
                          <DropdownMenuItem onClick={() => onView(test)} className="gap-2"><Eye className="w-4 h-4" />{t('view')}</DropdownMenuItem>
-                         <DropdownMenuItem onClick={() => onEdit(test)} className="gap-2"><Pencil className="w-4 h-4" />{t('edit')}</DropdownMenuItem>
+                         {test.status === 'archived' ? (
+                           onRestore && <DropdownMenuItem onClick={() => onRestore(test)} className="gap-2 text-emerald-600"><RefreshCw className="w-4 h-4" />Khôi phục</DropdownMenuItem>
+                         ) : (
+                           <>
+                             <DropdownMenuItem onClick={() => onEdit(test)} className="gap-2"><Pencil className="w-4 h-4" />{t('edit')}</DropdownMenuItem>
                          <DropdownMenuItem onClick={() => onDuplicate(test)} className="gap-2"><Copy className="w-4 h-4" />{t('duplicate')}</DropdownMenuItem>
                          {onNavigateToEdit && (
                            <DropdownMenuItem onClick={() => onNavigateToEdit(test)} className="gap-2"><ExternalLink className="w-4 h-4" />{t('openEditor')}</DropdownMenuItem>
@@ -322,6 +360,11 @@ export default function AdminTestTable({
                          <DropdownMenuItem onClick={() => handleArchiveClick(test)} className="gap-2 text-destructive focus:text-destructive"><Archive className="w-4 h-4" />{t('archive')}</DropdownMenuItem>
                          {onDelete && (
                            <DropdownMenuItem onClick={() => handleDeleteClick(test)} className="gap-2 text-destructive focus:text-destructive"><Trash2 className="w-4 h-4" />{t('delete')}</DropdownMenuItem>
+                          )}
+                           </>
+                         )}
+                         {onDelete && (
+                           null
                          )}
                        </DropdownMenuContent>
                     </DropdownMenu>
@@ -339,7 +382,7 @@ export default function AdminTestTable({
         })}
 
         {/* Mobile Pagination */}
-        {totalPages > 1 && (
+        {totalPages >= 1 && (
           <div className="flex flex-col gap-4 items-center py-4">
              <div className="text-xs text-muted-foreground">
               {t('showing')} {totalCount > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-{Math.min(currentPage * itemsPerPage, totalCount)} {t('of')} {totalCount} {t('tests').toLowerCase()}
