@@ -34,6 +34,17 @@ export const permissionService = {
     );
     return data.data;
   },
+  async createPermission(request: { name: string; pageAllow?: string[] }): Promise<PermissionResponse> {
+    const { data } = await apiClient.post<ApiWrapped<PermissionResponse>>("/permissions", request);
+    return data.data;
+  },
+  async updatePermission(id: string, request: { name: string; pageAllow?: string[] }): Promise<PermissionResponse> {
+    const { data } = await apiClient.put<ApiWrapped<PermissionResponse>>(`/permissions/${id}`, request);
+    return data.data;
+  },
+  async deletePermission(id: string): Promise<void> {
+    await apiClient.delete(`/permissions/${id}`);
+  },
 };
 
 export default permissionService;

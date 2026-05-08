@@ -61,13 +61,10 @@ export default function AdminLayout() {
   const navigationItems = [
     { icon: LayoutDashboard, label: t("dashboard"), href: "/admin", permission: "VIEW_ADMIN_DASHBOARD" },
     { icon: FileText, label: t("manageTests"), href: "/admin/tests", permission: "MANAGE_TESTS" },
-    { icon: Database, label: t("questionBank"), href: "/admin/questions", permission: "MANAGE_QUESTIONS" },
     { icon: GraduationCap, label: t("manageCourses"), href: "/admin/courses" },
     { icon: CreditCard, label: t("managePayments"), href: "/admin/payments" },
     { icon: Users, label: t("users"), href: "/admin/users", permission: "MANAGE_USERS" },
     { icon: Shield, label: t("roles"), href: "/admin/roles", permission: "MANAGE_USERS" },
-    { icon: Sparkles, label: t("aiQuestions"), href: "/admin/questions/ai-generate", permission: "MANAGE_QUESTIONS" },
-    { icon: Sparkles, label: t("aiUsers"), href: "/admin/users/ai-generate", permission: "MANAGE_USERS" },
     { icon: Bell, label: t("notifications"), href: "/admin/notifications", permission: "MANAGE_USERS" },
     { icon: BarChart3, label: t("analytics"), href: "/admin/analytics", permission: "VIEW_ANALYTICS" },
   ];
