@@ -5,11 +5,13 @@ import {
   CheckCircle2, 
   Clock, 
   FileDown, 
-  MoreVertical,
   User,
   BookOpen,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Eye,
+  Check,
+  Shield
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import paymentService from "@/services/paymentService";
@@ -18,16 +20,12 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 export default function AdminPaymentsPage() {
   const { t } = useLanguage();
@@ -51,7 +49,7 @@ export default function AdminPaymentsPage() {
   const { data: payments = [], isLoading } = useQuery({
     queryKey: ["admin-payments"],
     queryFn: paymentService.getAllPaymentsForAdmin,
-    staleTime: 30000, // Cache for 30 seconds
+    staleTime: 30000,
   });
 
   // Approval Mutation
@@ -156,58 +154,113 @@ export default function AdminPaymentsPage() {
     }
   };
 
+  const stats = useMemo(() => {
+    const totalRevenue = payments.reduce((acc, p) => p.status === "SUCCESS" ? acc + p.amount : acc, 0);
+    const pendingCount = payments.filter(p => p.status === "PENDING").length;
+    const totalCount = payments.filter(p => p.status === "SUCCESS").length;
+    return { totalRevenue, pendingCount, totalCount };
+  }, [payments]);
+
   return (
     <div className="space-y-6 pb-24">
-      <Card>
-        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="space-y-2">
-            <CardTitle>{t("paymentManagement")}</CardTitle>
-            <CardDescription>{t("paymentManagementDesc")}</CardDescription>
-          </div>
-          <Button 
-            variant="outline" 
-            className="rounded-xl gap-2 h-10 font-bold shadow-sm"
-            onClick={handleExport}
-          >
-            <FileDown className="w-4 h-4" />
-            {t("exportAllCsv")}
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-            <div className="relative flex-1 max-w-md w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input 
-                placeholder={t("searchPaymentsPlaceholder")}
-                className="pl-10 h-10 rounded-xl"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div className="flex gap-1.5 p-1 bg-muted/50 rounded-xl border border-border/50">
-               {["ALL", "PENDING", "SUCCESS"].map(s => (
-                 <Button 
-                   key={s}
-                   onClick={() => setFilterStatus(s)}
-                   variant={filterStatus === s ? "default" : "ghost"}
-                   className={`h-8 rounded-lg px-4 text-xs font-bold transition-all ${
-                     filterStatus === s 
-                       ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm shadow-primary/15" 
-                       : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
-                   }`}
-                 >
-                   {t(s.toLowerCase())}
-                 </Button>
-               ))}
+      {/* Statistics Header */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="border-border/50 shadow-sm overflow-hidden bg-gradient-to-br from-primary/5 to-transparent">
+          <CardHeader className="pb-2">
+            <CardDescription className="text-[10px] font-black uppercase tracking-widest text-primary/60">{t("totalRevenue")}</CardDescription>
+            <CardTitle className="text-3xl font-black text-primary flex items-baseline gap-1">
+              {stats.totalRevenue.toLocaleString()} 
+              <span className="text-sm opacity-50 font-bold">VND</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+             <div className="text-[10px] font-bold text-muted-foreground flex items-center gap-1.5">
+               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+               Hoàn thành: {stats.totalCount} giao dịch
+             </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/50 shadow-sm overflow-hidden bg-gradient-to-br from-amber-500/5 to-transparent">
+          <CardHeader className="pb-2">
+            <CardDescription className="text-[10px] font-black uppercase tracking-widest text-amber-600/60">{t("pendingApprovals")}</CardDescription>
+            <CardTitle className="text-3xl font-black text-amber-600 flex items-center gap-3">
+              {stats.pendingCount}
+              <Clock className="w-6 h-6 opacity-30" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+             <div className="text-[10px] font-bold text-muted-foreground flex items-center gap-1.5">
+               <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+               Cần xử lý gấp
+             </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/50 shadow-sm overflow-hidden bg-gradient-to-br from-blue-500/5 to-transparent">
+          <CardHeader className="pb-2">
+            <CardDescription className="text-[10px] font-black uppercase tracking-widest text-blue-600/60">Hệ thống</CardDescription>
+            <CardTitle className="text-3xl font-black text-blue-600">
+              Active
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+             <div className="text-[10px] font-bold text-muted-foreground flex items-center gap-1.5">
+               <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+               Cập nhật: {format(new Date(), "HH:mm")}
+             </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="border-border/50 shadow-sm overflow-hidden">
+        <CardContent className="p-0">
+          <div className="p-6 border-b border-border/50 bg-muted/10">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+              <div className="relative flex-1 max-w-md w-full group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <Input 
+                  placeholder={t("searchPaymentsPlaceholder")}
+                  className="pl-10 h-11 rounded-xl bg-background border-border/50 focus:border-primary/50 transition-all shadow-none"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                <div className="flex gap-1.5 p-1 bg-muted/50 rounded-xl border border-border/50">
+                   {["ALL", "PENDING", "SUCCESS"].map(s => (
+                     <Button 
+                       key={s}
+                       onClick={() => setFilterStatus(s)}
+                       variant={filterStatus === s ? "default" : "ghost"}
+                       className={`h-9 rounded-lg px-5 text-xs font-bold transition-all ${
+                         filterStatus === s 
+                           ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/15" 
+                           : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                       }`}
+                     >
+                       {t(s.toLowerCase())}
+                     </Button>
+                   ))}
+                </div>
+                <Button 
+                  variant="outline" 
+                  className="rounded-xl gap-2 h-11 font-bold border-border/50 hover:bg-muted transition-all px-5 ml-auto lg:ml-0"
+                  onClick={handleExport}
+                >
+                  <FileDown className="w-4 h-4 text-primary" />
+                  {t("exportAllCsv")}
+                </Button>
+              </div>
             </div>
           </div>
 
-          {/* Bulk Actions Bar */}
-          {selectedPaymentIds.size > 0 && (
-            <div className="flex items-center justify-between p-4 mb-6 bg-primary/[0.03] border border-primary/20 rounded-xl animate-in fade-in slide-in-from-top-2">
+          {/* Bulk Actions Bar - Only show when in PENDING tab */}
+          {filterStatus === "PENDING" && selectedPaymentIds.size > 0 && (
+            <div className="mx-6 mt-6 flex items-center justify-between p-4 bg-primary/[0.03] border border-primary/20 rounded-xl animate-in fade-in slide-in-from-top-2">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
-                <span className="text-sm font-bold text-primary">Đã chọn {selectedPaymentIds.size} giao dịch</span>
+                <span className="text-sm font-bold text-primary">Đã chọn {selectedPaymentIds.size} giao dịch chờ duyệt</span>
               </div>
               <div className="flex gap-2">
                 <Button 
@@ -223,164 +276,173 @@ export default function AdminPaymentsPage() {
             </div>
           )}
 
-          <div className="border border-border/50 rounded-xl overflow-hidden shadow-sm bg-card">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead className="bg-muted/30">
-                  <tr>
-                    <th className="p-6 w-12 text-center">
+          <div className="p-6">
+            <div className="border border-border/50 rounded-xl overflow-hidden bg-card shadow-sm">
+              <Table>
+                <TableHeader className="bg-muted/30">
+                  <TableRow>
+                    <TableHead className="w-12 text-center">
                       <Checkbox 
                         checked={paginatedPayments.length > 0 && paginatedPayments.every(p => selectedPaymentIds.has(p.id))}
                         onCheckedChange={toggleSelectAll}
                       />
-                    </th>
-                    <th className="p-6 text-[10px] font-black text-muted-foreground uppercase tracking-widest">{t("transactionDetail")}</th>
-                    <th className="p-6 text-[10px] font-black text-muted-foreground uppercase tracking-widest">{t("courseAndAmount")}</th>
-                    <th className="p-6 text-[10px] font-black text-muted-foreground uppercase tracking-widest">{t("userInfo")}</th>
-                    <th className="p-6 text-[10px] font-black text-muted-foreground uppercase tracking-widest">{t("status")}</th>
-                    <th className="p-6 text-right text-[10px] font-black text-muted-foreground uppercase tracking-widest">{t("actions")}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/50">
+                    </TableHead>
+                    <TableHead className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">{t("courses")}</TableHead>
+                    <TableHead className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">{t("price")}</TableHead>
+                    <TableHead className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">{t("userInfo")}</TableHead>
+                    <TableHead className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">{t("status")}</TableHead>
+                    <TableHead className="text-right text-[11px] font-bold text-muted-foreground uppercase tracking-wider">{t("actions")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                     {isLoading ? (
-                      <tr>
-                        <td colSpan={6} className="p-20 text-center text-sm text-muted-foreground">
-                          {t("loading")}...
-                        </td>
-                      </tr>
+                      <TableRow>
+                        <TableCell colSpan={6} className="h-40 text-center text-sm text-muted-foreground">
+                          <div className="flex flex-col items-center gap-2">
+                             <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                             {t("loading")}...
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ) : paginatedPayments.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="h-60 text-center">
+                          <div className="flex flex-col items-center justify-center space-y-4">
+                            <div className="w-20 h-20 rounded-[2.5rem] bg-muted mx-auto flex items-center justify-center">
+                              <CreditCard className="w-10 h-10 text-muted-foreground/30" />
+                            </div>
+                            <p className="text-muted-foreground font-bold">{t("noPaymentsFound")}</p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
                     ) : paginatedPayments.map((p) => (
-                      <tr 
+                      <TableRow 
                         key={p.id}
-                        className="group hover:bg-muted/20 transition-all"
+                        className={cn(
+                          "group transition-colors",
+                          selectedPaymentIds.has(p.id) ? "bg-primary/[0.02]" : "hover:bg-muted/30"
+                        )}
                       >
-                        <td className="p-6 w-12 text-center">
+                        <TableCell className="text-center">
                           <Checkbox 
                             checked={selectedPaymentIds.has(p.id)}
                             onCheckedChange={() => toggleSelectOne(p.id)}
                           />
-                        </td>
-                        <td className="p-6">
-                           <div className="space-y-1">
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-4">
+                            <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0 overflow-hidden border border-border/50">
+                               {p.thumbnailUrl ? (
+                                 <img src={p.thumbnailUrl} alt={p.courseTitle} className="w-full h-full object-cover" />
+                               ) : (
+                                 <BookOpen className="w-6 h-6" />
+                               )}
+                            </div>
+                            <div className="space-y-1">
+                              <p className="text-sm font-bold text-foreground leading-none">{p.courseTitle}</p>
                               <div className="flex items-center gap-2">
-                                <p className="font-mono text-sm font-black text-primary bg-primary/5 px-2 py-0.5 rounded inline-block">{p.referenceCode || "NO-CODE"}</p>
-                                {p.isVatRequired && (
-                                  <Badge className="bg-blue-500 text-white border-none text-[8px] px-1 py-0 font-black">VAT</Badge>
-                                )}
+                                <span className="text-[10px] font-mono text-muted-foreground font-bold">{p.referenceCode}</span>
+                                <Badge variant="outline" className="text-[9px] font-bold py-0 h-4 uppercase">{p.paymentMethod}</Badge>
                               </div>
                               {p.isVatRequired && (
-                                <div className="bg-blue-500/5 border border-blue-500/10 p-2 rounded-lg space-y-0.5 mb-2">
-                                   <p className="text-[9px] font-bold text-blue-600 line-clamp-1">🏢 {p.companyName}</p>
-                                   <p className="text-[9px] text-blue-500/70 font-mono">MST: {p.taxCode}</p>
-                                </div>
+                                <p className="text-[9px] font-bold text-blue-600 flex items-center gap-1">
+                                  <Shield className="w-2.5 h-2.5" /> VAT Required
+                                </p>
                               )}
-                              <p className="text-[10px] text-muted-foreground block">{(p.transactionRef || "").slice(0, 8)}...</p>
-                              <p className="text-[10px] text-muted-foreground">{p.createdAt ? format(new Date(p.createdAt), 'yyyy-MM-dd HH:mm:ss') : 'N/A'}</p>
-                              <Badge variant="outline" className="text-[9px] font-bold uppercase">{p.paymentMethod}</Badge>
-                           </div>
-                        </td>
-                        <td className="p-6">
-                           <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                                 <BookOpen className="w-5 h-5" />
-                              </div>
-                              <div>
-                                <p className="text-sm font-bold text-foreground line-clamp-1">{p.courseTitle}</p>
-                                <p className="text-sm font-black text-primary">{p.amount.toLocaleString()} VND</p>
-                              </div>
-                           </div>
-                        </td>
-                        <td className="p-6">
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <p className="text-sm font-black text-primary">{p.amount.toLocaleString()} <span className="text-[10px] opacity-70">₫</span></p>
+                        </TableCell>
+                        <TableCell>
                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
-                                 <User className="w-4 h-4 text-secondary-foreground" />
+                              <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center border border-border/50">
+                                 <User className="w-3.5 h-3.5 text-secondary-foreground" />
                               </div>
-                              <p className="text-sm font-medium text-foreground">{p.userId.slice(0,8)}...</p>
+                              <span className="text-xs font-medium text-muted-foreground">{p.userId.slice(0,8)}...</span>
                            </div>
-                        </td>
-                        <td className="p-6">
+                        </TableCell>
+                        <TableCell>
                            {getStatusBadge(p.status)}
-                        </td>
-                        <td className="p-6 text-right">
-                           {p.status === "PENDING" ? (
-                             <Button 
-                                onClick={() => approveMutation.mutate(p.id)}
-                                disabled={approveMutation.isPending}
-                                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl px-4 h-9 text-xs shadow-md shadow-emerald-600/20 transition-all"
-                             >
-                                {approveMutation.isPending ? "..." : t("approve")}
-                             </Button>
-                           ) : (
-                             <Button 
-                                variant="ghost" 
-                                className="rounded-xl font-bold text-xs border border-border/50 hover:bg-primary/10 hover:text-primary h-9 transition-all px-4"
-                                onClick={() => setSelectedPaymentForDetail(p)}
-                             >
-                                {t("viewDetails")}
-                             </Button>
-                           )}
-                        </td>
-                      </tr>
+                        </TableCell>
+                        <TableCell className="text-right">
+                           <div className="flex justify-end gap-2">
+                              {p.status === "PENDING" && (
+                                <Button 
+                                   size="sm"
+                                   variant="outline"
+                                   onClick={() => approveMutation.mutate(p.id)}
+                                   disabled={approveMutation.isPending}
+                                   className="h-8 rounded-lg bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 hover:text-emerald-700 hover:border-emerald-300 transition-all px-3 font-bold gap-1 shadow-sm"
+                                >
+                                   <Check className="w-3.5 h-3.5" /> Duyệt
+                                </Button>
+                              )}
+                              <Button 
+                                 size="icon"
+                                 variant="ghost" 
+                                 className="h-8 w-8 rounded-lg hover:bg-primary/5 text-primary hover:text-primary/80 transition-all border border-transparent hover:border-primary/20"
+                                 onClick={() => setSelectedPaymentForDetail(p)}
+                              >
+                                 <Eye className="w-4 h-4" />
+                              </Button>
+                           </div>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                </tbody>
-              </table>
-              {filteredPayments.length === 0 && !isLoading && (
-                <div className="p-20 text-center space-y-4">
-                   <div className="w-20 h-20 rounded-[2.5rem] bg-muted mx-auto flex items-center justify-center">
-                      <CreditCard className="w-10 h-10 text-muted-foreground/30" />
-                   </div>
-                   <p className="text-muted-foreground font-bold">{t("noPaymentsFound")}</p>
-                </div>
-              )}
+                </TableBody>
+              </Table>
             </div>
-            
-            {/* Pagination Controls */}
-            {totalPages >= 1 && (
-              <div className="p-6 bg-muted/10 border-t border-border/50 flex items-center justify-between">
-                <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">
-                  {t("showing")} {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, filteredPayments.length)} {t("of")} {filteredPayments.length}
-                </p>
-                <div className="flex gap-2 ml-auto">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-9 h-9 rounded-lg p-0 font-bold transition-all hover:bg-primary/10 hover:text-primary border border-border/50 disabled:opacity-50 flex items-center justify-center"
-                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                    disabled={currentPage === 1}
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </Button>
-                  <div className="flex gap-1">
-                    {[...Array(totalPages)].map((_, i) => (
-                      <Button
-                        key={i}
-                        variant={currentPage === i + 1 ? "default" : "ghost"}
-                        size="sm"
-                        className={`w-9 h-9 rounded-lg p-0 font-bold transition-all ${
-                          currentPage === i + 1 
-                            ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/15" 
-                            : "border border-border/50 hover:bg-primary/10 hover:text-primary"
-                        }`}
-                        onClick={() => setCurrentPage(i + 1)}
-                      >
-                        {i + 1}
-                      </Button>
-                    ))}
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-9 h-9 rounded-lg p-0 font-bold transition-all hover:bg-primary/10 hover:text-primary border border-border/50 disabled:opacity-50 flex items-center justify-center"
-                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                    disabled={currentPage === totalPages}
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>
+
+      {/* Pagination Controls */}
+      {totalPages >= 1 && (
+        <div className="p-6 bg-muted/10 border border-t-0 border-border/50 rounded-b-xl flex items-center justify-between">
+          <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">
+            {t("showing")} {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, filteredPayments.length)} {t("of")} {filteredPayments.length}
+          </p>
+          <div className="flex gap-2 ml-auto">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-9 h-9 rounded-lg p-0 font-bold transition-all hover:bg-primary/10 hover:text-primary border border-border/50 disabled:opacity-50 flex items-center justify-center"
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <div className="flex gap-1">
+              {[...Array(totalPages)].map((_, i) => (
+                <Button
+                  key={i}
+                  variant={currentPage === i + 1 ? "default" : "ghost"}
+                  size="sm"
+                  className={`w-9 h-9 rounded-lg p-0 font-bold transition-all ${
+                    currentPage === i + 1 
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/15" 
+                      : "border border-border/50 hover:bg-primary/10 hover:text-primary"
+                  }`}
+                  onClick={() => setCurrentPage(i + 1)}
+                >
+                  {i + 1}
+                </Button>
+              ))}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-9 h-9 rounded-lg p-0 font-bold transition-all hover:bg-primary/10 hover:text-primary border border-border/50 disabled:opacity-50 flex items-center justify-center"
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Premium Transaction Details Dialog */}
       <Dialog open={!!selectedPaymentForDetail} onOpenChange={(open) => !open && setSelectedPaymentForDetail(null)}>
@@ -396,28 +458,30 @@ export default function AdminPaymentsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-muted/30 p-3 rounded-2xl space-y-1">
                   <p className="text-[10px] uppercase font-black tracking-wider text-muted-foreground">Mã hóa đơn</p>
-                  <p className="font-mono text-sm font-bold text-primary">{selectedPaymentForDetail.referenceCode || "N/A"}</p>
+                  <p className="font-mono font-bold text-primary">{selectedPaymentForDetail.referenceCode}</p>
                 </div>
-                <div className="bg-muted/30 p-3 rounded-2xl space-y-1">
+                <div className="bg-muted/30 p-3 rounded-2xl space-y-1 text-right">
                   <p className="text-[10px] uppercase font-black tracking-wider text-muted-foreground">Trạng thái</p>
-                  <div>{getStatusBadge(selectedPaymentForDetail.status)}</div>
+                  <div className="flex justify-end">{getStatusBadge(selectedPaymentForDetail.status)}</div>
                 </div>
               </div>
 
-              <div className="bg-muted/30 p-4 rounded-2xl space-y-3">
-                <p className="text-[10px] uppercase font-black tracking-wider text-muted-foreground">Thông tin khóa học & số tiền</p>
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <BookOpen className="w-4 h-4 text-primary" />
-                    <span className="font-bold text-sm text-foreground">{selectedPaymentForDetail.courseTitle}</span>
+              <div className="border border-border/50 rounded-2xl p-4 space-y-3">
+                <div className="flex items-center gap-3 border-b border-border/50 pb-3">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                    <BookOpen className="w-6 h-6" />
                   </div>
-                  <span className="font-black text-primary text-sm">{selectedPaymentForDetail.amount.toLocaleString()} VND</span>
+                  <div>
+                    <p className="text-sm font-bold text-foreground">{selectedPaymentForDetail.courseTitle}</p>
+                    <p className="text-xs text-muted-foreground">Thanh toán khóa học</p>
+                  </div>
                 </div>
-              </div>
 
-              <div className="bg-muted/30 p-4 rounded-2xl space-y-3">
-                <p className="text-[10px] uppercase font-black tracking-wider text-muted-foreground">Thông tin khách hàng & giao dịch</p>
-                <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-xs">
+                <div className="grid grid-cols-2 gap-y-3 text-xs">
+                  <div>
+                    <p className="text-muted-foreground font-semibold">Số tiền:</p>
+                    <p className="text-primary font-black text-sm">{selectedPaymentForDetail.amount.toLocaleString()} VND</p>
+                  </div>
                   <div>
                     <p className="text-muted-foreground font-semibold">Mã khách hàng:</p>
                     <p className="font-mono font-bold text-foreground">{selectedPaymentForDetail.userId.slice(0, 16)}...</p>

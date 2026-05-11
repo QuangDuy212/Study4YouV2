@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ConfirmDeleteModal } from "@/components/ConfirmDeleteModal";
 
 const ITEMS_PER_PAGE = 8;
 
@@ -37,6 +38,9 @@ export default function UsersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
+  const [isDeletingUser, setIsDeletingUser] = useState(false);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   const fetchUsers = async () => {
     setIsLoading(true);
@@ -93,15 +97,18 @@ export default function UsersPage() {
 
   const confirmDelete = async () => {
     if (userToDelete) {
+      setIsDeletingUser(true);
       try {
         await userService.deleteUser(userToDelete.id);
         toast.success(t("userDeleted").replace("{name}", userToDelete.fullName));
         fetchUsers();
+        setDeleteOpen(false);
+        setUserToDelete(null);
       } catch (error) {
         toast.error(t("failedToDelete") || "Failed to delete user");
+      } finally {
+        setIsDeletingUser(false);
       }
-      setDeleteOpen(false);
-      setUserToDelete(null);
     }
   };
 
@@ -152,18 +159,18 @@ export default function UsersPage() {
     }
   };
 
-  const handleBulkDelete = async () => {
-    if (!window.confirm(`Are you sure you want to delete ${selectedUserIds.size} selected users?`)) return;
-    setIsLoading(true);
+  const handleBulkDeleteConfirm = async () => {
+    setIsBulkDeleting(true);
     try {
       await Promise.all(Array.from(selectedUserIds).map(id => userService.deleteUser(id)));
       toast.success("Selected users deleted successfully");
       setSelectedUserIds(new Set());
+      setBulkDeleteOpen(false);
       fetchUsers();
     } catch (e) {
       toast.error("Failed to delete some selected users");
     } finally {
-      setIsLoading(false);
+      setIsBulkDeleting(false);
     }
   };
 
@@ -187,9 +194,6 @@ export default function UsersPage() {
                     <SelectItem value="inactive">{t('inactive')}</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button variant="outline" className="gap-2" onClick={() => navigate("/admin/users/ai-generate")}>
-                  <Sparkles className="w-4 h-4" /> {t('aiGenerateUsers')}
-                </Button>
                 <Button className="gap-2" onClick={() => navigate("/admin/users/create")}>
                   <Plus className="w-4 h-4" /> {t('createUser')}
                 </Button>
@@ -219,7 +223,7 @@ export default function UsersPage() {
               <Button 
                 variant="destructive" 
                 size="sm" 
-                onClick={handleBulkDelete}
+                onClick={() => setBulkDeleteOpen(true)}
                 className="rounded-lg font-bold shadow-sm h-9 px-4"
               >
                 <Trash2 className="w-4 h-4 mr-1.5" /> Xóa nhiều
@@ -365,18 +369,24 @@ export default function UsersPage() {
           </CardContent>
         </Card>
 
-        <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-destructive"><AlertTriangle className="w-5 h-5" /> {t('deleteUser')}</DialogTitle>
-              <DialogDescription>{t('deleteUserConfirm').replace('{name}', userToDelete?.fullName || '')}</DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setDeleteOpen(false)}>{t('cancel')}</Button>
-              <Button variant="destructive" onClick={confirmDelete}>{t('delete')}</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        {/* Individual User Delete Modal */}
+        <ConfirmDeleteModal
+          isOpen={deleteOpen}
+          onClose={() => setDeleteOpen(false)}
+          onConfirm={confirmDelete}
+          isLoading={isDeletingUser}
+          itemName={userToDelete?.fullName}
+        />
+
+        {/* Bulk User Delete Modal */}
+        <ConfirmDeleteModal
+          isOpen={bulkDeleteOpen}
+          onClose={() => setBulkDeleteOpen(false)}
+          onConfirm={handleBulkDeleteConfirm}
+          isLoading={isBulkDeleting}
+          title={`Xóa ${selectedUserIds.size} người dùng?`}
+          description={`Bạn có chắc chắn muốn xóa toàn bộ ${selectedUserIds.size} người dùng đã được lựa chọn không? Thao tác này không thể khôi phục.`}
+        />
       </div>
     </>
   );

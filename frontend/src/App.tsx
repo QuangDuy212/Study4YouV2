@@ -2,11 +2,11 @@ import "./course.css";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ChatbotWidget } from "@/components/chatbot/ChatbotWidget";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
@@ -53,6 +53,21 @@ import AdminLayout from "@/components/admin/AdminLayout";
 
 const queryClient = new QueryClient();
 
+const AdminRootRedirect = () => {
+  const { hasPermission, isAdmin } = useAuth();
+  
+  if (!isAdmin) return <Navigate to="/403" replace />;
+  if (hasPermission("VIEW_ADMIN_DASHBOARD")) return <AdminDashboardPage />;
+  if (hasPermission("MANAGE_TESTS") || hasPermission("MANAGE_TEST")) return <Navigate to="/admin/tests" replace />;
+  if (hasPermission("MANAGE_COURSES") || hasPermission("MANAGE_COURSE")) return <Navigate to="/admin/courses" replace />;
+  if (hasPermission("MANAGE_PAYMENTS") || hasPermission("MANAGE_PAYMENT")) return <Navigate to="/admin/payments" replace />;
+  if (hasPermission("MANAGE_USERS") || hasPermission("MANAGE_USER")) return <Navigate to="/admin/users" replace />;
+  if (hasPermission("VIEW_ANALYTICS")) return <Navigate to="/admin/analytics" replace />;
+  
+  // Ultimate fallback: Try to go anywhere allowed, or show Forbidden if truly empty
+  return <Navigate to="/admin/users" replace />;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
@@ -95,7 +110,7 @@ const App = () => (
                 {/* Admin Routes wrapper */}
                 <Route element={<ProtectedRoute requireAdmin />}>
                   <Route element={<AdminLayout />}>
-                    <Route path="/admin" element={<ProtectedRoute requiredPermission="VIEW_ADMIN_DASHBOARD"><AdminDashboardPage /></ProtectedRoute>} />
+                    <Route path="/admin" element={<AdminRootRedirect />} />
                     <Route path="/admin/tests" element={<ProtectedRoute requiredPermission="MANAGE_TESTS"><AdminPage /></ProtectedRoute>} />
                     <Route path="/admin/tests/create" element={<TestEditorPage />} />
                     <Route path="/admin/tests/:id/edit" element={<TestEditorPage />} />

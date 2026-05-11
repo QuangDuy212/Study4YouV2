@@ -156,7 +156,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const roles = profile?.roles ?? [];
-  const isAdmin = roles.includes("ADMIN") || roles.includes("admin");
+  const permissions = profile?.permissions ?? [];
+  
+  // User is considered admin if they have any role other than basic USER, 
+  // or if they have explicit permissions beyond the basic student features.
+  const isAdmin = roles.some(r => {
+    const role = r.toUpperCase();
+    return role !== "ROLE_USER" && role !== "USER";
+  }) || permissions.some(p => p.toUpperCase() !== "TAKE_TOEIC_TEST");
 
   return (
     <AuthContext.Provider

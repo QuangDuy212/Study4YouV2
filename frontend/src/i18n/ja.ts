@@ -29,6 +29,12 @@ export const ja = {
   profile: "プロフィール",
   collapse: "折りたたむ",
   continue: "続ける",
+  goodMorning: "おはようございます",
+  goodAfternoon: "こんにちは",
+  goodEvening: "こんばんは",
+  searchPlaceholder: "コース、テストを検索...",
+  readyToLearn: "学習の準備はできましたか、{name}さん？",
+  readyToLearnGeneric: "学習の準備はできましたか？",
   export: "エクスポート",
   add: "追加",
   close: "閉じる",
@@ -442,6 +448,10 @@ export const ja = {
   createSuccess: "正常に作成されました！",
   deleteSuccess: "正常に削除されました！",
   updateSuccess: "正常に更新されました！",
+  confirmDeleteTitle: "完全な削除を確認",
+  confirmDeleteAction: "今すぐ削除",
+  confirmDeleteDesc: "{name}を完全に削除してもよろしいですか？この操作は取り消せません。",
+  deleteItemNoun: "このアイテム",
   saveChanges: "変更を保存",
   saving: "保存中...",
 
@@ -781,6 +791,7 @@ export const ja = {
 
   // RBAC Groups
   roleUsersAccess: "ユーザーとアクセス",
+  roleCourseManagement: "コース管理",
   roleToeicManagement: "TOEIC管理",
   roleDashboardAnalytics: "ダッシュボードと分析",
   roleStudentFeatures: "学生機能",

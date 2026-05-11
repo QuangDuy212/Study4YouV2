@@ -83,6 +83,9 @@ public class PermissionService {
         if (!permissionRepository.existsById(id)) {
             throw new ResourceNotFoundException("Permission", "id", id);
         }
+        // First, detach the permission from any roles referencing it to clear DB constraints
+        permissionRepository.deleteRolePermissionsByPermissionId(id);
+        // Now, safely delete the permission
         permissionRepository.deleteById(id);
     }
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation, Outlet } from "react-router-dom";
+import { Link, useLocation, Outlet, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -18,7 +18,8 @@ import {
   Menu,
   GraduationCap,
   PlayCircle,
-  CreditCard
+  CreditCard,
+  Search
 } from "lucide-react";
 import NotificationDropdown from "@/components/NotificationDropdown";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
@@ -33,6 +34,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
 
 export default function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(false);
@@ -40,9 +42,24 @@ export default function DashboardLayout() {
   const { t } = useLanguage();
   const { profile, signOut, isAdmin } = useAuth();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return t("goodMorning");
+    if (hour < 18) return t("goodAfternoon");
+    return t("goodEvening");
+  };
+
+  const handleSearch = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && searchQuery.trim()) {
+      navigate(`/courses?keyword=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
+    }
+  };
 
   const navItems = [
-    { icon: LayoutDashboard, label: t("dashboard"), href: "/dashboard" },
     { icon: BookOpen, label: t("toeicTests"), href: "/tests" },
     { icon: GraduationCap, label: t("courses"), href: "/courses" },
     { icon: PlayCircle, label: t("myCourses"), href: "/my-courses" },
@@ -204,12 +221,31 @@ export default function DashboardLayout() {
                 </SheetContent>
               </Sheet>
             )}
-            {pageTitle && (
-              <div className="animate-in fade-in slide-in-from-left-4 duration-500">
-                <h1 className="font-display text-lg sm:text-xl font-bold text-foreground leading-tight">{pageTitle}</h1>
-                {pageDescription && <p className="text-xs text-muted-foreground hidden sm:block">{pageDescription}</p>}
+            <div className="hidden lg:block animate-in fade-in slide-in-from-left-4 duration-500">
+              <p className="text-xs font-semibold text-primary tracking-wide mb-0.5">{getGreeting()} 👋</p>
+              <h2 className="text-sm font-bold text-foreground">
+                {profile?.fullName 
+                  ? t("readyToLearn", { name: profile.fullName.split(' ')[0] }) 
+                  : t("readyToLearnGeneric")}
+              </h2>
+            </div>
+
+            <div className="flex-1 flex justify-center px-4 max-w-xl mx-auto">
+              <div className="relative w-full max-w-md group hidden sm:block">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <Input 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={handleSearch}
+                  placeholder={t("searchPlaceholder")} 
+                  className="pl-9 bg-muted/40 border-transparent h-10 w-full rounded-2xl focus-visible:ring-primary/20 focus:bg-background focus:border-border transition-all shadow-none"
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden md:flex items-center gap-1 px-1.5 py-0.5 rounded border border-border bg-card text-[10px] font-bold text-muted-foreground shadow-sm">
+                  <span className="text-[12px]">⌘</span>
+                  <span>K</span>
+                </div>
               </div>
-            )}
+            </div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4">

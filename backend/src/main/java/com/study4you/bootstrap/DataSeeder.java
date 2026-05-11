@@ -42,18 +42,21 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
+        // Triggered reload attempt at 2026-05-11T17:56:00
+        log.info("Self-healing platform configuration syncing...");
+        
+        // 1. Sync/Seed Permissions (Always ensures pool is up to date)
+        Map<String, Permission> permissions = seedPermissions();
+
+        // 2. Sync/Seed Roles (Always ensures Admin role is populated with latest code permissions)
+        Map<String, Role> roles = seedRoles(permissions);
+
         if (userRepository.count() > 0 || toeicTestRepository.count() > 0) {
-            log.info("Database already seeded. Skipping data seeder.");
+            log.info("Dynamic metadata synchronized. Core transactional entities exist, skipping initialization.");
             return;
         }
 
-        log.info("Starting data seeding...");
-
-        // 1. Seed Permissions
-        Map<String, Permission> permissions = seedPermissions();
-
-        // 2. Seed Roles
-        Map<String, Role> roles = seedRoles(permissions);
+        log.info("Starting standard baseline data seeding...");
 
         // 3. Seed Users
         seedUsers(roles);
@@ -65,27 +68,39 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private Map<String, Permission> seedPermissions() {
-        log.info("Seeding permissions...");
+        log.info("Validating and healing system permissions pool...");
         Map<String, Permission> permissionMap = new HashMap<>();
 
         String[] permissionNames = {
                 "MANAGE_USERS", "MANAGE_TESTS", "VIEW_ADMIN_DASHBOARD", "TAKE_TOEIC_TEST",
-                "MANAGE_QUESTIONS", "VIEW_ANALYTICS"
+                "MANAGE_QUESTIONS", "VIEW_ANALYTICS", "MANAGE_COURSES", "MANAGE_PAYMENTS",
+                "MANAGE_ROLES", "MANAGE_NOTIFICATIONS"
         };
 
         for (String name : permissionNames) {
+            Optional<Permission> existing = permissionRepository.findByName(name);
+            if (existing.isPresent()) {
+                permissionMap.put(name, existing.get());
+                continue;
+            }
+
             Permission permission = new Permission();
             permission.setName(name);
             
             List<String> routes = new ArrayList<>();
-            if (name.contains("MANAGE")) {
-                routes.add("/admin/**");
-            } else if (name.equals("VIEW_ADMIN_DASHBOARD")) {
+            if (name.equals("VIEW_ADMIN_DASHBOARD")) {
                 routes.add("/admin/dashboard");
             } else if (name.equals("VIEW_ANALYTICS")) {
                 routes.add("/admin/analytics");
-            } else {
+            } else if (name.equals("TAKE_TOEIC_TEST")) {
                 routes.add("/student/**");
+            } else if (name.contains("MANAGE_")) {
+                // Intelligently deduce module name from MANAGE_SOMETHING e.g., MANAGE_USERS -> /admin/users/**
+                String module = name.replace("MANAGE_", "").toLowerCase();
+                routes.add("/admin/" + module + "/**");
+            } else {
+                // Fallback for generic manages or others
+                routes.add("/admin/**");
             }
             permission.setPageAllow(routes);
             
@@ -96,23 +111,34 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private Map<String, Role> seedRoles(Map<String, Permission> permissions) {
-        log.info("Seeding roles...");
+        log.info("Validating and healing core system roles...");
         Map<String, Role> roleMap = new HashMap<>();
 
-        // ADMIN Role
-        Role adminRole = new Role();
-        adminRole.setName("ADMIN");
-        adminRole.setDescription("System Administrator with full access");
-        adminRole.setPermissions(new HashSet<>(permissions.values()));
+        // ADMIN Role: Find or create, then dynamically ensure ALL defined permissions are attached.
+        Role adminRole = roleRepository.findByName("ADMIN").orElseGet(() -> {
+            Role r = new Role();
+            r.setName("ADMIN");
+            r.setDescription("System Administrator with full access");
+            return r;
+        });
+        
+        // Force push ALL permissions to ensure no sync drifts
+        adminRole.setPermissions(new HashSet<>(permissionRepository.findAll()));
         roleMap.put("ADMIN", roleRepository.save(adminRole));
 
         // STUDENT Role
-        Role studentRole = new Role();
-        studentRole.setName("STUDENT");
-        studentRole.setDescription("Standard user with access to practice tests");
-        Set<Permission> studentPerms = new HashSet<>();
-        studentPerms.add(permissions.get("TAKE_TOEIC_TEST"));
-        studentRole.setPermissions(studentPerms);
+        Role studentRole = roleRepository.findByName("STUDENT").orElseGet(() -> {
+            Role r = new Role();
+            r.setName("STUDENT");
+            r.setDescription("Standard user with access to practice tests");
+            return r;
+        });
+        
+        if (studentRole.getPermissions() == null || studentRole.getPermissions().isEmpty()) {
+            Set<Permission> studentPerms = new HashSet<>();
+            studentPerms.add(permissions.get("TAKE_TOEIC_TEST"));
+            studentRole.setPermissions(studentPerms);
+        }
         roleMap.put("STUDENT", roleRepository.save(studentRole));
 
         return roleMap;

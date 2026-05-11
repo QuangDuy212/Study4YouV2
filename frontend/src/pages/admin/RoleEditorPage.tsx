@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { ConfirmDeleteModal } from "@/components/ConfirmDeleteModal";
 
 export default function RoleEditorPage() {
   const { id } = useParams<{ id: string }>();
@@ -37,10 +38,15 @@ export default function RoleEditorPage() {
   const [editPermPath, setEditPermPath] = useState("");
   const [isUpdatingPerm, setIsUpdatingPerm] = useState(false);
 
+  // States for delete confirmation
+  const [deletePermTarget, setDeletePermTarget] = useState<{id: string, name: string} | null>(null);
+  const [isDeletingPerm, setIsDeletingPerm] = useState(false);
+
   const groupPermissions = useCallback((permissions: PermissionResponse[]): Record<string, PermissionResponse[]> => {
     const groups: Record<string, PermissionResponse[]> = {
       [t("roleUsersAccess")]: [],
       [t("roleToeicManagement")]: [],
+      [t("roleCourseManagement")]: [],
       [t("roleDashboardAnalytics")]: [],
       [t("roleStudentFeatures")]: [],
       [t("roleOthers")]: [],
@@ -56,6 +62,8 @@ export default function RoleEditorPage() {
         } else {
           groups[t("roleToeicManagement")].push(p);
         }
+      } else if (name.includes("COURSE")) {
+        groups[t("roleCourseManagement")].push(p);
       } else if (name.includes("DASHBOARD") || name.includes("ANALYTICS")) {
         groups[t("roleDashboardAnalytics")].push(p);
       } else {
@@ -123,20 +131,20 @@ export default function RoleEditorPage() {
     }
   };
 
-  const handleDeletePermission = async (permId: string, permName: string) => {
-    const systemPerms = ["MANAGE_USERS", "MANAGE_QUESTIONS", "MANAGE_TESTS", "VIEW_ADMIN_DASHBOARD", "VIEW_ANALYTICS", "TAKE_TOEIC_TEST"];
-    if (systemPerms.includes(permName)) {
-      toast.error(t("cannotRenameSystemPerm"));
-      return;
-    }
-    if (!confirm(`${t("delete")} "${permName}"?`)) return;
+  const handleDeletePermission = async () => {
+    if (!deletePermTarget) return;
+    const { id, name } = deletePermTarget;
+    setIsDeletingPerm(true);
     try {
-      await permissionService.deletePermission(permId);
+      await permissionService.deletePermission(id);
       toast.success(t("deleteSuccess"));
-      setSelectedPermissions(prev => prev.filter(id => id !== permId));
+      setSelectedPermissions(prev => prev.filter(pId => pId !== id));
       await fetchPermissions();
+      setDeletePermTarget(null);
     } catch (err: any) {
       toast.error(t("error"), { description: err?.response?.data?.message || err.message });
+    } finally {
+      setIsDeletingPerm(false);
     }
   };
 
@@ -250,12 +258,11 @@ export default function RoleEditorPage() {
             </CardTitle>
             <Button
               type="button"
-              variant="outline"
               size="sm"
               onClick={() => setShowCreatePermDialog(true)}
-              className="gap-1.5 text-xs font-bold h-8.5 rounded-xl border-primary/20 hover:border-primary/40 text-primary hover:bg-primary/5 transition-all"
+              className="gap-1.5 text-xs font-bold h-9 px-4 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/20 transition-all border border-primary/10"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-3.5 h-3.5" />
               {t("createNewPermission")}
             </Button>
           </CardHeader>
@@ -317,19 +324,17 @@ export default function RoleEditorPage() {
                             >
                               <Pencil className="w-3.5 h-3.5" />
                             </Button>
-                            {!isSystem && (
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 className="h-8.5 w-8.5 rounded-xl text-destructive hover:text-destructive/80 hover:bg-destructive/10 transition-colors"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleDeletePermission(perm.id, perm.name);
+                                  setDeletePermTarget({ id: perm.id, name: perm.name });
                                 }}
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </Button>
-                            )}
                           </div>
                         </div>
                       );
@@ -386,6 +391,7 @@ export default function RoleEditorPage() {
 
       {/* Dialog chỉnh sửa quyền */}
       <Dialog open={!!editingPerm} onOpenChange={(open) => !open && setEditingPerm(null)}>
+        {/* (Existing code retained) ... */}
         <DialogContent className="sm:max-w-[425px] rounded-2xl shadow-xl border border-border/80">
           <DialogHeader className="space-y-2">
             <DialogTitle className="text-lg font-bold tracking-tight">{t("editPermissionTitle")}</DialogTitle>
@@ -402,11 +408,7 @@ export default function RoleEditorPage() {
                 onChange={(e) => setEditPermName(e.target.value)}
                 placeholder="Ví dụ: MANAGE_PAYMENTS"
                 className="rounded-xl h-10 border-border/60 focus:border-primary/50"
-                disabled={editingPerm ? ["MANAGE_USERS", "MANAGE_QUESTIONS", "MANAGE_TESTS", "VIEW_ADMIN_DASHBOARD", "VIEW_ANALYTICS", "TAKE_TOEIC_TEST"].includes(editingPerm.name) : false}
               />
-              {editingPerm && ["MANAGE_USERS", "MANAGE_QUESTIONS", "MANAGE_TESTS", "VIEW_ADMIN_DASHBOARD", "VIEW_ANALYTICS", "TAKE_TOEIC_TEST"].includes(editingPerm.name) && (
-                <p className="text-[10px] text-destructive/80 font-semibold mt-1">{t("cannotRenameSystemPerm")}</p>
-              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="edit-perm-path" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("pagePathAllow")} *</Label>
@@ -429,6 +431,15 @@ export default function RoleEditorPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Sử dụng component Confirm chung */}
+      <ConfirmDeleteModal
+        isOpen={!!deletePermTarget}
+        onClose={() => setDeletePermTarget(null)}
+        onConfirm={handleDeletePermission}
+        isLoading={isDeletingPerm}
+        itemName={deletePermTarget?.name}
+      />
     </>
   );
 }

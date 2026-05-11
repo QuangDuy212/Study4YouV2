@@ -29,6 +29,12 @@ export const en = {
   profile: "Profile",
   collapse: "Collapse",
   continue: "Continue",
+  goodMorning: "Good morning",
+  goodAfternoon: "Good afternoon",
+  goodEvening: "Good evening",
+  searchPlaceholder: "Search courses, tests...",
+  readyToLearn: "Ready to learn, {name}?",
+  readyToLearnGeneric: "Ready to learn?",
   export: "Export",
   add: "Add",
   close: "Close",
@@ -518,6 +524,10 @@ export const en = {
   createSuccess: "Created successfully!",
   deleteSuccess: "Deleted successfully!",
   updateSuccess: "Updated successfully!",
+  confirmDeleteTitle: "Confirm Permanent Deletion",
+  confirmDeleteAction: "Delete Now",
+  confirmDeleteDesc: "Are you sure you want to permanently delete {name}? This action cannot be undone.",
+  deleteItemNoun: "this item",
   saveChanges: "Save Changes",
   saving: "Saving...",
 
@@ -903,6 +913,7 @@ export const en = {
 
   // RBAC Groups
   roleUsersAccess: "Users & Access",
+  roleCourseManagement: "Course Management",
   roleToeicManagement: "TOEIC Management",
   roleDashboardAnalytics: "Dashboard & Analytics",
   roleStudentFeatures: "Student Features",

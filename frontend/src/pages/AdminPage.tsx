@@ -14,6 +14,7 @@ import { formatDistanceToNow } from "date-fns";
 import { vi as viLocale, enUS as enLocale, zhCN as zhLocale, ja as jaLocale, ko as koLocale } from "date-fns/locale";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ChevronLeft, ChevronRight, Plus, FileDown, Trash2, RefreshCw } from "lucide-react";
+import { ConfirmDeleteModal } from "@/components/ConfirmDeleteModal";
 
 const localeMap = {
   vi: viLocale,
@@ -36,6 +37,11 @@ export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  
+  const [deleteTarget, setDeleteTarget] = useState<Test | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   useEffect(() => {
     fetchTests();
@@ -120,14 +126,22 @@ export default function AdminPage() {
     }
   };
 
-  const handleDelete = async (test: Test) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn xóa bài thi "${test.name}"?`)) return;
+  const handleDeleteClick = (test: Test) => {
+    setDeleteTarget(test);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
     try {
-      await testService.updateTest(test.id, { title: test.name, active: false });
+      await testService.updateTest(deleteTarget.id, { title: deleteTarget.name, active: false });
       toast.success("Xóa bài thi thành công");
+      setDeleteTarget(null);
       fetchTests();
     } catch (error) {
       toast.error(t('failedToDelete') || "Xóa bài thi thất bại");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -163,9 +177,8 @@ export default function AdminPage() {
     setSelectedIds(next);
   };
 
-  const handleBulkDelete = async () => {
-    if (!window.confirm(`Bạn có chắc chắn muốn xóa ${selectedIds.size} bài thi đã chọn?`)) return;
-    setIsLoading(true);
+  const handleBulkDeleteConfirm = async () => {
+    setIsBulkDeleting(true);
     try {
       await Promise.all(Array.from(selectedIds).map(async (id) => {
         const test = tests.find(t => t.id === id);
@@ -175,11 +188,12 @@ export default function AdminPage() {
       }));
       toast.success("Xóa các bài thi thành công");
       setSelectedIds(new Set());
+      setBulkDeleteOpen(false);
       fetchTests();
     } catch (error) {
       toast.error("Xóa các bài thi thất bại");
     } finally {
-      setIsLoading(false);
+      setIsBulkDeleting(false);
     }
   };
 
@@ -269,7 +283,7 @@ export default function AdminPage() {
                   <Button 
                     variant="destructive" 
                     size="sm" 
-                    onClick={handleBulkDelete}
+                    onClick={() => setBulkDeleteOpen(true)}
                     className="rounded-lg font-bold shadow-sm h-9 px-4"
                   >
                     <Trash2 className="w-4 h-4 mr-1.5" /> Xóa nhiều
@@ -296,7 +310,7 @@ export default function AdminPage() {
             onEdit={handleEdit}
             onDuplicate={handleDuplicate} 
             onArchive={handleArchive}
-            onDelete={handleDelete} 
+            onDelete={handleDeleteClick} 
             onRestore={handleRestore} 
             onNavigateToEdit={handleEdit}
             currentPage={currentPage}
@@ -311,6 +325,25 @@ export default function AdminPage() {
         </CardContent>
       </Card>
       <ViewTestDialog open={viewOpen} onOpenChange={setViewOpen} test={viewingTest} onEdit={handleEdit} />
+
+      {/* Single Delete Confirmation */}
+      <ConfirmDeleteModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDeleteConfirm}
+        isLoading={isDeleting}
+        itemName={deleteTarget?.name}
+      />
+
+      {/* Bulk Delete Confirmation */}
+      <ConfirmDeleteModal
+        isOpen={bulkDeleteOpen}
+        onClose={() => setBulkDeleteOpen(false)}
+        onConfirm={handleBulkDeleteConfirm}
+        isLoading={isBulkDeleting}
+        title={`Xác nhận xóa ${selectedIds.size} bài thi?`}
+        description={`Bạn có chắc chắn muốn xóa toàn bộ ${selectedIds.size} bài thi đã được lựa chọn không? Bạn có thể khôi phục chúng trong tab Lưu trữ.`}
+      />
     </div>
   );
 }

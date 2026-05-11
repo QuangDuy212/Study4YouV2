@@ -9,12 +9,16 @@ import courseService, { type CourseResponse } from "@/services/courseService";
 import lessonService from "@/services/lessonService";
 import { type LessonResponse } from "@/services/courseService";
 import { getMediaUrl } from "@/lib/utils";
+import { ConfirmDeleteModal } from "@/components/ConfirmDeleteModal";
 
 export default function AdminCurriculumPage() {
   const { id } = useParams<{ id: string }>();
   const [course, setCourse] = useState<CourseResponse | null>(null);
   const [lessons, setLessons] = useState<LessonResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  const [deleteTarget, setDeleteTarget] = useState<{id: string, title: string} | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchData = async () => {
     if (!id) return;
@@ -36,14 +40,18 @@ export default function AdminCurriculumPage() {
     fetchData();
   }, [id]);
 
-  const deleteLesson = async (lessonId: string, title: string) => {
-    if (!window.confirm(`Are you sure you want to delete lesson "${title}"?`)) return;
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
     try {
-      await lessonService.deleteLesson(lessonId);
-      toast.success("Lesson deleted");
+      await lessonService.deleteLesson(deleteTarget.id);
+      toast.success("Lesson deleted successfully");
+      setDeleteTarget(null);
       fetchData();
     } catch (e) {
       toast.error("Failed to delete lesson");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -114,7 +122,7 @@ export default function AdminCurriculumPage() {
                       <Edit className="w-4 h-4 text-blue-500" />
                     </Link>
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => deleteLesson(lesson.id, lesson.title)}>
+                  <Button variant="ghost" size="icon" onClick={() => setDeleteTarget({ id: lesson.id, title: lesson.title })}>
                     <Trash2 className="w-4 h-4 text-destructive" />
                   </Button>
                 </div>
@@ -132,6 +140,16 @@ export default function AdminCurriculumPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Lesson Delete Confirmation */}
+      <ConfirmDeleteModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDeleteConfirm}
+        isLoading={isDeleting}
+        itemName={deleteTarget?.title}
+        description={`Bạn có chắc chắn muốn xóa bài học "${deleteTarget?.title}" không? Thao tác này sẽ gỡ bài học ra khỏi khóa học hiện tại.`}
+      />
     </div>
   );
 }

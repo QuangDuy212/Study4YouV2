@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Plus, Edit, Trash2, Search, Video, Eye, Loader2, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Edit, Trash2, Search, Video, Eye, Loader2, RefreshCw, ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import courseService, { type CourseResponse, type PageResponse } from "@/services/courseService";
 import { getMediaUrl } from "@/lib/utils";
+import { ConfirmDeleteModal } from "@/components/ConfirmDeleteModal";
 
 export default function AdminCoursesPage() {
   const { t } = useLanguage();
@@ -20,6 +21,12 @@ export default function AdminCoursesPage() {
   const [page, setPage] = useState(0);
   const [activeTab, setActiveTab] = useState<"ALL" | "ACTIVE" | "DELETED">("ALL");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [courseToDelete, setCourseToDelete] = useState<{id: string, title: string} | null>(null);
+  const [isDeletingCourse, setIsDeletingCourse] = useState(false);
+
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   const filteredCourses = useMemo(() => {
     if (!courses?.content) return [];
@@ -61,14 +68,34 @@ export default function AdminCoursesPage() {
     fetchCourses();
   };
 
-  const handleDelete = async (id: string, title: string) => {
-    if (!window.confirm(`Are you sure you want to delete course "${title}"?`)) return;
+  const handlePublish = async (id: string, title: string) => {
     try {
-      await courseService.deleteCourse(id);
-      toast.success("Course deleted successfully");
+      await courseService.publishCourse(id);
+      toast.success(`Khóa học "${title}" đã được công khai!`);
       fetchCourses();
     } catch (e: any) {
+      toast.error(e.response?.data?.message || "Không thể công khai khóa học");
+    }
+  };
+
+  const handleDelete = (id: string, title: string) => {
+    setCourseToDelete({ id, title });
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!courseToDelete) return;
+    setIsDeletingCourse(true);
+    try {
+      await courseService.deleteCourse(courseToDelete.id);
+      toast.success("Course deleted successfully");
+      fetchCourses();
+      setDeleteConfirmOpen(false);
+      setCourseToDelete(null);
+    } catch (e: any) {
       toast.error(e.response?.data?.message || "Failed to delete course");
+    } finally {
+      setIsDeletingCourse(false);
     }
   };
 
@@ -104,18 +131,18 @@ export default function AdminCoursesPage() {
     setSelectedIds(next);
   };
 
-  const handleBulkDelete = async () => {
-    if (!window.confirm(`Are you sure you want to delete ${selectedIds.size} selected courses?`)) return;
-    setLoading(true);
+  const handleBulkDeleteConfirm = async () => {
+    setIsBulkDeleting(true);
     try {
       await Promise.all(Array.from(selectedIds).map(id => courseService.deleteCourse(id)));
       toast.success("Selected courses deleted successfully");
       setSelectedIds(new Set());
+      setBulkDeleteOpen(false);
       fetchCourses();
     } catch (e: any) {
       toast.error("Failed to delete some selected courses");
     } finally {
-      setLoading(false);
+      setIsBulkDeleting(false);
     }
   };
 
@@ -196,7 +223,7 @@ export default function AdminCoursesPage() {
                   <Button 
                     variant="destructive" 
                     size="sm" 
-                    onClick={handleBulkDelete}
+                    onClick={() => setBulkDeleteOpen(true)}
                     className="rounded-lg font-bold shadow-sm h-9 px-4"
                   >
                     <Trash2 className="w-4 h-4 mr-1.5" /> Xóa nhiều
@@ -293,6 +320,16 @@ export default function AdminCoursesPage() {
                                   <Eye className="w-4 h-4 text-primary" />
                                 </Link>
                               </Button>
+                              {course.status === "DRAFT" && (
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  onClick={() => handlePublish(course.id, course.title)}
+                                  title="Công khai khóa học"
+                                >
+                                  <Check className="w-4 h-4 text-emerald-600" />
+                                </Button>
+                              )}
                               <Button variant="ghost" size="icon" asChild>
                                 <Link to={`/admin/courses/${course.id}/edit`}>
                                   <Edit className="w-4 h-4 text-blue-500" />
@@ -366,6 +403,26 @@ export default function AdminCoursesPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Single Delete Course */}
+      <ConfirmDeleteModal
+        isOpen={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        onConfirm={confirmDelete}
+        isLoading={isDeletingCourse}
+        itemName={courseToDelete?.title}
+        description={`Bạn có chắc chắn muốn xóa khóa học "${courseToDelete?.title}"? Hành động này sẽ chuyển khóa học vào thùng rác.`}
+      />
+
+      {/* Bulk Delete Course */}
+      <ConfirmDeleteModal
+        isOpen={bulkDeleteOpen}
+        onClose={() => setBulkDeleteOpen(false)}
+        onConfirm={handleBulkDeleteConfirm}
+        isLoading={isBulkDeleting}
+        title={`Xóa ${selectedIds.size} khóa học?`}
+        description={`Bạn có chắc chắn muốn xóa vĩnh viễn ${selectedIds.size} khóa học này không?`}
+      />
     </div>
   );
 }

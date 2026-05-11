@@ -59,14 +59,14 @@ export default function AdminLayout() {
   }, []);
 
   const navigationItems = [
-    { icon: LayoutDashboard, label: t("dashboard"), href: "/admin", permission: "VIEW_ADMIN_DASHBOARD" },
-    { icon: FileText, label: t("manageTests"), href: "/admin/tests", permission: "MANAGE_TESTS" },
-    { icon: GraduationCap, label: t("manageCourses"), href: "/admin/courses" },
-    { icon: CreditCard, label: t("managePayments"), href: "/admin/payments" },
-    { icon: Users, label: t("users"), href: "/admin/users", permission: "MANAGE_USERS" },
-    { icon: Shield, label: t("roles"), href: "/admin/roles", permission: "MANAGE_USERS" },
-    { icon: Bell, label: t("notifications"), href: "/admin/notifications", permission: "MANAGE_USERS" },
-    { icon: BarChart3, label: t("analytics"), href: "/admin/analytics", permission: "VIEW_ANALYTICS" },
+    { icon: LayoutDashboard, label: t("dashboard"), href: "/admin", permissions: ["VIEW_ADMIN_DASHBOARD"] },
+    { icon: FileText, label: t("manageTests"), href: "/admin/tests", permissions: ["MANAGE_TESTS", "MANAGE_TEST"] },
+    { icon: GraduationCap, label: t("manageCourses"), href: "/admin/courses", permissions: ["MANAGE_COURSES", "MANAGE_COURSE"] },
+    { icon: CreditCard, label: t("managePayments"), href: "/admin/payments", permissions: ["MANAGE_PAYMENTS", "MANAGE_PAYMENT"] },
+    { icon: Users, label: t("users"), href: "/admin/users", permissions: ["MANAGE_USERS", "MANAGE_USER"] },
+    { icon: Shield, label: t("roles"), href: "/admin/roles", permissions: ["MANAGE_ROLES", "MANAGE_ROLE"] },
+    { icon: Bell, label: t("notifications"), href: "/admin/notifications", permissions: ["MANAGE_NOTIFICATIONS", "MANAGE_NOTIFICATION"] },
+    { icon: BarChart3, label: t("analytics"), href: "/admin/analytics", permissions: ["VIEW_ANALYTICS"] },
   ];
 
   const path = location.pathname;
@@ -96,7 +96,7 @@ export default function AdminLayout() {
   }
 
   const filteredItems = navigationItems.filter(item => 
-    !item.permission || hasPermission(item.permission)
+    !item.permissions || item.permissions.length === 0 || item.permissions.some(p => hasPermission(p))
   );
 
   const sidebarNavContent = (
