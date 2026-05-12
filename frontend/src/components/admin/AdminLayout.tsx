@@ -220,7 +220,7 @@ export default function AdminLayout() {
              <div className="lg:hidden">
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full hover:bg-primary/10 hover:text-primary text-muted-foreground transition-all duration-200">
                     <Menu className="w-5 h-5" />
                   </Button>
                 </SheetTrigger>
@@ -245,7 +245,7 @@ export default function AdminLayout() {
             <NotificationDropdown />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2 h-auto py-1.5 px-1 sm:px-3">
+                <Button variant="ghost" className="flex items-center gap-2 h-auto py-1.5 px-1 sm:px-3 hover:bg-primary/5 transition-all duration-200 rounded-xl">
                   <Avatar className="w-8 h-8">
                     <AvatarImage src={profile?.avatarUrl || ""} />
                     <AvatarFallback className="bg-primary/10 text-primary font-medium text-xs">

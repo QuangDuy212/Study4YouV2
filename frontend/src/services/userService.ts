@@ -7,6 +7,7 @@ export interface UserResponse {
   phone?: string;
   status: string;
   avatarUrl: string | null;
+  active?: boolean;
   roles: Array<{ id: string; name: string }>;
   createdAt: string;
   updatedAt: string;
@@ -50,11 +51,14 @@ export const userService = {
     page = 0,
     size = 10,
     sortBy = "createdAt",
-    sortDir = "DESC"
+    sortDir = "DESC",
+    active?: boolean
   ): Promise<PageResponse<UserResponse>> {
-    const { data } = await apiClient.get<ApiWrapped<PageResponse<UserResponse>>>(
-      `/users?page=${page}&size=${size}&sortBy=${sortBy}&sortDir=${sortDir}`
-    );
+    let url = `/users?page=${page}&size=${size}&sortBy=${sortBy}&sortDir=${sortDir}`;
+    if (active !== undefined) {
+      url += `&active=${active}`;
+    }
+    const { data } = await apiClient.get<ApiWrapped<PageResponse<UserResponse>>>(url);
     return data.data;
   },
 
@@ -93,6 +97,10 @@ export const userService = {
 
   async deleteUser(id: string): Promise<void> {
     await apiClient.delete(`/users/${id}`);
+  },
+  
+  async restoreUser(id: string): Promise<void> {
+    await apiClient.put(`/users/${id}/restore`);
   },
 };
 

@@ -29,8 +29,8 @@ public class RoleService {
     private final PermissionRepository permissionRepository;
 
     @Transactional(readOnly = true)
-    public PageResponse<RoleResponse> getAllRoles(@org.springframework.lang.NonNull Pageable pageable) {
-        Page<Role> rolePage = roleRepository.findAll(pageable);
+    public PageResponse<RoleResponse> getAllRoles(@org.springframework.lang.NonNull org.springframework.data.domain.Pageable pageable, Boolean active) {
+        Page<Role> rolePage = active != null ? roleRepository.findAllByActive(active, pageable) : roleRepository.findAll(pageable);
         List<RoleResponse> roles = rolePage.getContent().stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -101,10 +101,18 @@ public class RoleService {
 
     @Transactional
     public void deleteRole(@org.springframework.lang.NonNull UUID id) {
-        if (!roleRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Role", "id", id);
-        }
-        roleRepository.deleteById(id);
+        Role role = roleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Role", "id", id));
+        role.setActive(false);
+        roleRepository.save(role);
+    }
+
+    @Transactional
+    public void restoreRole(@org.springframework.lang.NonNull UUID id) {
+        Role role = roleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Role", "id", id));
+        role.setActive(true);
+        roleRepository.save(role);
     }
 
     private RoleResponse mapToResponse(Role role) {
@@ -112,6 +120,7 @@ public class RoleService {
         response.setId(role.getId());
         response.setName(role.getName());
         response.setDescription(role.getDescription());
+        response.setActive(role.getActive());
         response.setCreatedAt(role.getCreatedAt());
         response.setUpdatedAt(role.getUpdatedAt());
         

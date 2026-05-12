@@ -925,4 +925,16 @@ export const en = {
   // Landing Page
   platformSubtitle: "TOEIC Practice Platform",
   heroDescription: "Master TOEIC Reading and Listening skills with comprehensive practice tests and detailed score analysis.",
+  softDeleteConfirmTitle: "Confirm move to trash",
+  softDeleteConfirmDesc: "Are you sure you want to move {name} to trash? You can still restore it at any time.",
+  bulkSoftDeleteTitle: "Confirm delete selected items",
+  bulkSoftDeleteDesc: "Are you sure you want to temporarily delete these {count} selected items?",
+  selectedItems: "{count} items selected",
+  deleteSelected: "Delete selected",
+  restoreSelected: "Restore selected",
+  bulkDeleteSuccess: "Successfully deleted",
+  bulkRestoreSuccess: "Successfully restored",
+  bulkDeleteFailed: "Failed to delete some items",
+  bulkRestoreFailed: "Failed to restore some items",
+  restoreSuccess: "{name} restored successfully",
 } as const;

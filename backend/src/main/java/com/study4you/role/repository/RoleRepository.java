@@ -11,4 +11,5 @@ import java.util.UUID;
 public interface RoleRepository extends JpaRepository<Role, UUID> {
     Optional<Role> findByName(String name);
     boolean existsByName(String name);
+    org.springframework.data.domain.Page<Role> findAllByActive(Boolean active, org.springframework.data.domain.Pageable pageable);
 }

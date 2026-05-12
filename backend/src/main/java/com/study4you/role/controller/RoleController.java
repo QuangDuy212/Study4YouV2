@@ -28,13 +28,14 @@ public class RoleController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "DESC") String sortDir
+            @RequestParam(defaultValue = "DESC") String sortDir,
+            @RequestParam(required = false) Boolean active
     ) {
         Sort sort = sortDir.equalsIgnoreCase("ASC") ? 
                     Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
         
-        PageResponse<RoleResponse> roles = roleService.getAllRoles(pageable);
+        PageResponse<RoleResponse> roles = roleService.getAllRoles(pageable, active);
         return ResponseEntity.ok(ApiResponse.success(roles));
     }
 
@@ -63,6 +64,12 @@ public class RoleController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteRole(@PathVariable @org.springframework.lang.NonNull UUID id) {
         roleService.deleteRole(id);
-        return ResponseEntity.ok(ApiResponse.success("Role deleted successfully", null));
+        return ResponseEntity.ok(ApiResponse.success("Role moved to trash successfully", null));
+    }
+
+    @PutMapping("/{id}/restore")
+    public ResponseEntity<ApiResponse<Void>> restoreRole(@PathVariable @org.springframework.lang.NonNull UUID id) {
+        roleService.restoreRole(id);
+        return ResponseEntity.ok(ApiResponse.success("Role restored successfully", null));
     }
 }

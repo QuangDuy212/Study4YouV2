@@ -35,6 +35,9 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private UserStatus status = UserStatus.ACTIVE;
 
+    @Column(nullable = false)
+    private Boolean active = true;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "user_roles",

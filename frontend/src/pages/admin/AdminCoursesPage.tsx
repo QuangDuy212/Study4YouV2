@@ -164,19 +164,7 @@ export default function AdminCoursesPage() {
   return (
     <div className="space-y-6 pb-24">
       <Card>
-        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="space-y-2">
-            <CardTitle>{t("manageCourses")}</CardTitle>
-            <CardDescription>{t("manageCoursesDesc") || "Overview and management of learning courses"}</CardDescription>
-          </div>
-          <Button asChild className="gap-2 shrink-0">
-            <Link to="/admin/courses/create">
-              <Plus className="w-4 h-4" />
-              {t("createCourse")}
-            </Link>
-          </Button>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <form onSubmit={handleSearch} className="flex gap-3 w-full md:w-auto flex-1 max-w-md">
               <div className="relative flex-1">
@@ -191,23 +179,31 @@ export default function AdminCoursesPage() {
               <Button type="submit" variant="secondary" className="h-11 rounded-xl px-5 font-bold">{t("search")}</Button>
             </form>
 
-            <div className="flex gap-1.5 p-1 bg-muted/40 rounded-xl border border-border/50">
-              {(["ALL", "ACTIVE", "DELETED"] as const).map((tab) => (
-                <Button
-                  key={tab}
-                  type="button"
-                  onClick={() => {
-                    setActiveTab(tab);
-                    setPage(0);
-                  }}
-                  variant={activeTab === tab ? "default" : "ghost"}
-                  className={`h-9 rounded-lg px-4 text-xs font-bold transition-all ${
-                    activeTab === tab ? "shadow-sm bg-primary text-primary-foreground" : "hover:bg-primary/10 hover:text-primary"
-                  }`}
-                >
-                  {tab === "ALL" ? t("all") : tab === "ACTIVE" ? t("activeTestsTab") : t("deletedTestsTab")}
-                </Button>
-              ))}
+            <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+              <div className="flex gap-1.5 p-1 bg-muted/40 rounded-xl border border-border/50">
+                {(["ALL", "ACTIVE", "DELETED"] as const).map((tab) => (
+                  <Button
+                    key={tab}
+                    type="button"
+                    onClick={() => {
+                      setActiveTab(tab);
+                      setPage(0);
+                    }}
+                    variant={activeTab === tab ? "default" : "ghost"}
+                    className={`h-9 rounded-lg px-4 text-xs font-bold transition-all ${
+                      activeTab === tab ? "shadow-sm bg-primary text-primary-foreground" : "hover:bg-primary/10 hover:text-primary"
+                    }`}
+                  >
+                    {tab === "ALL" ? t("all") : tab === "ACTIVE" ? t("activeTestsTab") : t("deletedTestsTab")}
+                  </Button>
+                ))}
+              </div>
+              <Button asChild className="gap-2 shrink-0 shadow-lg shadow-primary/20">
+                <Link to="/admin/courses/create">
+                  <Plus className="w-4 h-4" />
+                  {t("createCourse")}
+                </Link>
+              </Button>
             </div>
           </div>
 

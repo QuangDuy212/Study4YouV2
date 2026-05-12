@@ -84,8 +84,14 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<UserResponse> getAllUsers(@org.springframework.lang.NonNull Pageable pageable) {
-        Page<User> userPage = userRepository.findAll(pageable);
+    public PageResponse<UserResponse> getAllUsers(@org.springframework.lang.NonNull Pageable pageable, Boolean active) {
+        Page<User> userPage;
+        if (active != null) {
+            userPage = userRepository.findAllByActive(active, pageable);
+        } else {
+            userPage = userRepository.findAll(pageable);
+        }
+        
         List<UserResponse> users = userPage.getContent().stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -191,15 +197,33 @@ public class UserService {
 
     @Transactional
     public void deleteUser(@org.springframework.lang.NonNull UUID id) {
-        if (!userRepository.existsById(id)) {
-            throw new ResourceNotFoundException("User", "id", id);
-        }
-        userRepository.deleteById(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+        
+        user.setActive(false);
+        userRepository.save(user);
 
         userActivityService.logActivity(
                 null,
                 "DELETE_USER",
-                "Deleted user with id: " + id,
+                "Soft deleted user with id: " + id,
+                "USER",
+                id
+        );
+    }
+
+    @Transactional
+    public void restoreUser(@org.springframework.lang.NonNull UUID id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+        
+        user.setActive(true);
+        userRepository.save(user);
+
+        userActivityService.logActivity(
+                null,
+                "RESTORE_USER",
+                "Restored user with id: " + id,
                 "USER",
                 id
         );
@@ -212,6 +236,7 @@ public class UserService {
         response.setFullName(user.getFullName());
         response.setPhone(user.getPhone());
         response.setStatus(user.getStatus());
+        response.setActive(user.getActive());
         response.setCreatedAt(user.getCreatedAt());
         response.setUpdatedAt(user.getUpdatedAt());
         

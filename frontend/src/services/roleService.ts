@@ -5,6 +5,7 @@ export interface RoleResponse {
   name: string;
   description: string;
   permissions: Array<{ id: string; name: string; description: string }>;
+  active: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -34,11 +35,14 @@ export const roleService = {
     page = 0,
     size = 100,
     sortBy = "createdAt",
-    sortDir = "DESC"
+    sortDir = "DESC",
+    active?: boolean
   ): Promise<PageResponse<RoleResponse>> {
-    const { data } = await apiClient.get<ApiWrapped<PageResponse<RoleResponse>>>(
-      `/roles?page=${page}&size=${size}&sortBy=${sortBy}&sortDir=${sortDir}`
-    );
+    let url = `/roles?page=${page}&size=${size}&sortBy=${sortBy}&sortDir=${sortDir}`;
+    if (active !== undefined) {
+      url += `&active=${active}`;
+    }
+    const { data } = await apiClient.get<ApiWrapped<PageResponse<RoleResponse>>>(url);
     return data.data;
   },
 
@@ -59,6 +63,10 @@ export const roleService = {
 
   async deleteRole(id: string): Promise<void> {
     await apiClient.delete(`/roles/${id}`);
+  },
+
+  async restoreRole(id: string): Promise<void> {
+    await apiClient.put(`/roles/${id}/restore`);
   },
 };
 

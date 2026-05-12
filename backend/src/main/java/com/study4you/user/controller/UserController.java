@@ -32,13 +32,14 @@ public class UserController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "DESC") String sortDir
+            @RequestParam(defaultValue = "DESC") String sortDir,
+            @RequestParam(required = false) Boolean active
     ) {
         Sort sort = sortDir.equalsIgnoreCase("ASC") ? 
                     Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
         
-        PageResponse<UserResponse> users = userService.getAllUsers(pageable);
+        PageResponse<UserResponse> users = userService.getAllUsers(pageable, active);
         return ResponseEntity.ok(ApiResponse.success(users));
     }
 
@@ -99,6 +100,13 @@ public class UserController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable @org.springframework.lang.NonNull UUID id) {
         userService.deleteUser(id);
-        return ResponseEntity.ok(ApiResponse.success("User deleted successfully", null));
+        return ResponseEntity.ok(ApiResponse.success("User moved to trash successfully", null));
+    }
+
+    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    @PutMapping("/{id}/restore")
+    public ResponseEntity<ApiResponse<Void>> restoreUser(@PathVariable @org.springframework.lang.NonNull UUID id) {
+        userService.restoreUser(id);
+        return ResponseEntity.ok(ApiResponse.success("User restored successfully", null));
     }
 }
