@@ -321,6 +321,10 @@ export const en = {
   activeTests: "Active Tests",
   activeTestsTab: "Active",
   deletedTestsTab: "Deleted",
+  totalCourses: "Total Courses",
+  publishedCourses: "Published",
+  draftCourses: "Draft",
+  deletedCourses: "Deleted",
   publishedAvailable: "Published & available",
   draftTests: "Draft Tests",
   workInProgress: "Work in progress",
@@ -367,6 +371,13 @@ export const en = {
   count: "Count",
   system: "System",
   activity: "Activity",
+  payments: "Payments",
+  welcomeBack: "Welcome back",
+  adminWelcomeSubtitle: "All systems are operating flawlessly. Let's start your day with maximum productivity!",
+  shortcutManageCourses: "Lecture Management",
+  shortcutToeicBank: "TOEIC Test Bank",
+  shortcutTransactionHistory: "Transaction History",
+  shortcutSystemAccounts: "System Accounts",
 
 
   // Admin Question Bank

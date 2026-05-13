@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Users, FileText, HelpCircle, TrendingUp, Clock, Loader2, Sparkles, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { Users, FileText, HelpCircle, TrendingUp, Clock, Loader2, Sparkles, ArrowRight, ChevronLeft, ChevronRight, BookOpen, GraduationCap, CreditCard, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from "@/components/ui/chart";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell } from "recharts";
@@ -35,7 +36,8 @@ const getActivityBadge = (type: string, t: any) => {
 
 
 export default function AdminDashboardPage() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState({
     users: "...",
@@ -56,7 +58,7 @@ export default function AdminDashboardPage() {
   };
 
   const [dashboardStats, setDashboardStats] = useState<{
-    testsOverTime: Array<{ month: string; tests: number }>;
+    testsOverTime: Array<{ date: string; tests: number }>;
     skillDistribution: Array<{ skill: string; count: number; fill: string }>;
   }>({
     testsOverTime: [],
@@ -87,7 +89,7 @@ export default function AdminDashboardPage() {
 
         setDashboardStats({
           testsOverTime: statsData.testsOverTime.map(item => ({
-            month: item.month,
+            date: item.date,
             tests: item.count
           })),
           skillDistribution: mappedSkillDist
@@ -128,9 +130,114 @@ export default function AdminDashboardPage() {
   return (
     <>
       <div className="space-y-3 sm:space-y-6">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ delay: 0.1 }}
+        >
+          {/* Full-Width Dynamic Theme Adaptive Welcome Banner - Moved to TOP */}
+          <Card className="relative overflow-hidden bg-card border border-border shadow-sm min-h-[260px] flex flex-col justify-center group">
+            {/* Themed dynamic adaptive decorative backdrop */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 opacity-70 pointer-events-none" />
+            <div className="absolute top-[-20%] right-[-5%] w-80 h-80 bg-primary/10 rounded-full blur-[100px] pointer-events-none group-hover:bg-primary/20 transition-colors duration-1000" />
+            <div className="absolute bottom-[-20%] left-[-5%] w-64 h-64 bg-primary/5 rounded-full blur-[80px] pointer-events-none" />
+            
+            {/* Dynamic theme grid pattern overlay */}
+            <div className="absolute inset-0 opacity-[0.04] pointer-events-none" 
+                 style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(var(--primary)) 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+
+            <CardContent className="relative z-10 p-8 md:p-10 h-full flex flex-col md:flex-row items-center justify-between gap-10">
+              
+              {/* Left Side: Thematic Typography */}
+              <div className="flex-1 space-y-5 w-full">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary border border-border shadow-none">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  <span className="text-xs font-bold text-muted-foreground tracking-wide uppercase">
+                    {new Date().toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'en-US', { weekday: 'long', day: 'numeric', month: 'long' })}
+                  </span>
+                </div>
+                
+                <div className="space-y-3">
+                  <h2 className="text-3xl md:text-5xl font-black tracking-tight text-foreground leading-[1.1]">
+                    {t('welcomeBack')}, <br />
+                    <span className="text-primary drop-shadow-sm">
+                      {user?.fullName || (lang === 'vi' ? "Quản trị viên" : "Administrator")}
+                    </span>! 👋
+                  </h2>
+                  <p className="text-muted-foreground text-base md:text-lg font-medium max-w-md leading-relaxed">
+                    {t('adminWelcomeSubtitle')}
+                  </p>
+                </div>
+              </div>
+
+              {/* Right Side: Modular dynamic theme shortcuts */}
+              <div className="w-full md:w-[440px] shrink-0 grid grid-cols-2 gap-4 relative">
+                <div className="absolute inset-[-20px] bg-secondary/50 rounded-3xl blur-xl -z-10" />
+                
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate("/admin/courses")}
+                  className="h-auto bg-card hover:bg-card border-border hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 text-foreground flex flex-col items-start justify-between p-5 rounded-2xl transition-all hover:-translate-y-1 group/btn overflow-hidden relative shadow-sm"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover/btn:bg-primary group-hover/btn:text-primary-foreground transition-all duration-300 mb-4">
+                    <BookOpen className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-0.5 text-left">
+                    <span className="block font-bold text-sm text-foreground">{t('courses')}</span>
+                    <span className="block text-[10px] text-muted-foreground font-medium uppercase tracking-wider group-hover/btn:text-primary transition-colors">{t('shortcutManageCourses')}</span>
+                  </div>
+                </Button>
+
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate("/admin/tests")}
+                  className="h-auto bg-card hover:bg-card border-border hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 text-foreground flex flex-col items-start justify-between p-5 rounded-2xl transition-all hover:-translate-y-1 group/btn overflow-hidden relative shadow-sm"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover/btn:bg-primary group-hover/btn:text-primary-foreground transition-all duration-300 mb-4">
+                    <GraduationCap className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-0.5 text-left">
+                    <span className="block font-bold text-sm text-foreground">{t('tests')}</span>
+                    <span className="block text-[10px] text-muted-foreground font-medium uppercase tracking-wider group-hover/btn:text-primary transition-colors">{t('shortcutToeicBank')}</span>
+                  </div>
+                </Button>
+
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate("/admin/payments")}
+                  className="h-auto bg-card hover:bg-card border-border hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 text-foreground flex flex-col items-start justify-between p-5 rounded-2xl transition-all hover:-translate-y-1 group/btn overflow-hidden relative shadow-sm"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover/btn:bg-primary group-hover/btn:text-primary-foreground transition-all duration-300 mb-4">
+                    <CreditCard className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-0.5 text-left">
+                    <span className="block font-bold text-sm text-foreground">{t('payments')}</span>
+                    <span className="block text-[10px] text-muted-foreground font-medium uppercase tracking-wider group-hover/btn:text-primary transition-colors">{t('shortcutTransactionHistory')}</span>
+                  </div>
+                </Button>
+
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate("/admin/users")}
+                  className="h-auto bg-card hover:bg-card border-border hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 text-foreground flex flex-col items-start justify-between p-5 rounded-2xl transition-all hover:-translate-y-1 group/btn overflow-hidden relative shadow-sm"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover/btn:bg-primary group-hover/btn:text-primary-foreground transition-all duration-300 mb-4">
+                    <Users className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-0.5 text-left">
+                    <span className="block font-bold text-sm text-foreground">{t('users')}</span>
+                    <span className="block text-[10px] text-muted-foreground font-medium uppercase tracking-wider group-hover/btn:text-primary transition-colors">{t('shortcutSystemAccounts')}</span>
+                  </div>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Summary Stats - Moved Below Banner */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {summaryCards.map((card, index) => (
-            <motion.div key={card.title} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}>
+            <motion.div key={card.title} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + (index * 0.1) }}>
               <Card className="relative overflow-hidden">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">{card.title}</CardTitle>
@@ -149,58 +256,34 @@ export default function AdminDashboardPage() {
             </motion.div>
           ))}
         </div>
- 
-         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-           <Card className="bg-gradient-to-r from-primary/10 via-background to-background border-primary/20">
-             <CardHeader className="flex flex-row items-center gap-4 py-4">
-               <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-                 <Sparkles className="w-5 h-5 text-primary animate-pulse" />
-               </div>
-                <div>
-                  <CardTitle className="text-lg">{t('aiMagic')}</CardTitle>
-                  <p className="text-sm text-muted-foreground">{t('aiMagicDesc')}</p>
-                </div>
-              </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-6">
-                <Button 
-                  variant="outline" 
-                  className="h-auto py-4 px-6 justify-between hover:border-primary/50 hover:bg-primary/5 transition-all group text-left"
-                  onClick={() => navigate("/admin/questions/ai-generate")}
-                >
-                  <div className="flex flex-col items-start gap-1">
-                    <span className="font-semibold">{t('generateReadingQuestionsShort')}</span>
-                    <span className="text-xs text-muted-foreground">{t('generateReadingQuestionsShortDesc')}</span>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="h-auto py-4 px-6 justify-between hover:border-primary/50 hover:bg-primary/5 transition-all group text-left"
-                  onClick={() => navigate("/admin/users/ai-generate")}
-                >
-                  <div className="flex flex-col items-start gap-1">
-                    <span className="font-semibold">{t('bulkGenerateUsersShort')}</span>
-                    <span className="text-xs text-muted-foreground">{t('bulkGenerateUsersShortDesc')}</span>
-                  </div>
-                 <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-               </Button>
-             </CardContent>
-           </Card>
-         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Biểu đồ Thống kê */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-            <Card>
-              <CardHeader><CardTitle className="text-lg font-semibold">{t('testsTakenOverTime')}</CardTitle></CardHeader>
+            <Card className="border-border shadow-sm">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div className="space-y-0.5">
+                  <CardTitle className="text-lg font-semibold tracking-tight text-foreground">{t('testsTakenOverTime')}</CardTitle>
+                </div>
+                <div className="p-2 rounded-lg bg-secondary text-muted-foreground">
+                  <TrendingUp className="w-4 h-4" />
+                </div>
+              </CardHeader>
               <CardContent>
-                <ChartContainer config={lineChartConfig} className="h-[300px]">
+                <ChartContainer config={lineChartConfig} className="h-[300px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={dashboardStats.testsOverTime}>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                      <XAxis dataKey="month" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} axisLine={{ stroke: "hsl(var(--border))" }} />
-                      <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} axisLine={{ stroke: "hsl(var(--border))" }} />
+                      <defs>
+                        <linearGradient id="colorTests" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="4 4" className="stroke-muted/30" vertical={false} />
+                      <XAxis dataKey="date" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={10} />
+                      <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} axisLine={false} tickLine={false} />
                       <ChartTooltip content={<ChartTooltipContent />} />
-                      <Line type="monotone" dataKey="tests" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ fill: "hsl(var(--primary))", strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                      <Line type="monotone" dataKey="tests" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: "hsl(var(--background))" }} activeDot={{ r: 6, strokeWidth: 0 }} fillOpacity={1} fill="url(#colorTests)" />
                     </LineChart>
                   </ResponsiveContainer>
                 </ChartContainer>
@@ -208,16 +291,19 @@ export default function AdminDashboardPage() {
             </Card>
           </motion.div>
 
+          {/* Biểu đồ Phân bổ Kỹ năng quay trở lại */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-            <Card>
-              <CardHeader><CardTitle className="text-lg font-semibold">{t('skillDistribution')}</CardTitle></CardHeader>
+            <Card className="border-border shadow-sm h-full">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold tracking-tight text-foreground">{t('skillDistribution')}</CardTitle>
+              </CardHeader>
               <CardContent>
                 <ChartContainer config={barChartConfig} className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={dashboardStats.skillDistribution} layout="vertical">
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                      <XAxis type="number" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} axisLine={{ stroke: "hsl(var(--border))" }} />
-                      <YAxis dataKey="skill" type="category" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} axisLine={{ stroke: "hsl(var(--border))" }} width={80} />
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
+                      <XAxis type="number" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} axisLine={false} />
+                      <YAxis dataKey="skill" type="category" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} axisLine={false} width={80} />
                       <ChartTooltip content={<ChartTooltipContent />} />
                       <Bar dataKey="count" radius={[0, 4, 4, 0]}>
                         {dashboardStats.skillDistribution.map((entry, index) => (

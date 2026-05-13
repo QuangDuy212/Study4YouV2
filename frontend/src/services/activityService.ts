@@ -13,7 +13,7 @@ export interface DashboardStats {
   totalUsers: number;
   totalTests: number;
   totalQuestions: number;
-  testsOverTime: Array<{ month: string; count: number }>;
+  testsOverTime: Array<{ date: string; count: number }>;
   skillDistribution: Array<{ skill: string; count: number }>;
 }
 

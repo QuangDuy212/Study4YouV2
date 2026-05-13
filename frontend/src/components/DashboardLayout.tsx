@@ -60,6 +60,7 @@ export default function DashboardLayout() {
   };
 
   const navItems = [
+    { icon: LayoutDashboard, label: t("dashboard"), href: "/dashboard" },
     { icon: BookOpen, label: t("toeicTests"), href: "/tests" },
     { icon: GraduationCap, label: t("courses"), href: "/courses" },
     { icon: PlayCircle, label: t("myCourses"), href: "/my-courses" },

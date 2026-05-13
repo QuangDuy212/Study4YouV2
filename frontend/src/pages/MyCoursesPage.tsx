@@ -41,7 +41,7 @@ export default function MyCoursesPage() {
 
   return (
     <>
-      <div className="max-w-6xl mx-auto space-y-8 pb-12 pt-4">
+      <div className="max-w-6xl mx-auto space-y-8 py-8 px-4 sm:px-6 lg:px-8">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">

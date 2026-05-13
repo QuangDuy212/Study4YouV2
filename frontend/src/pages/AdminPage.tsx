@@ -272,7 +272,7 @@ export default function AdminPage() {
           />
 
           {/* Bulk Actions Bar */}
-          {selectedIds.size > 0 && (
+          {selectedIds.size > 0 && activeTab !== "ALL" && (
             <div className="flex items-center justify-between p-4 bg-primary/[0.03] border border-primary/20 rounded-lg animate-in fade-in slide-in-from-top-2">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
@@ -321,6 +321,7 @@ export default function AdminPage() {
             selectedIds={selectedIds}
             onSelectAll={toggleSelectAll}
             onSelectOne={toggleSelectOne}
+            activeTab={activeTab}
           />
         </CardContent>
       </Card>

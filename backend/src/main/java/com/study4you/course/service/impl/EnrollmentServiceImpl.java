@@ -48,7 +48,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     @Transactional(readOnly = true)
     public List<EnrollmentResponse> getMyCourses(UUID userId) {
-        return enrollmentRepository.findByUserIdOrderByCreatedAtDesc(userId)
+        return enrollmentRepository.findActiveEnrollmentsByUserId(userId)
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
 

@@ -117,7 +117,7 @@ export default function NotificationsPage() {
 
   return (
     <>
-      <div className="max-w-3xl mx-auto space-y-6">
+      <div className="max-w-3xl mx-auto space-y-6 py-8 px-4 sm:px-6">
 
         {/* Header */}
         <motion.div

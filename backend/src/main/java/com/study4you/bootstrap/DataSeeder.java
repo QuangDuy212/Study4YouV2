@@ -16,6 +16,8 @@ import com.study4you.toeic.test.entity.ToeicTest;
 import com.study4you.toeic.test.repository.ToeicTestRepository;
 import com.study4you.user.entity.User;
 import com.study4you.user.repository.UserRepository;
+import com.study4you.toeic.attempt.entity.ToeicAttempt;
+import com.study4you.toeic.attempt.repository.ToeicAttemptRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -23,6 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Component
@@ -37,6 +40,7 @@ public class DataSeeder implements CommandLineRunner {
     private final ToeicPartRepository toeicPartRepository;
     private final ToeicQuestionRepository toeicQuestionRepository;
     private final ToeicOptionRepository toeicOptionRepository;
+    private final ToeicAttemptRepository toeicAttemptRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -51,8 +55,11 @@ public class DataSeeder implements CommandLineRunner {
         // 2. Sync/Seed Roles (Always ensures Admin role is populated with latest code permissions)
         Map<String, Role> roles = seedRoles(permissions);
 
+        // 2.5. Generate Dense Mock Data for Dashboard analytics if sparse
+        generateDenseAnalyticsData();
+
         if (userRepository.count() > 0 || toeicTestRepository.count() > 0) {
-            log.info("Dynamic metadata synchronized. Core transactional entities exist, skipping initialization.");
+            log.info("Dynamic metadata synchronized. Core transactional entities exist, skipping structural initialization.");
             return;
         }
 
@@ -250,5 +257,56 @@ public class DataSeeder implements CommandLineRunner {
             option.setContent("Option " + label + " for question " + index);
             toeicOptionRepository.save(option);
         }
+    }
+
+    private void generateDenseAnalyticsData() {
+        long attemptCount = toeicAttemptRepository.count();
+        if (attemptCount >= 20) {
+            log.info("Found existing analytics data ({} items). Skipping density injection.", attemptCount);
+            return;
+        }
+
+        log.info("Starting dense analytics data synthesis for dashboard...");
+        
+        List<User> users = userRepository.findAll();
+        List<ToeicTest> tests = toeicTestRepository.findAll();
+        
+        if (users.isEmpty() || tests.isEmpty()) {
+            log.warn("Insufficient core data (Users/Tests) to generate analytics. Data will populate on next cycle.");
+            return;
+        }
+
+        Random random = new Random();
+        int totalAdded = 0;
+
+        // Generate ~60 randomized attempts over the last 30 days
+        for (int i = 0; i < 30; i++) {
+            int dailyVolume = random.nextInt(4); // 0 to 3 tests per day
+            for (int v = 0; v < dailyVolume; v++) {
+                User targetUser = users.get(random.nextInt(users.size()));
+                ToeicTest targetTest = tests.get(random.nextInt(tests.size()));
+
+                LocalDateTime timestamp = LocalDateTime.now()
+                    .minusDays(i)
+                    .minusHours(random.nextInt(20))
+                    .minusMinutes(random.nextInt(60));
+
+                ToeicAttempt attempt = new ToeicAttempt();
+                attempt.setUserId(targetUser.getId());
+                attempt.setTestId(targetTest.getId());
+                attempt.setStartedAt(timestamp);
+                attempt.setSubmittedAt(timestamp.plusMinutes(40 + random.nextInt(60)));
+                attempt.setRawScore(60 + random.nextInt(140));
+                attempt.setToeicScore(200 + random.nextInt(700));
+                
+                // Set creation timestamp manually since we are synthesizing history
+                attempt.setCreatedAt(timestamp); 
+                
+                toeicAttemptRepository.save(attempt);
+                totalAdded++;
+            }
+        }
+
+        log.info("Analytics synthesis complete. Added {} randomized archival attempts to dataset.", totalAdded);
     }
 }

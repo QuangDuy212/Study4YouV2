@@ -14,4 +14,5 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByEmail(String email);
     boolean existsByEmail(String email);
     Page<User> findAllByActive(Boolean active, Pageable pageable);
+    void deleteAllByDeletedAtBefore(java.time.LocalDateTime dateTime);
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { getMediaUrl } from "@/lib/utils";
 import courseService, { type CourseResponse } from "@/services/courseService";
 import paymentService, { type PaymentMethod } from "@/services/paymentService";
 import { toast } from "sonner";
@@ -252,6 +253,7 @@ export default function PaymentPage() {
                   <div className="grid gap-3">
                     {[
                       { id: "VIETQR", title: "VietQR", desc: t("vietqrDesc"), icon: "📲" },
+                      { id: "MOCK", title: "Developer Bypass (Free)", desc: "Instant enrollment for testing purposes.", icon: "🛠️" },
                     ].map(m => (
                       <label 
                         key={m.id} 
@@ -296,8 +298,12 @@ export default function PaymentPage() {
                   <h3 className="text-xl font-bold text-foreground">{t("orderSummary")}</h3>
                   
                   <div className="flex gap-4 p-3 bg-muted/30 rounded-2xl border border-border/30">
-                    <div className="w-20 h-14 rounded-lg overflow-hidden shadow-sm bg-muted flex-shrink-0">
-                       {course.thumbnailUrl && <img src={course.thumbnailUrl} className="w-full h-full object-cover" />}
+                    <div className="w-20 h-14 rounded-lg overflow-hidden shadow-sm bg-muted flex-shrink-0 flex items-center justify-center">
+                       {course.thumbnailUrl ? (
+                         <img src={getMediaUrl(course.thumbnailUrl)} className="w-full h-full object-cover" />
+                       ) : (
+                         <GraduationCap className="w-6 h-6 text-primary/30" />
+                       )}
                     </div>
                     <div className="flex-1 min-w-0 flex flex-col justify-center">
                        <h4 className="font-bold text-foreground text-sm truncate leading-tight">{course.title}</h4>

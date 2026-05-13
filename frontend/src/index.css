@@ -87,48 +87,48 @@
   }
 
   .dark {
-    --background: 222 47% 11%;
+    --background: 255 35% 8%;
     --foreground: 210 40% 98%;
 
-    --card: 222 47% 14%;
+    --card: 255 35% 11%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222 47% 14%;
+    --popover: 255 35% 11%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217 91% 60%;
-    --primary-foreground: 222 47% 11%;
+    --primary: 263.4 85% 65%;
+    --primary-foreground: 255 35% 8%;
 
-    --secondary: 217 33% 17%;
+    --secondary: 255 25% 18%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 255 25% 18%;
+    --muted-foreground: 255 15% 70%;
 
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 263.4 30% 20%;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 63% 31%;
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 212 27% 84%;
+    --border: 255 25% 18%;
+    --input: 255 25% 18%;
+    --ring: 263.4 85% 65%;
 
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-background: 255 40% 7%;
+    --sidebar-foreground: 255 15% 85%;
+    --sidebar-primary: 263.4 85% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 255 25% 15%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 255 25% 15%;
+    --sidebar-ring: 263.4 85% 65%;
 
-    --chart-1: 217 91% 60%;
-    --chart-2: 172 66% 50%;
-    --chart-3: 142 71% 45%;
-    --chart-4: 38 92% 50%;
-    --chart-5: 0 84% 60%;
+    --chart-1: 263.4 85% 65%;
+    --chart-2: 280 75% 60%;
+    --chart-3: 160 80% 50%;
+    --chart-4: 45 95% 60%;
+    --chart-5: 0 85% 65%;
   }
 
   /* Soft Blue Theme - Academic */

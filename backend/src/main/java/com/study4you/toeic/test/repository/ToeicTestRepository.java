@@ -17,4 +17,6 @@ public interface ToeicTestRepository extends JpaRepository<ToeicTest, UUID> {
      */
     @EntityGraph(attributePaths = {"parts"})
     Optional<ToeicTest> findById(UUID id);
+
+    void deleteAllByDeletedAtBefore(java.time.LocalDateTime dateTime);
 }

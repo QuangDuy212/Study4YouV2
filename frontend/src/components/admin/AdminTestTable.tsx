@@ -66,6 +66,7 @@ interface AdminTestTableProps {
   selectedIds?: Set<string>;
   onSelectAll?: () => void;
   onSelectOne?: (id: string) => void;
+  activeTab?: string;
 }
 
 const skillConfig: Record<string, { icon: any; color: string; bg: string }> = {
@@ -144,6 +145,7 @@ export default function AdminTestTable({
   selectedIds,
   onSelectAll,
   onSelectOne,
+  activeTab = "ALL",
 }: AdminTestTableProps) {
   const { t } = useLanguage();
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
@@ -182,14 +184,16 @@ export default function AdminTestTable({
           <Table>
             <TableHeader className="sticky top-0 bg-muted/50 z-10">
               <TableRow>
-                <TableHead className="w-12">
-                  <input 
-                    type="checkbox" 
-                    checked={tests.length > 0 && tests.every(t => selectedIds?.has(t.id))}
-                    onChange={onSelectAll}
-                    className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary cursor-pointer"
-                  />
-                </TableHead>
+                {activeTab !== "ALL" && (
+                  <TableHead className="w-12">
+                    <input 
+                      type="checkbox" 
+                      checked={tests.length > 0 && tests.every(t => selectedIds?.has(t.id))}
+                      onChange={onSelectAll}
+                      className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary cursor-pointer"
+                    />
+                  </TableHead>
+                )}
                 <TableHead className="w-[280px]">{t('testName')}</TableHead>
                 <TableHead className="w-[100px]">{t('skill')}</TableHead>
                 <TableHead className="w-[100px]">{t('level')}</TableHead>
@@ -214,14 +218,16 @@ export default function AdminTestTable({
                       transition={{ duration: 0.2, delay: index * 0.03 }}
                       className={cn("border-b transition-colors hover:bg-muted/30", index % 2 === 0 ? "bg-transparent" : "bg-muted/10", selectedIds?.has(test.id) ? "bg-primary/[0.02]" : "")}
                     >
-                      <TableCell className="w-12">
-                        <input 
-                          type="checkbox" 
-                          checked={selectedIds?.has(test.id) || false}
-                          onChange={() => onSelectOne?.(test.id)}
-                          className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary cursor-pointer"
-                        />
-                      </TableCell>
+                      {activeTab !== "ALL" && (
+                        <TableCell className="w-12">
+                          <input 
+                            type="checkbox" 
+                            checked={selectedIds?.has(test.id) || false}
+                            onChange={() => onSelectOne?.(test.id)}
+                            className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary cursor-pointer"
+                          />
+                        </TableCell>
+                      )}
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center", skill.bg)}>

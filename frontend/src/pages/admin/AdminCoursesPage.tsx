@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Plus, Edit, Trash2, Search, Video, Eye, Loader2, RefreshCw, ChevronLeft, ChevronRight, Check } from "lucide-react";
+import { Plus, Edit, Trash2, Search, Video, Eye, Loader2, RefreshCw, ChevronLeft, ChevronRight, Check, BookOpen, CheckCircle, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -15,10 +16,11 @@ import { ConfirmDeleteModal } from "@/components/ConfirmDeleteModal";
 export default function AdminCoursesPage() {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const [courses, setCourses] = useState<PageResponse<CourseResponse> | null>(null);
+  const [allCourses, setAllCourses] = useState<CourseResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [keyword, setKeyword] = useState("");
   const [page, setPage] = useState(0);
+  const pageSize = 5;
   const [activeTab, setActiveTab] = useState<"ALL" | "ACTIVE" | "DELETED">("ALL");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -27,27 +29,49 @@ export default function AdminCoursesPage() {
 
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+  const [stats, setStats] = useState({ total: 0, published: 0, draft: 0, deleted: 0 });
+  const [statusFilter, setStatusFilter] = useState("ALL");
 
   const filteredCourses = useMemo(() => {
-    if (!courses?.content) return [];
-    return courses.content.filter((course) => {
+    return allCourses.filter((course) => {
       const matchesKeyword = course.title.toLowerCase().includes(keyword.toLowerCase()) ||
         (course.description?.toLowerCase() || "").includes(keyword.toLowerCase());
       
-      if (activeTab === "ACTIVE") return matchesKeyword && course.status !== "DELETED";
-      if (activeTab === "DELETED") return matchesKeyword && course.status === "DELETED";
-      return matchesKeyword;
+      const matchesStatus = statusFilter === "ALL" || course.status === statusFilter;
+      
+      let matchesTab = true;
+      if (activeTab === "ACTIVE") matchesTab = course.status !== "DELETED";
+      else if (activeTab === "DELETED") matchesTab = course.status === "DELETED";
+
+      return matchesKeyword && matchesTab && matchesStatus;
     });
-  }, [courses, keyword, activeTab]);
+  }, [allCourses, keyword, activeTab, statusFilter]);
+
+  // Perform in-memory pagination on the filtered set
+  const paginatedCourses = useMemo(() => {
+    const startIndex = page * pageSize;
+    return filteredCourses.slice(startIndex, startIndex + pageSize);
+  }, [filteredCourses, page, pageSize]);
+
+  const totalPages = Math.ceil(filteredCourses.length / pageSize);
 
   const fetchCourses = async () => {
     setLoading(true);
     try {
-      const data = await courseService.getAllCoursesAdmin(page, 5);
-      setCourses(data);
+      const fullData = await courseService.getAllCoursesAdmin(0, 1000);
+      const all = fullData.content;
+      setAllCourses(all);
+      
+      setStats({
+        total: fullData.totalElements,
+        published: all.filter(c => c.status === "PUBLISHED").length,
+        draft: all.filter(c => c.status === "DRAFT").length,
+        deleted: all.filter(c => c.status === "DELETED").length,
+      });
     } catch (error) {
+      console.error("Failed to load courses:", error);
       toast.error("Failed to load courses");
-      setCourses({ content: [], totalElements: 0, totalPages: 0, pageSize: 5, pageNumber: 0, last: true });
+      setAllCourses([]);
     } finally {
       setLoading(false);
     }
@@ -55,17 +79,17 @@ export default function AdminCoursesPage() {
 
   useEffect(() => {
     fetchCourses();
-  }, [page]);
+  }, []); // Fetch once on mount
 
-  // Reset selection when tab or page changes
+  // Reset selection and return to page 0 when filters change
   useEffect(() => {
+    setPage(0);
     setSelectedIds(new Set());
-  }, [page, activeTab]);
+  }, [activeTab, statusFilter]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setPage(0);
-    fetchCourses();
   };
 
   const handlePublish = async (id: string, title: string) => {
@@ -163,21 +187,84 @@ export default function AdminCoursesPage() {
 
   return (
     <div className="space-y-6 pb-24">
+      {/* Colorful Statistics Section */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="border-none shadow-md bg-gradient-to-br from-primary/5 to-primary/10 backdrop-blur-md">
+          <CardContent className="p-5 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shadow-lg shadow-primary/20">
+              <BookOpen className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold tracking-tight">{stats.total}</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("totalCourses")}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-none shadow-md bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 backdrop-blur-md">
+          <CardContent className="p-5 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20">
+              <CheckCircle className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-400 tracking-tight">{stats.published}</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("publishedCourses")}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-none shadow-md bg-gradient-to-br from-amber-500/5 to-amber-500/10 backdrop-blur-md">
+          <CardContent className="p-5 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/20">
+              <FileText className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-amber-700 dark:text-amber-400 tracking-tight">{stats.draft}</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("draftCourses")}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-none shadow-md bg-gradient-to-br from-rose-500/5 to-rose-500/10 backdrop-blur-md">
+          <CardContent className="p-5 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-rose-500 text-white flex items-center justify-center shadow-lg shadow-rose-500/20">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-rose-700 dark:text-rose-400 tracking-tight">{stats.deleted}</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("deletedCourses")}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
       <Card>
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-            <form onSubmit={handleSearch} className="flex gap-3 w-full md:w-auto flex-1 max-w-md">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder={t("searchCourses")}
-                  value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
-                  className="pl-9 h-11 rounded-xl"
-                />
-              </div>
-              <Button type="submit" variant="secondary" className="h-11 rounded-xl px-5 font-bold">{t("search")}</Button>
-            </form>
+            <div className="flex flex-1 gap-3 w-full md:w-auto flex-wrap">
+              <form onSubmit={handleSearch} className="flex gap-3 w-full md:w-auto flex-1 max-w-md">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder={t("searchCourses")}
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                    className="pl-9 h-11 rounded-xl"
+                  />
+                </div>
+                <Button type="submit" variant="secondary" className="h-11 rounded-xl px-5 font-bold">{t("search")}</Button>
+              </form>
+
+              <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val)}>
+                <SelectTrigger className="w-[180px] h-11 rounded-xl bg-background border-border/60">
+                  <SelectValue placeholder={t("status")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">{t("allStatus") || "Tất cả trạng thái"}</SelectItem>
+                  <SelectItem value="PUBLISHED">{t("publishedCourses")}</SelectItem>
+                  <SelectItem value="DRAFT">{t("draftCourses")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
               <div className="flex gap-1.5 p-1 bg-muted/40 rounded-xl border border-border/50">
@@ -208,7 +295,7 @@ export default function AdminCoursesPage() {
           </div>
 
           {/* Bulk Actions Bar */}
-          {selectedIds.size > 0 && (
+          {selectedIds.size > 0 && activeTab !== "ALL" && (
             <div className="flex items-center justify-between p-4 mb-6 bg-primary/[0.03] border border-primary/20 rounded-xl animate-in fade-in slide-in-from-top-2">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
@@ -246,14 +333,16 @@ export default function AdminCoursesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-12">
-                      <input 
-                        type="checkbox" 
-                        checked={filteredCourses.length > 0 && filteredCourses.every(c => selectedIds.has(c.id))}
-                        onChange={toggleSelectAll}
-                        className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary cursor-pointer"
-                      />
-                    </TableHead>
+                    {activeTab !== "ALL" && (
+                      <TableHead className="w-12">
+                        <input 
+                          type="checkbox" 
+                          checked={filteredCourses.length > 0 && filteredCourses.every(c => selectedIds.has(c.id))}
+                          onChange={toggleSelectAll}
+                          className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary cursor-pointer"
+                        />
+                      </TableHead>
+                    )}
                     <TableHead>{t("courses")}</TableHead>
                     <TableHead>{t("price")}</TableHead>
                     <TableHead>{t("status")}</TableHead>
@@ -261,16 +350,18 @@ export default function AdminCoursesPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredCourses.map((course) => (
+                  {paginatedCourses.map((course) => (
                     <TableRow key={course.id} className={selectedIds.has(course.id) ? "bg-primary/[0.02]" : ""}>
-                      <TableCell className="w-12">
-                        <input 
-                          type="checkbox" 
-                          checked={selectedIds.has(course.id)}
-                          onChange={() => toggleSelectOne(course.id)}
-                          className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary cursor-pointer"
-                        />
-                      </TableCell>
+                      {activeTab !== "ALL" && (
+                        <TableCell className="w-12">
+                          <input 
+                            type="checkbox" 
+                            checked={selectedIds.has(course.id)}
+                            onChange={() => toggleSelectOne(course.id)}
+                            className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary cursor-pointer"
+                          />
+                        </TableCell>
+                      )}
                       <TableCell>
                         <div className="flex items-center gap-3">
                           {course.thumbnailUrl ? (
@@ -340,9 +431,9 @@ export default function AdminCoursesPage() {
                       </TableCell>
                     </TableRow>
                   ))}
-                  {filteredCourses.length === 0 && (
+                  {paginatedCourses.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                      <TableCell colSpan={activeTab !== "ALL" ? 5 : 4} className="h-24 text-center text-muted-foreground">
                         {t("noCoursesFound") || "No courses found."}
                       </TableCell>
                     </TableRow>
@@ -353,10 +444,10 @@ export default function AdminCoursesPage() {
           )}
 
           {/* Pagination Controls */}
-          {courses && courses.totalPages >= 1 && (
+          {totalPages >= 1 && (
             <div className="p-6 bg-muted/10 border border-t-0 border-border/50 rounded-b-md flex items-center justify-between">
               <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">
-                {t("showing")} {courses.pageNumber * courses.pageSize + 1} - {Math.min((courses.pageNumber + 1) * courses.pageSize, courses.totalElements)} {t("of")} {courses.totalElements}
+                {t("showing")} {page * pageSize + 1} - {Math.min((page + 1) * pageSize, filteredCourses.length)} {t("of")} {filteredCourses.length}
               </p>
               <div className="flex gap-2 ml-auto">
                 <Button
@@ -369,7 +460,7 @@ export default function AdminCoursesPage() {
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
                 <div className="flex gap-1">
-                  {[...Array(courses.totalPages)].map((_, i) => (
+                  {[...Array(totalPages)].map((_, i) => (
                     <Button
                       key={i}
                       variant={page === i ? "default" : "ghost"}
@@ -389,8 +480,8 @@ export default function AdminCoursesPage() {
                   variant="ghost"
                   size="sm"
                   className="w-9 h-9 rounded-lg p-0 font-bold transition-all hover:bg-primary/10 hover:text-primary border border-border/50 disabled:opacity-50 flex items-center justify-center"
-                  onClick={() => setPage(prev => Math.min(courses.totalPages - 1, prev + 1))}
-                  disabled={page === courses.totalPages - 1}
+                  onClick={() => setPage(prev => Math.min(totalPages - 1, prev + 1))}
+                  disabled={page === totalPages - 1}
                 >
                   <ChevronRight className="w-4 h-4" />
                 </Button>

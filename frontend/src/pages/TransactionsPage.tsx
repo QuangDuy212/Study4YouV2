@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 import { 
   CreditCard, 
   Search, 
@@ -21,6 +22,15 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 // @ts-ignore
 import html2pdf from "html2pdf.js";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 function docSoThienVND(number: number): string {
   if (number === 0) return "Không đồng";
@@ -78,6 +88,12 @@ export default function TransactionsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTx, setSelectedTx] = useState<PaymentResponse | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   useEffect(() => {
     loadTransactions();
@@ -138,6 +154,61 @@ export default function TransactionsPage() {
     tx.courseTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
     tx.transactionRef.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+  const currentTransactions = filteredTransactions.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const renderPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        pages.push(1, 2, 3, 4, "ellipsis", totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1, "ellipsis", totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pages.push(1, "ellipsis", currentPage - 1, currentPage, currentPage + 1, "ellipsis", totalPages);
+      }
+    }
+    
+    return pages.map((page, index) => {
+      if (page === "ellipsis") {
+        return (
+          <PaginationItem key={`ellipsis-${index}`}>
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
+      }
+      return (
+        <PaginationItem key={page}>
+          <PaginationLink
+            href="#"
+            isActive={currentPage === page}
+            onClick={(e) => {
+              e.preventDefault();
+              setCurrentPage(page as number);
+            }}
+            className={cn(
+              "cursor-pointer rounded-xl font-bold h-10 w-10 transition-all border",
+              currentPage === page 
+                ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground shadow-md shadow-primary/15 border-transparent" 
+                : "border-border/50 hover:bg-primary/10 hover:text-primary"
+            )}
+          >
+            {page}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    });
+  };
 
   return (
     <div className="space-y-8 p-6 lg:p-10 max-w-7xl mx-auto">
@@ -229,7 +300,7 @@ export default function TransactionsPage() {
                   </td>
                 </tr>
               ) : (
-                filteredTransactions.map((tx, i) => (
+                currentTransactions.map((tx, i) => (
                   <motion.tr 
                     key={tx.id}
                     initial={{ opacity: 0 }}
@@ -284,6 +355,48 @@ export default function TransactionsPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        {filteredTransactions.length > 0 && (
+          <div className="p-6 border-t border-border/50 bg-muted/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-xs font-bold text-muted-foreground">
+              Showing {Math.min((currentPage - 1) * itemsPerPage + 1, filteredTransactions.length)} - {Math.min(currentPage * itemsPerPage, filteredTransactions.length)} of {filteredTransactions.length} transactions
+            </p>
+            <Pagination className="mx-0 w-auto">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (currentPage > 1) setCurrentPage(currentPage - 1);
+                    }}
+                    className={cn(
+                      "rounded-xl font-bold cursor-pointer border border-border/50 transition-all hover:bg-primary/10 hover:text-primary",
+                      currentPage === 1 && "pointer-events-none opacity-50"
+                    )}
+                  />
+                </PaginationItem>
+                
+                {renderPageNumbers()}
+
+                <PaginationItem>
+                  <PaginationNext 
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+                    }}
+                    className={cn(
+                      "rounded-xl font-bold cursor-pointer border border-border/50 transition-all hover:bg-primary/10 hover:text-primary",
+                      currentPage === totalPages && "pointer-events-none opacity-50"
+                    )}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </div>
 
       {/* Hidden Invoice Template for PDF Generation */}

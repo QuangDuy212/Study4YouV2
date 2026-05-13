@@ -30,13 +30,11 @@ public class DashboardService {
         long totalTests = toeicTestRepository.count();
         long totalQuestions = toeicQuestionRepository.count();
 
-        // Tests Taken Over Time (Attempts)
-        List<Object[]> attemptCounts = toeicAttemptRepository.countAttemptsByMonth();
-        List<DashboardStatsResponse.MonthlyCount> testsOverTime = attemptCounts.stream()
-                .map(obj -> new DashboardStatsResponse.MonthlyCount((String) obj[0], ((Number) obj[1]).longValue()))
+        // Tests Taken Over Time (Attempts aggregated by DAY over last 30 days)
+        List<Object[]> attemptCounts = toeicAttemptRepository.countAttemptsByDay();
+        List<DashboardStatsResponse.TimeCount> testsOverTime = attemptCounts.stream()
+                .map(obj -> new DashboardStatsResponse.TimeCount((String) obj[0], ((Number) obj[1]).longValue()))
                 .collect(Collectors.toList());
-        
-        Collections.reverse(testsOverTime);
 
         // Skill Distribution (Questions grouped by Reading/Listening)
         List<Object[]> partCounts = toeicQuestionRepository.countByPart();

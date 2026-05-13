@@ -281,12 +281,14 @@ export default function AdminPaymentsPage() {
               <Table>
                 <TableHeader className="bg-muted/30">
                   <TableRow>
-                    <TableHead className="w-12 text-center">
-                      <Checkbox 
-                        checked={paginatedPayments.length > 0 && paginatedPayments.every(p => selectedPaymentIds.has(p.id))}
-                        onCheckedChange={toggleSelectAll}
-                      />
-                    </TableHead>
+                    {filterStatus === "PENDING" && (
+                      <TableHead className="w-12 text-center">
+                        <Checkbox 
+                          checked={paginatedPayments.length > 0 && paginatedPayments.every(p => selectedPaymentIds.has(p.id))}
+                          onCheckedChange={toggleSelectAll}
+                        />
+                      </TableHead>
+                    )}
                     <TableHead className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">{t("courses")}</TableHead>
                     <TableHead className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">{t("price")}</TableHead>
                     <TableHead className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">{t("userInfo")}</TableHead>
@@ -297,7 +299,7 @@ export default function AdminPaymentsPage() {
                 <TableBody>
                     {isLoading ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="h-40 text-center text-sm text-muted-foreground">
+                        <TableCell colSpan={filterStatus === "PENDING" ? 6 : 5} className="h-40 text-center text-sm text-muted-foreground">
                           <div className="flex flex-col items-center gap-2">
                              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                              {t("loading")}...
@@ -306,7 +308,7 @@ export default function AdminPaymentsPage() {
                       </TableRow>
                     ) : paginatedPayments.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="h-60 text-center">
+                        <TableCell colSpan={filterStatus === "PENDING" ? 6 : 5} className="h-60 text-center">
                           <div className="flex flex-col items-center justify-center space-y-4">
                             <div className="w-20 h-20 rounded-[2.5rem] bg-muted mx-auto flex items-center justify-center">
                               <CreditCard className="w-10 h-10 text-muted-foreground/30" />
@@ -323,12 +325,14 @@ export default function AdminPaymentsPage() {
                           selectedPaymentIds.has(p.id) ? "bg-primary/[0.02]" : "hover:bg-muted/30"
                         )}
                       >
-                        <TableCell className="text-center">
-                          <Checkbox 
-                            checked={selectedPaymentIds.has(p.id)}
-                            onCheckedChange={() => toggleSelectOne(p.id)}
-                          />
-                        </TableCell>
+                        {filterStatus === "PENDING" && (
+                          <TableCell className="text-center">
+                            <Checkbox 
+                              checked={selectedPaymentIds.has(p.id)}
+                              onCheckedChange={() => toggleSelectOne(p.id)}
+                            />
+                          </TableCell>
+                        )}
                         <TableCell>
                           <div className="flex items-center gap-4">
                             <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0 overflow-hidden border border-border/50">

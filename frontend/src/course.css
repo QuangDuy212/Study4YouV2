@@ -4,7 +4,7 @@
    ============================================================ */
 
 /* ── Variables ───────────────────────────────────────────── */
-:root {
+:root, body {
   --course-surface: hsl(var(--background));
   --course-surface-light: hsl(var(--card));
   --course-text: hsl(var(--foreground));
@@ -12,6 +12,8 @@
   --course-primary: hsl(var(--primary));
   --course-primary-dark: hsl(var(--primary) / 0.9);
   --course-primary-glow: hsl(var(--primary) / 0.3);
+  --course-border: hsl(var(--border));
+  --course-radius: var(--radius);
   --glass-bg: rgba(255, 255, 255, 0.03);
   --glass-border: rgba(255, 255, 255, 0.1);
 }

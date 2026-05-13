@@ -26,4 +26,6 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
         @Param("status") CourseStatus status,
         Pageable pageable
     );
+
+    void deleteAllByDeletedAtBefore(java.time.LocalDateTime dateTime);
 }

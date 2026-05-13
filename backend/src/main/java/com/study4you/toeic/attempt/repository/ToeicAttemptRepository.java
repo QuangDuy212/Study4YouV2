@@ -16,11 +16,12 @@ public interface ToeicAttemptRepository extends JpaRepository<ToeicAttempt, UUID
     List<ToeicAttempt> findByUserId(UUID userId);
     List<ToeicAttempt> findByTestId(UUID testId);
 
-    @Query(value = "SELECT TO_CHAR(a.created_at, 'YYYY-MM') as month, COUNT(*) as count " +
-           "FROM toeic_attempts a " +
-           "GROUP BY TO_CHAR(a.created_at, 'YYYY-MM') " +
-           "ORDER BY month DESC", nativeQuery = true)
-    List<Object[]> countAttemptsByMonth();
+    @Query(value = "SELECT TO_CHAR(dates.day, 'DD/MM') as date, COUNT(a.id) as count " +
+           "FROM generate_series(CURRENT_DATE - INTERVAL '29 days', CURRENT_DATE, INTERVAL '1 day') AS dates(day) " +
+           "LEFT JOIN toeic_attempts a ON DATE(a.created_at) = DATE(dates.day) " +
+           "GROUP BY dates.day " +
+           "ORDER BY dates.day ASC", nativeQuery = true)
+    List<Object[]> countAttemptsByDay();
 
     @Query("SELECT COUNT(a) FROM ToeicAttempt a WHERE a.submittedAt IS NOT NULL")
     long countCompletedAttempts();

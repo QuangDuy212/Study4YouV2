@@ -319,6 +319,10 @@ export const vi = {
   activeTests: "Bài thi đang hoạt động",
   activeTestsTab: "Đang hoạt động",
   deletedTestsTab: "Đã xóa",
+  totalCourses: "Tổng khóa học",
+  publishedCourses: "Đã xuất bản",
+  draftCourses: "Bản nháp",
+  deletedCourses: "Đã xóa",
   publishedAvailable: "Đã xuất bản & có sẵn",
   draftTests: "Bài thi nháp",
   workInProgress: "Đang tiến hành",
@@ -365,6 +369,13 @@ export const vi = {
   count: "Số lượng",
   system: "Hệ thống",
   activity: "Hoạt động",
+  payments: "Thanh toán",
+  welcomeBack: "Chào mừng trở lại",
+  adminWelcomeSubtitle: "Mọi hệ thống đang vận hành hoàn hảo. Hãy bắt đầu quản lý ngày mới thật hiệu quả nhé!",
+  shortcutManageCourses: "Quản lý bài giảng",
+  shortcutToeicBank: "Kho đề thi TOEIC",
+  shortcutTransactionHistory: "Lịch sử giao dịch",
+  shortcutSystemAccounts: "Tài khoản hệ thống",
 
 
   // Admin Question Bank

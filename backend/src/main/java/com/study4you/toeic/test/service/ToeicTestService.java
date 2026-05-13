@@ -27,6 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -112,6 +113,12 @@ public class ToeicTestService {
 
         test.setTitle(request.getTitle());
         if (request.getActive() != null) {
+            // If changing to false, set deletedAt. If true, clear it.
+            if (Boolean.TRUE.equals(test.getActive()) && Boolean.FALSE.equals(request.getActive())) {
+                test.setDeletedAt(LocalDateTime.now());
+            } else if (Boolean.FALSE.equals(test.getActive()) && Boolean.TRUE.equals(request.getActive())) {
+                test.setDeletedAt(null);
+            }
             test.setActive(request.getActive());
         }
         if (request.getSkill() != null) {

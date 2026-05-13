@@ -836,4 +836,11 @@ export const ja = {
   bulkDeleteFailed: "一部のアイテムの削除に失敗しました",
   bulkRestoreFailed: "一部のアイテムの復元に失敗しました",
   restoreSuccess: "{name} を正常に復元しました",
+  payments: "決済",
+  welcomeBack: "おかえりなさい",
+  adminWelcomeSubtitle: "すべてのシステムが正常に動作しています。今日も一日頑張りましょう！",
+  shortcutManageCourses: "講座管理",
+  shortcutToeicBank: "TOEIC問題バンク",
+  shortcutTransactionHistory: "取引履歴",
+  shortcutSystemAccounts: "システムアカウント",
 } as const;

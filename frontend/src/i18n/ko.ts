@@ -855,4 +855,11 @@ export const ko = {
   bulkDeleteFailed: "일부 항목 삭제 실패",
   bulkRestoreFailed: "일부 항목 복원 실패",
   restoreSuccess: "{name} 항목을 성공적으로 복원했습니다",
+  payments: "결제",
+  welcomeBack: "다시 오신 것을 환영합니다",
+  adminWelcomeSubtitle: "모든 시스템이 완벽하게 작동하고 있습니다. 오늘 하루도 생산적으로 시작해보세요!",
+  shortcutManageCourses: "강의 관리",
+  shortcutToeicBank: "TOEIC 문제 은행",
+  shortcutTransactionHistory: "거래 내역",
+  shortcutSystemAccounts: "시스템 계정",
 } as const;

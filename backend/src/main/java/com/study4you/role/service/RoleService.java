@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -104,6 +105,7 @@ public class RoleService {
         Role role = roleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Role", "id", id));
         role.setActive(false);
+        role.setDeletedAt(LocalDateTime.now());
         roleRepository.save(role);
     }
 
@@ -112,6 +114,7 @@ public class RoleService {
         Role role = roleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Role", "id", id));
         role.setActive(true);
+        role.setDeletedAt(null);
         roleRepository.save(role);
     }
 

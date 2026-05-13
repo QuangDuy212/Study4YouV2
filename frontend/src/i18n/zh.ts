@@ -870,4 +870,11 @@ export const zh = {
   bulkDeleteFailed: "删除部分项目失败",
   bulkRestoreFailed: "恢复部分项目失败",
   restoreSuccess: "{name} 恢复成功",
+  payments: "支付",
+  welcomeBack: "欢迎回来",
+  adminWelcomeSubtitle: "所有系统运行完美。让我们开启高效率的一天吧！",
+  shortcutManageCourses: "课程管理",
+  shortcutToeicBank: "TOEIC 题库",
+  shortcutTransactionHistory: "交易历史",
+  shortcutSystemAccounts: "系统账号",
 } as const;

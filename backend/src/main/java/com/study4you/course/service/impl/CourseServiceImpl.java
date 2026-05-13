@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -61,6 +62,7 @@ public class CourseServiceImpl implements CourseService {
     public void deleteCourse(UUID id) {
         Course course = findOrThrow(id);
         course.setStatus(CourseStatus.DELETED);
+        course.setDeletedAt(LocalDateTime.now());
         courseRepository.save(course);
     }
 
@@ -72,6 +74,7 @@ public class CourseServiceImpl implements CourseService {
             throw new BadRequestException("Course is not deleted");
         }
         course.setStatus(CourseStatus.DRAFT);
+        course.setDeletedAt(null);
         return toResponse(courseRepository.save(course), null);
     }
 

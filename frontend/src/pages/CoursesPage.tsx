@@ -8,6 +8,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 export default function CoursesPage() {
   const { t } = useLanguage();
@@ -24,12 +34,65 @@ export default function CoursesPage() {
     return () => clearTimeout(timer);
   }, [keyword]);
 
+  const itemsPerPage = 6;
+
   const { data, isLoading, isPlaceholderData } = useQuery({
-    queryKey: ["courses", search, page],
-    queryFn: () => courseService.getAllCourses({ keyword: search || undefined, page, size: 12 }),
+    queryKey: ["courses", search, page, itemsPerPage],
+    queryFn: () => courseService.getAllCourses({ keyword: search || undefined, page, size: itemsPerPage }),
     placeholderData: (previousData) => previousData,
     staleTime: 5000,
   });
+
+  const renderPageNumbers = () => {
+    const totalPages = data?.totalPages || 0;
+    const currentPage = page + 1; 
+    const pages = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        pages.push(1, 2, 3, 4, "ellipsis", totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1, "ellipsis", totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pages.push(1, "ellipsis", currentPage - 1, currentPage, currentPage + 1, "ellipsis", totalPages);
+      }
+    }
+    
+    return pages.map((pNum, index) => {
+      if (pNum === "ellipsis") {
+        return (
+          <PaginationItem key={`ellipsis-${index}`}>
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
+      }
+      return (
+        <PaginationItem key={pNum}>
+          <PaginationLink
+            href="#"
+            isActive={currentPage === pNum}
+            onClick={(e) => {
+              e.preventDefault();
+              setPage((pNum as number) - 1);
+            }}
+            className={cn(
+              "cursor-pointer rounded-xl font-bold h-10 w-10 transition-all border",
+              currentPage === pNum 
+                ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground shadow-md shadow-primary/15 border-transparent" 
+                : "border-border/50 hover:bg-primary/10 hover:text-primary"
+            )}
+          >
+            {pNum}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    });
+  };
 
   return (
     <div className="max-w-6xl mx-auto space-y-12 py-12 px-4 sm:px-6 lg:px-8">
@@ -79,27 +142,41 @@ export default function CoursesPage() {
             </div>
 
             {/* Pagination */}
-            {data.totalPages > 1 && (
-              <div className="courses-page__pagination mt-12 flex justify-center items-center gap-4">
-                <Button
-                  variant="outline"
-                  disabled={page === 0}
-                  onClick={() => setPage(p => p - 1)}
-                  className="rounded-xl font-bold"
-                >
-                  ← Prev
-                </Button>
-                <span className="text-sm font-bold text-muted-foreground">
-                  Page {page + 1} of {data.totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  disabled={page >= data.totalPages - 1}
-                  onClick={() => setPage(p => p + 1)}
-                  className="rounded-xl font-bold"
-                >
-                  Next →
-                </Button>
+            {data.totalPages > 0 && (
+              <div className="courses-page__pagination mt-12 flex justify-center items-center">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (page > 0) setPage(p => p - 1);
+                        }}
+                        className={cn(
+                          "rounded-xl font-bold cursor-pointer border border-border/50 transition-all hover:bg-primary/10 hover:text-primary",
+                          page === 0 && "pointer-events-none opacity-50"
+                        )}
+                      />
+                    </PaginationItem>
+                    
+                    {renderPageNumbers()}
+
+                    <PaginationItem>
+                      <PaginationNext 
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (page < data.totalPages - 1) setPage(p => p + 1);
+                        }}
+                        className={cn(
+                          "rounded-xl font-bold cursor-pointer border border-border/50 transition-all hover:bg-primary/10 hover:text-primary",
+                          page >= data.totalPages - 1 && "pointer-events-none opacity-50"
+                        )}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
               </div>
             )}
           </motion.div>

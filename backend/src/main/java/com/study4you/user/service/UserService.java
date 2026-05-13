@@ -21,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -201,6 +202,7 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
         
         user.setActive(false);
+        user.setDeletedAt(LocalDateTime.now());
         userRepository.save(user);
 
         userActivityService.logActivity(
@@ -218,6 +220,7 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
         
         user.setActive(true);
+        user.setDeletedAt(null);
         userRepository.save(user);
 
         userActivityService.logActivity(
