@@ -345,6 +345,25 @@ export const en = {
   failedToDelete: "Failed to delete test",
   deletedSuccess: "Deleted: {name}",
 
+  // Admin Tests specific
+  deleteTestSuccess: "Test deleted successfully",
+  deleteTestFailed: "Failed to delete test",
+  restoreTestSuccess: "Test \"{name}\" restored successfully",
+  restoreTestFailed: "Failed to restore test",
+  bulkDeleteSuccess: "Tests deleted successfully",
+  bulkDeleteFailed: "Failed to delete tests",
+  bulkRestoreConfirm: "Are you sure you want to restore {count} selected tests?",
+  bulkRestoreSuccess: "Tests restored successfully",
+  bulkRestoreFailed: "Failed to restore tests",
+  selectedTestsCount: "Selected {count} tests",
+  bulkDeleteTitle: "Bulk Delete",
+  bulkRestoreTitle: "Bulk Restore",
+  confirmBulkDeleteTitle: "Confirm deleting {count} tests?",
+  confirmBulkDeleteDesc: "Are you sure you want to delete all {count} selected tests? You can restore them in the Archived tab.",
+  deleteTest: "Delete Test",
+  deleteTestConfirm: "Are you sure you want to delete \"{name}\"?",
+  restore: "Restore",
+
   // Admin Dashboard
   adminDashboard: "Dashboard",
   adminDashboardDesc: "Overview of system activity and performance",

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import courseService from "@/services/courseService";
 import { CourseCard } from "@/components/course/CourseCard";
 import { GraduationCap, Search } from "lucide-react";
@@ -21,18 +21,37 @@ import {
 
 export default function CoursesPage() {
   const { t } = useLanguage();
-  const [keyword, setKeyword] = useState("");
-  const [search, setSearch] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlKeyword = searchParams.get("keyword") || "";
+
+  const [keyword, setKeyword] = useState(urlKeyword);
+  const [search, setSearch] = useState(urlKeyword);
   const [page, setPage] = useState(0);
 
-  // Debounce search input
+  // Sync from URL when it changes externally (e.g., from top search bar)
+  useEffect(() => {
+    if (urlKeyword !== search) {
+      setKeyword(urlKeyword);
+      setSearch(urlKeyword);
+      setPage(0);
+    }
+  }, [urlKeyword]);
+
+  // Debounce search input from this page
   useEffect(() => {
     const timer = setTimeout(() => {
-      setSearch(keyword);
-      setPage(0);
+      if (keyword !== search) {
+        setSearch(keyword);
+        setPage(0);
+        if (keyword) {
+          setSearchParams({ keyword });
+        } else {
+          setSearchParams({});
+        }
+      }
     }, 500);
     return () => clearTimeout(timer);
-  }, [keyword]);
+  }, [keyword, search, setSearchParams]);
 
   const itemsPerPage = 6;
 
@@ -187,7 +206,7 @@ export default function CoursesPage() {
              </div>
              <h3 className="text-xl font-bold">{t("noCoursesFound")}</h3>
              {search && (
-               <Button variant="link" onClick={() => { setKeyword(""); setSearch(""); setPage(0); }}>
+               <Button variant="link" onClick={() => { setKeyword(""); setSearch(""); setPage(0); setSearchParams({}); }}>
                  Clear search
                </Button>
              )}

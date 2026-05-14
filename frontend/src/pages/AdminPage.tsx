@@ -135,11 +135,11 @@ export default function AdminPage() {
     setIsDeleting(true);
     try {
       await testService.updateTest(deleteTarget.id, { title: deleteTarget.name, active: false });
-      toast.success("Xóa bài thi thành công");
+      toast.success(t("deleteTestSuccess"));
       setDeleteTarget(null);
       fetchTests();
     } catch (error) {
-      toast.error(t('failedToDelete') || "Xóa bài thi thất bại");
+      toast.error(t("deleteTestFailed"));
     } finally {
       setIsDeleting(false);
     }
@@ -148,10 +148,10 @@ export default function AdminPage() {
   const handleRestore = async (test: Test) => {
     try {
       await testService.updateTest(test.id, { title: test.name, active: true });
-      toast.success(`Khôi phục bài thi "${test.name}" thành công`);
+      toast.success(t("restoreTestSuccess").replace("{name}", test.name));
       fetchTests();
     } catch (error) {
-      toast.error("Khôi phục bài thi thất bại");
+      toast.error(t("restoreTestFailed"));
     }
   };
 
@@ -186,19 +186,19 @@ export default function AdminPage() {
           await testService.updateTest(id, { title: test.name, active: false });
         }
       }));
-      toast.success("Xóa các bài thi thành công");
+      toast.success(t("bulkDeleteSuccess"));
       setSelectedIds(new Set());
       setBulkDeleteOpen(false);
       fetchTests();
     } catch (error) {
-      toast.error("Xóa các bài thi thất bại");
+      toast.error(t("bulkDeleteFailed"));
     } finally {
       setIsBulkDeleting(false);
     }
   };
 
   const handleBulkRestore = async () => {
-    if (!window.confirm(`Bạn có chắc chắn muốn khôi phục ${selectedIds.size} bài thi đã chọn?`)) return;
+    if (!window.confirm(t("bulkRestoreConfirm").replace("{count}", selectedIds.size.toString()))) return;
     setIsLoading(true);
     try {
       await Promise.all(Array.from(selectedIds).map(async (id) => {
@@ -207,11 +207,11 @@ export default function AdminPage() {
           await testService.updateTest(id, { title: test.name, active: true });
         }
       }));
-      toast.success("Khôi phục các bài thi thành công");
+      toast.success(t("bulkRestoreSuccess"));
       setSelectedIds(new Set());
       fetchTests();
     } catch (error) {
-      toast.error("Khôi phục các bài thi thất bại");
+      toast.error(t("bulkRestoreFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -276,7 +276,7 @@ export default function AdminPage() {
             <div className="flex items-center justify-between p-4 bg-primary/[0.03] border border-primary/20 rounded-lg animate-in fade-in slide-in-from-top-2">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
-                <span className="text-sm font-bold text-primary">Đã chọn {selectedIds.size} bài thi</span>
+                <span className="text-sm font-bold text-primary">{t("selectedTestsCount").replace("{count}", selectedIds.size.toString())}</span>
               </div>
               <div className="flex gap-2">
                 {activeTab !== "DELETED" && (
@@ -286,7 +286,7 @@ export default function AdminPage() {
                     onClick={() => setBulkDeleteOpen(true)}
                     className="rounded-lg font-bold shadow-sm h-9 px-4"
                   >
-                    <Trash2 className="w-4 h-4 mr-1.5" /> Xóa nhiều
+                    <Trash2 className="w-4 h-4 mr-1.5" /> {t("bulkDeleteTitle")}
                   </Button>
                 )}
                 {activeTab !== "ACTIVE" && (
@@ -296,7 +296,7 @@ export default function AdminPage() {
                     onClick={handleBulkRestore}
                     className="rounded-lg font-bold border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800 transition-all shadow-sm h-9 px-4"
                   >
-                    <RefreshCw className="w-4 h-4 mr-1.5" /> Khôi phục nhiều
+                    <RefreshCw className="w-4 h-4 mr-1.5" /> {t("bulkRestoreTitle")}
                   </Button>
                 )}
               </div>
@@ -342,8 +342,8 @@ export default function AdminPage() {
         onClose={() => setBulkDeleteOpen(false)}
         onConfirm={handleBulkDeleteConfirm}
         isLoading={isBulkDeleting}
-        title={`Xác nhận xóa ${selectedIds.size} bài thi?`}
-        description={`Bạn có chắc chắn muốn xóa toàn bộ ${selectedIds.size} bài thi đã được lựa chọn không? Bạn có thể khôi phục chúng trong tab Lưu trữ.`}
+        title={t("confirmBulkDeleteTitle").replace("{count}", selectedIds.size.toString())}
+        description={t("confirmBulkDeleteDesc").replace("{count}", selectedIds.size.toString())}
       />
     </div>
   );

@@ -120,7 +120,7 @@ export default function QuestionEditor({
                         variant="outline" 
                         size="sm" 
                         type="button"
-                        className="w-full border-dashed border-2 hover:border-primary hover:bg-primary/5 hover:text-primary transition-all text-muted-foreground"
+                        className="w-full border-dashed border-2 hover:border-primary hover:bg-primary/5 hover:text-primary transition-all !text-muted-foreground"
                         disabled={isUploadingImage}
                       >
                         {isUploadingImage ? (

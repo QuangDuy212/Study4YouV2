@@ -251,7 +251,7 @@ export default function AdminTestTable({
                           {test.status === 'archived' && onRestore ? (
                             <Tooltip>
                               <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50/50" onClick={() => onRestore(test)}><RefreshCw className="w-4 h-4" /></Button></TooltipTrigger>
-                              <TooltipContent className="bg-card border border-border">Khôi phục</TooltipContent>
+                              <TooltipContent className="bg-card border border-border">{t("restore")}</TooltipContent>
                             </Tooltip>
                           ) : (
                             <Tooltip>
@@ -354,7 +354,7 @@ export default function AdminTestTable({
                        <DropdownMenuContent align="end" className="bg-card border border-border">
                          <DropdownMenuItem onClick={() => onView(test)} className="gap-2"><Eye className="w-4 h-4" />{t('view')}</DropdownMenuItem>
                          {test.status === 'archived' ? (
-                           onRestore && <DropdownMenuItem onClick={() => onRestore(test)} className="gap-2 text-emerald-600"><RefreshCw className="w-4 h-4" />Khôi phục</DropdownMenuItem>
+                           onRestore && <DropdownMenuItem onClick={() => onRestore(test)} className="gap-2 text-emerald-600"><RefreshCw className="w-4 h-4" />{t("restore")}</DropdownMenuItem>
                          ) : (
                            <>
                              <DropdownMenuItem onClick={() => onEdit(test)} className="gap-2"><Pencil className="w-4 h-4" />{t('edit')}</DropdownMenuItem>

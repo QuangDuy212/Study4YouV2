@@ -343,6 +343,25 @@ export const vi = {
   failedToDelete: "Xóa bài kiểm tra thất bại",
   deletedSuccess: "Đã xóa: {name}",
 
+  // Admin Tests specific
+  deleteTestSuccess: "Xóa bài thi thành công",
+  deleteTestFailed: "Xóa bài thi thất bại",
+  restoreTestSuccess: "Khôi phục bài thi \"{name}\" thành công",
+  restoreTestFailed: "Khôi phục bài thi thất bại",
+  bulkDeleteSuccess: "Xóa các bài thi thành công",
+  bulkDeleteFailed: "Xóa các bài thi thất bại",
+  bulkRestoreConfirm: "Bạn có chắc chắn muốn khôi phục {count} bài thi đã chọn?",
+  bulkRestoreSuccess: "Khôi phục các bài thi thành công",
+  bulkRestoreFailed: "Khôi phục các bài thi thất bại",
+  selectedTestsCount: "Đã chọn {count} bài thi",
+  bulkDeleteTitle: "Xóa nhiều",
+  bulkRestoreTitle: "Khôi phục nhiều",
+  confirmBulkDeleteTitle: "Xác nhận xóa {count} bài thi?",
+  confirmBulkDeleteDesc: "Bạn có chắc chắn muốn xóa toàn bộ {count} bài thi đã được lựa chọn không? Bạn có thể khôi phục chúng trong tab Lưu trữ.",
+  deleteTest: "Xóa bài kiểm tra",
+  deleteTestConfirm: "Bạn có chắc chắn muốn xóa \"{name}\" không?",
+  restore: "Khôi phục",
+
   // Admin Dashboard
   adminDashboard: "Bảng điều khiển",
   adminDashboardDesc: "Tổng quan hoạt động và hiệu suất hệ thống",

@@ -294,6 +294,25 @@ export const zh = {
   failedToDelete: "删除测试失败",
   deletedSuccess: "已删除: {name}",
 
+  // Admin Tests specific
+  deleteTestSuccess: "测试删除成功",
+  deleteTestFailed: "删除测试失败",
+  restoreTestSuccess: "测试\"{name}\"恢复成功",
+  restoreTestFailed: "恢复测试失败",
+  bulkDeleteSuccess: "测试批量删除成功",
+  bulkDeleteFailed: "批量删除测试失败",
+  bulkRestoreConfirm: "您确定要恢复选中的{count}个测试吗？",
+  bulkRestoreSuccess: "测试批量恢复成功",
+  bulkRestoreFailed: "批量恢复测试失败",
+  selectedTestsCount: "已选择{count}个测试",
+  bulkDeleteTitle: "批量删除",
+  bulkRestoreTitle: "批量恢复",
+  confirmBulkDeleteTitle: "确认删除{count}个测试？",
+  confirmBulkDeleteDesc: "您确定要删除所有选中的{count}个测试吗？您可以在已归档标签页中恢复它们。",
+  deleteTest: "删除测试",
+  deleteTestConfirm: "您确定要删除\"{name}\"吗？",
+  restore: "恢复",
+
   // Admin Dashboard
   adminDashboard: "仪表板",
   adminDashboardDesc: "系统活动和性能概览",

@@ -281,6 +281,25 @@ export const ja = {
   failedToDelete: "テストの削除に失敗しました",
   deletedSuccess: "削除しました: {name}",
 
+  // Admin Tests specific
+  deleteTestSuccess: "テストが正常に削除されました",
+  deleteTestFailed: "テストの削除に失敗しました",
+  restoreTestSuccess: "テスト「{name}」が正常に復元されました",
+  restoreTestFailed: "テストの復元に失敗しました",
+  bulkDeleteSuccess: "テストが正常に削除されました",
+  bulkDeleteFailed: "テストの削除に失敗しました",
+  bulkRestoreConfirm: "選択した{count}個のテストを復元してもよろしいですか？",
+  bulkRestoreSuccess: "テストが正常に復元されました",
+  bulkRestoreFailed: "テストの復元に失敗しました",
+  selectedTestsCount: "{count}個のテストを選択しました",
+  bulkDeleteTitle: "一括削除",
+  bulkRestoreTitle: "一括復元",
+  confirmBulkDeleteTitle: "{count}個のテストの削除を確認しますか？",
+  confirmBulkDeleteDesc: "選択した{count}個のテストをすべて削除してもよろしいですか？アーカイブタブで復元できます。",
+  deleteTest: "テストの削除",
+  deleteTestConfirm: "「{name}」を削除してもよろしいですか？",
+  restore: "復元",
+
   // Admin Dashboard
   adminDashboard: "ダッシュボード",
   adminDashboardDesc: "システムアクティビティとパフォーマンスの概要",

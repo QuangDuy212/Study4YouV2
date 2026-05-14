@@ -118,7 +118,7 @@ export default function ListeningMediaUploader({
           
           <div className="flex flex-col gap-2">
             <Upload {...audioUploadProps}>
-              <Button variant="outline" type="button" className="w-full">
+              <Button variant="outline" type="button" className="w-full !text-foreground">
                 <UploadIcon className="w-4 h-4 mr-2" />
                 {t("uploadAudio")}
               </Button>
@@ -150,7 +150,7 @@ export default function ListeningMediaUploader({
           
           <div className="flex flex-col gap-2">
             <Upload {...imageUploadProps}>
-              <Button variant="outline" type="button" className="w-full">
+              <Button variant="outline" type="button" className="w-full !text-foreground">
                 <UploadIcon className="w-4 h-4 mr-2" />
                 {t("uploadImage")}
               </Button>

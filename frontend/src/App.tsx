@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ChatbotWidget } from "@/components/chatbot/ChatbotWidget";
+import ScrollToTop from "@/components/ScrollToTop";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
@@ -75,6 +76,7 @@ const App = () => (
         <AuthProvider>
           <TooltipProvider>
             <Toaster />
+            <ScrollToTop />
             <BrowserRouter>
               <ChatbotWidget />
               <Routes>

@@ -279,6 +279,25 @@ export const ko = {
   failedToDelete: "테스트 삭제에 실패했습니다.",
   deletedSuccess: "삭제됨: {name}",
 
+  // Admin Tests specific
+  deleteTestSuccess: "테스트가 성공적으로 삭제되었습니다",
+  deleteTestFailed: "테스트 삭제에 실패했습니다",
+  restoreTestSuccess: "테스트 \"{name}\"이(가) 성공적으로 복원되었습니다",
+  restoreTestFailed: "테스트 복원에 실패했습니다",
+  bulkDeleteSuccess: "테스트가 성공적으로 삭제되었습니다",
+  bulkDeleteFailed: "테스트 삭제에 실패했습니다",
+  bulkRestoreConfirm: "선택한 {count}개의 테스트를 복원하시겠습니까?",
+  bulkRestoreSuccess: "테스트가 성공적으로 복원되었습니다",
+  bulkRestoreFailed: "테스트 복원에 실패했습니다",
+  selectedTestsCount: "{count}개의 테스트 선택됨",
+  bulkDeleteTitle: "일괄 삭제",
+  bulkRestoreTitle: "일괄 복원",
+  confirmBulkDeleteTitle: "{count}개의 테스트 삭제 확인?",
+  confirmBulkDeleteDesc: "선택한 {count}개의 테스트를 모두 삭제하시겠습니까? 보관됨 탭에서 복원할 수 있습니다.",
+  deleteTest: "테스트 삭제",
+  deleteTestConfirm: "\"{name}\"을(를) 삭제하시겠습니까?",
+  restore: "복원",
+
   // Admin Dashboard
   adminDashboard: "대시보드",
   adminDashboardDesc: "시스템 활동 및 성능 개요",
